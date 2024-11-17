@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
 import TopBar from '../components/TopBar';
 import LocationsOverview from '../components/LocationsOverview';
+import { useLocation } from 'react-router-dom';
 
 const DashboardContainer = styled.div`
   min-height: 100vh;
@@ -90,6 +91,75 @@ const areas = {
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const location = useLocation();
+  const [expandedAreas, setExpandedAreas] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem('dashboardState');
+      return saved ? JSON.parse(saved).expandedAreas : {};
+    } catch (error) {
+      return {};
+    }
+  });
+
+  // Save expanded areas state whenever it changes
+  useEffect(() => {
+    try {
+      const scrollPos = window.scrollY;
+      sessionStorage.setItem('dashboardState', JSON.stringify({
+        expandedAreas,
+        scrollPosition: scrollPos
+      }));
+    } catch (error) {
+      console.error('Error saving dashboard state:', error);
+    }
+  }, [expandedAreas]);
+
+  // Handle scroll position preservation
+  useEffect(() => {
+    const handleScroll = () => {
+      try {
+        const currentState = JSON.parse(sessionStorage.getItem('dashboardState') || '{}');
+        sessionStorage.setItem('dashboardState', JSON.stringify({
+          ...currentState,
+          scrollPosition: window.scrollY
+        }));
+      } catch (error) {
+        console.error('Error saving scroll position:', error);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Restore state when returning to dashboard
+  useEffect(() => {
+    if (location.state?.preserveState) {
+      try {
+        const savedState = sessionStorage.getItem('dashboardState');
+        if (savedState) {
+          const { scrollPosition } = JSON.parse(savedState);
+          // Use a small timeout to ensure the DOM is ready
+          setTimeout(() => {
+            window.scrollTo(0, scrollPosition);
+          }, 100);
+        }
+      } catch (error) {
+        console.error('Error restoring dashboard state:', error);
+      }
+    } else {
+      // Clear saved state if not preserving
+      sessionStorage.removeItem('dashboardState');
+      window.scrollTo(0, 0);
+    }
+  }, [location.state]);
+
+  const handleAreaToggle = (areaName) => {
+    setExpandedAreas(prev => ({
+      ...prev,
+      [areaName]: !prev[areaName]
+    }));
+  };
 
   const renderContent = () => {
     switch (user?.role) {
@@ -98,7 +168,11 @@ const Dashboard = () => {
         return (
           <>
             <Title>Locations Overview</Title>
-            <LocationsOverview areas={areas} />
+            <LocationsOverview 
+              areas={areas} 
+              expandedAreas={expandedAreas}
+              onAreaToggle={handleAreaToggle}
+            />
           </>
         );
       default:

@@ -1,57 +1,68 @@
 const fs = require('fs');
 const csv = require('csv-parse');
 const path = require('path');
+const warnings = require('../config/data/warnings');
+const locationSettings = require('../config/data/settings');
 
-// Mock data for warnings (in real app, this would come from a database)
-const warnings = {
-  "Bov Kirke": [
-    { id: 1, type: "temperature", status: "active", message: "Temperature too low" },
-  ],
-  "Aabenraa Kirke": [],
-  "Haderslev Kirke": [
-    { id: 2, type: "humidity", status: "active", message: "Humidity too high" },
-  ],
-  "Padborg Kirke": [],
-  "Rise Kirke": []
-};
+// Read actual data from files
+const readLocationData = async (locationId, timeRange) => {
+  const locationDir = path.join(__dirname, '..', 'data', locationId);
+  
+  try {
+    // Check if directory exists
+    if (!fs.existsSync(locationDir)) {
+      return [];
+    }
 
-// Add location settings to our mock data
-const locationSettings = {
-  "Bov Kirke": { groundTemperature: 15 },
-  "Aabenraa Kirke": { groundTemperature: 15 },
-  "Haderslev Kirke": { groundTemperature: 15 },
-  "Padborg Kirke": { groundTemperature: 15 },
-  "Rise Kirke": { groundTemperature: 15 }
-};
+    // Get all CSV files in the location directory
+    const files = fs.readdirSync(locationDir)
+      .filter(file => file.endsWith('.csv'))
+      .sort((a, b) => b.localeCompare(a)); // Sort newest first
 
-// Mock environmental data generator
-const generateMockData = (timeRange) => {
-  const data = [];
-  const now = new Date();
-  const points = timeRange === '1day' ? 288 : // 5-minute intervals for 1 day
-                timeRange === '1month' ? 720 : // 1-hour intervals for 1 month
-                timeRange === '6months' ? 4320 : // 1-hour intervals for 6 months
-                8760; // 1-hour intervals for 1 year
-
-  for (let i = points; i >= 0; i--) {
-    const timestamp = new Date(now - i * (timeRange === '1day' ? 5 * 60000 : 3600000));
+    let allData = [];
     
-    // Add some random variation to make the data look realistic
-    const baseTemp = 20 + Math.sin(i / (points/4)) * 10;
-    const baseHumidity = 50 + Math.sin(i / (points/6)) * 20;
-    const basePressure = 1013 + Math.sin(i / (points/8)) * 20;
+    // Read and parse each file
+    for (const file of files) {
+      const fileContent = fs.readFileSync(path.join(locationDir, file), 'utf-8');
+      const records = await new Promise((resolve, reject) => {
+        csv.parse(fileContent, {
+          columns: true,
+          skip_empty_lines: true
+        }, (err, data) => {
+          if (err) reject(err);
+          else resolve(data);
+        });
+      });
 
-    data.push({
-      record_time: timestamp.toISOString(),
-      temperature: +(baseTemp + Math.random() * 2 - 1).toFixed(1),
-      relative_humidity: +(baseHumidity + Math.random() * 4 - 2).toFixed(1),
-      air_pressure: +(basePressure + Math.random() * 2 - 1).toFixed(1)
+      allData = [...allData, ...records];
+    }
+
+    // Filter data based on timeRange
+    const now = new Date();
+    const timeRangeInMs = {
+      '1day': 24 * 60 * 60 * 1000,
+      '1month': 30 * 24 * 60 * 60 * 1000,
+      '6months': 180 * 24 * 60 * 60 * 1000,
+      '1year': 365 * 24 * 60 * 60 * 1000
+    };
+
+    const filteredData = allData.filter(record => {
+      const recordDate = new Date(record.record_time);
+      return (now - recordDate) <= timeRangeInMs[timeRange];
     });
-  }
 
-  return data;
+    // Sort by timestamp
+    return filteredData.sort((a, b) => 
+      new Date(a.record_time) - new Date(b.record_time)
+    );
+
+  } catch (error) {
+    console.error('Error reading location data:', error);
+    return [];
+  }
 };
 
+// Export all the controller functions
 exports.handleUpload = async (req, res) => {
   try {
     if (!req.file) {
@@ -126,7 +137,14 @@ exports.getLocationData = async (req, res) => {
   const { locationId } = req.params;
   try {
     const locationWarnings = warnings[locationId] || [];
-    const settings = locationSettings[locationId] || { groundTemperature: 15 };
+    const settings = locationSettings[locationId] || { 
+      groundTemperature: 15,
+      thresholds: {
+        temperature: { min: 2, max: 22 },
+        humidity: { min: 45, max: 65 },
+        pressure: { min: 980, max: 1030 }
+      }
+    };
     
     res.json({
       location: locationId,
@@ -144,7 +162,6 @@ exports.updateLocationSettings = async (req, res) => {
   const { settings } = req.body;
 
   try {
-    // In a real app, this would update a database
     locationSettings[locationId] = {
       ...locationSettings[locationId],
       ...settings
@@ -181,10 +198,7 @@ exports.getEnvironmentalData = async (req, res) => {
   const { timeRange = '1month' } = req.query;
 
   try {
-    // In a real app, you would fetch this from your database
-    // For now, we'll generate mock data
-    const data = generateMockData(timeRange);
-    
+    const data = await readLocationData(locationId, timeRange);
     res.json(data);
   } catch (error) {
     console.error('Error fetching environmental data:', error);

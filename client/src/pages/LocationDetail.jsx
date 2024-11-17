@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import axios from 'axios';
 import TopBar from '../components/TopBar';
@@ -152,8 +152,33 @@ const SettingInput = styled.input`
   width: 100px;
 `;
 
+const BackButton = styled.button`
+  position: fixed;
+  top: 100px;
+  left: 2rem;
+  background: none;
+  border: none;
+  color: #005670;
+  font-size: 2rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  line-height: 1;
+
+  &:hover {
+    color: #004560;
+  }
+
+  &::before {
+    content: '←';
+  }
+`;
+
 const LocationDetail = () => {
   const { locationId } = useParams();
+  const navigate = useNavigate();
   const [locationData, setLocationData] = useState(null);
   const [environmentalData, setEnvironmentalData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -298,12 +323,108 @@ const LocationDetail = () => {
     }
   };
 
+  const renderCombinedGraph = (data, thresholds, groundTemp) => (
+    <ResponsiveContainer width="100%" height="100%">
+      <LineChart data={data} margin={{ top: 5, right: 30, bottom: 5, left: 0 }}>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis 
+          dataKey="record_time" 
+          tickFormatter={formatDate}
+          interval="preserveStartEnd"
+        />
+        <YAxis 
+          yAxisId="temp" 
+          domain={[thresholds.temperature.min, thresholds.temperature.max]}
+          orientation="left"
+        />
+        <YAxis 
+          yAxisId="humidity" 
+          orientation="right" 
+          domain={[thresholds.humidity.min, thresholds.humidity.max]}
+        />
+        <YAxis 
+          yAxisId="pressure" 
+          orientation="right" 
+          domain={[970, 1050]}
+          hide // Hide the axis but keep it for the line
+        />
+        
+        <Tooltip 
+          labelFormatter={(label) => new Date(label).toLocaleString()}
+          formatter={(value, name) => {
+            switch(name) {
+              case 'temperature':
+                return [`${value}°C`, 'Temperature'];
+              case 'relative_humidity':
+                return [`${value}%`, 'Humidity'];
+              case 'air_pressure':
+                return [`${value} hPa`, 'Pressure'];
+              default:
+                return [value, name];
+            }
+          }}
+        />
+
+        {/* Ground temperature reference line */}
+        <ReferenceLine 
+          yAxisId="temp"
+          y={groundTemp} 
+          stroke="#005670" 
+          strokeDasharray="3 3"
+          label={{ 
+            value: `Ground Temp: ${groundTemp}°C`,
+            position: 'right',
+            fill: '#005670'
+          }}
+        />
+
+        <Line 
+          yAxisId="temp"
+          type="monotone" 
+          dataKey="temperature" 
+          stroke="#FF6B6B" 
+          dot={false}
+          strokeWidth={2}
+          name="temperature"
+        />
+        <Line 
+          yAxisId="humidity"
+          type="monotone" 
+          dataKey="relative_humidity" 
+          stroke="#4ECDC4" 
+          dot={false}
+          strokeWidth={2}
+          name="relative_humidity"
+        />
+        <Line 
+          yAxisId="pressure"
+          type="monotone" 
+          dataKey="air_pressure" 
+          stroke="#45B7D1" 
+          dot={false}
+          strokeWidth={2}
+          name="air_pressure"
+        />
+      </LineChart>
+    </ResponsiveContainer>
+  );
+
+  const handleBack = () => {
+    // Navigate back while preserving the dashboard state
+    navigate('/dashboard', { 
+      state: { 
+        preserveState: true 
+      }
+    });
+  };
+
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
 
   return (
     <PageContainer>
       <TopBar locationName={locationId} />
+      <BackButton onClick={handleBack} />
       <Content>
         <MainSection>
           <Card>
@@ -334,6 +455,15 @@ const LocationDetail = () => {
                 1 Year
               </TimeButton>
             </TimeRangeSelector>
+
+            <GraphCard>
+              <GraphTitle>Combined Temperature and Humidity</GraphTitle>
+              {environmentalData && renderCombinedGraph(
+                environmentalData,
+                thresholds,
+                settings.groundTemperature
+              )}
+            </GraphCard>
 
             <GraphCard>
               <GraphTitle>Temperature (°C)</GraphTitle>

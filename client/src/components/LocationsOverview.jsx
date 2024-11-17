@@ -138,10 +138,9 @@ const WarningCount = styled.div`
   text-align: center;
 `;
 
-const LocationsOverview = ({ areas }) => {
+const LocationsOverview = ({ areas, expandedAreas, onAreaToggle }) => {
   const navigate = useNavigate();
   const [locationStatuses, setLocationStatuses] = useState({});
-  const [expandedAreas, setExpandedAreas] = useState({});
 
   useEffect(() => {
     const fetchLocationStatuses = async () => {
@@ -156,22 +155,11 @@ const LocationsOverview = ({ areas }) => {
     fetchLocationStatuses();
   }, []);
 
-  const toggleArea = (areaName) => {
-    setExpandedAreas(prev => ({
-      ...prev,
-      [areaName]: !prev[areaName]
-    }));
-  };
-
-  const handleLocationClick = (location) => {
-    navigate(`/location/${encodeURIComponent(location)}`);
-  };
-
   return (
     <div>
       {Object.entries(areas).map(([areaName, locations]) => (
         <AreaContainer key={areaName}>
-          <AreaBar onClick={() => toggleArea(areaName)}>
+          <AreaBar onClick={() => onAreaToggle(areaName)}>
             <AreaHeader>
               <AreaLabel>
                 {areaName}
@@ -183,7 +171,7 @@ const LocationsOverview = ({ areas }) => {
                     key={location}
                     $hasWarning={locationStatuses[location]?.hasActiveWarnings}
                     $locationName={location}
-                    onClick={() => handleLocationClick(location)}
+                    onClick={() => navigate(`/location/${encodeURIComponent(location)}`)}
                   />
                 ))}
               </LocationsContainer>
@@ -198,7 +186,7 @@ const LocationsOverview = ({ areas }) => {
               return (
                 <LocationRow 
                   key={location}
-                  onClick={() => handleLocationClick(location)}
+                  onClick={() => navigate(`/location/${encodeURIComponent(location)}`)}
                 >
                   <LocationName>{location}</LocationName>
                   <LocationStatus>
