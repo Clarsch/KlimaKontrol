@@ -2,6 +2,19 @@ const fs = require('fs');
 const csv = require('csv-parse');
 const path = require('path');
 
+// Mock data for warnings (in real app, this would come from a database)
+const warnings = {
+  "Bov Kirke": [
+    { id: 1, type: "temperature", status: "active", message: "Temperature too low" },
+  ],
+  "Aabenraa Kirke": [],
+  "Haderslev Kirke": [
+    { id: 2, type: "humidity", status: "active", message: "Humidity too high" },
+  ],
+  "Padborg Kirke": [],
+  "Rise Kirke": []
+};
+
 exports.handleUpload = async (req, res) => {
   try {
     if (!req.file) {
@@ -69,5 +82,40 @@ exports.handleUpload = async (req, res) => {
   } catch (error) {
     console.error('Upload error:', error);
     res.status(500).json({ message: 'Error processing file' });
+  }
+};
+
+exports.getLocationData = async (req, res) => {
+  const { locationId } = req.params;
+  try {
+    // Get warnings for the location
+    const locationWarnings = warnings[locationId] || [];
+    
+    // In a real app, you would fetch actual data from files/database
+    // For now, return mock data
+    res.json({
+      location: locationId,
+      warnings: locationWarnings,
+      hasActiveWarnings: locationWarnings.some(w => w.status === 'active')
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching location data' });
+  }
+};
+
+exports.getLocationsStatus = async (req, res) => {
+  try {
+    const statuses = {};
+    Object.keys(warnings).forEach(location => {
+      const activeWarnings = warnings[location].filter(w => w.status === 'active');
+      statuses[location] = {
+        hasActiveWarnings: activeWarnings.length > 0,
+        warnings: warnings[location],
+        activeWarningCount: activeWarnings.length
+      };
+    });
+    res.json(statuses);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching locations status' });
   }
 }; 

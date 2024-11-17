@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Upload from './pages/Upload';
 import { useAuth } from './contexts/AuthContext';
+import LocationDetail from './pages/LocationDetail';
 
 // Protected Route component with role check
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
@@ -40,6 +41,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Upload />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/location/:locationId"
+            element={
+              <ProtectedRoute allowedRoles={['admin', 'monitoring']}>
+                <LocationDetail />
               </ProtectedRoute>
             }
           />

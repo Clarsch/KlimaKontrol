@@ -1,8 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
-import { Link } from 'react-router-dom';
 import TopBar from '../components/TopBar';
+import LocationsOverview from '../components/LocationsOverview';
 
 const DashboardContainer = styled.div`
   min-height: 100vh;
@@ -12,98 +12,105 @@ const DashboardContainer = styled.div`
 
 const Content = styled.div`
   padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
 `;
 
-const RoleSpecificContent = styled.div`
-  background-color: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+const Title = styled.h2`
+  color: #005670;
+  margin-bottom: 2rem;
 `;
 
-const UploadLink = styled(Link)`
-  display: inline-block;
-  background-color: #005670;
-  color: white;
-  padding: 0.8rem 1.5rem;
-  border-radius: 4px;
-  text-decoration: none;
-  margin-top: 1.5rem;
-  font-size: 1.1rem;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: #004560;
-  }
-`;
+// Areas data (in real app, this would come from an API)
+const areas = {
+  "Aabenraa Sogn": [
+    "Aabenraa Sankt Nicolai Kirke",
+    "Løjt Kirke",
+    "Rise Kirke",
+    "Hjordkær Kirke",
+    "Bjolderup Kirke",
+    "Ensted Kirke",
+    "Varnæs Kirke",
+    "Felsted Kirke",
+    "Kliplev Kirke",
+    "Kværs Kirke",
+    "Holbøl Kirke",
+    "Bov Kirke",
+    "Kollund Kirke"
+  ],
+  "Haderslev Sogn": [
+    "Haderslev Domkirke",
+    "Gl. Haderslev Kirke",
+    "Sct. Severin Kirke",
+    "Vojens Kirke",
+    "Hammelev Kirke",
+    "Moltrup Kirke",
+    "Bjerning Kirke",
+    "Grarup Kirke",
+    "Halk Kirke",
+    "Øsby Kirke",
+    "Vilstrup Kirke",
+    "Starup Kirke",
+    "Vonsbæk Kirke"
+  ],
+  "Tønder Sogn": [
+    "Tønder Kristkirke",
+    "Abild Kirke",
+    "Møgeltønder Kirke",
+    "Ubjerg Kirke",
+    "Højer Kirke",
+    "Emmerlev Kirke",
+    "Daler Kirke",
+    "Visby Kirke",
+    "Hostrup Kirke",
+    "Højst Kirke",
+    "Bylderup Kirke",
+    "Burkal Kirke",
+    "Tinglev Kirke"
+  ],
+  "Sønderborg Sogn": [
+    "Sønderborg Christianskirke",
+    "Sankt Marie Kirke",
+    "Christians Kirke",
+    "Ulkebøl Kirke",
+    "Augustenborg Slotskirke",
+    "Hørup Kirke",
+    "Kegnæs Kirke",
+    "Lysabild Kirke",
+    "Tandslet Kirke",
+    "Asserballe Kirke",
+    "Notmark Kirke",
+    "Egen Kirke",
+    "Svenstrup Kirke",
+    "Havnbjerg Kirke",
+    "Nordborg Kirke",
+    "Oksbøl Kirke",
+  ]
+};
 
 const Dashboard = () => {
   const { user } = useAuth();
 
-  const renderRoleSpecificContent = () => {
+  const renderContent = () => {
     switch (user?.role) {
       case 'admin':
-        return (
-          <RoleSpecificContent>
-            <h2>Admin Dashboard</h2>
-            <p>Welcome to the admin dashboard. Here you can:</p>
-            <ul>
-              <li>Manage users</li>
-              <li>Manage locations</li>
-              <li>View system settings</li>
-            </ul>
-          </RoleSpecificContent>
-        );
       case 'monitoring':
         return (
-          <RoleSpecificContent>
-            <h2>Monitoring Dashboard</h2>
-            <p>Welcome to the monitoring dashboard. Here you can:</p>
-            <ul>
-              <li>View all locations</li>
-              <li>Check environmental data</li>
-              <li>Manage warnings</li>
-            </ul>
-          </RoleSpecificContent>
-        );
-      case 'collector':
-        return (
-          <RoleSpecificContent>
-            <h2>Data Collector Dashboard</h2>
-            <p>Welcome to the data collector dashboard.</p>
-            <p>Your assigned location:</p>
-            <ul>
-              {user?.locations?.map((location) => (
-                <li key={location}>{location}</li>
-              ))}
-            </ul>
-            <UploadLink to="/upload">+ Upload New Data</UploadLink>
-          </RoleSpecificContent>
+          <>
+            <Title>Locations Overview</Title>
+            <LocationsOverview areas={areas} />
+          </>
         );
       default:
-        return <div>Invalid role</div>;
-    }
-  };
-
-  // Get location name based on role
-  const getLocationName = () => {
-    switch (user?.role) {
-      case 'admin':
-        return 'Admin Dashboard';
-      case 'monitoring':
-        return 'Monitoring Dashboard';
-      case 'collector':
-        return user?.locations?.[0] || 'Data Collector Dashboard';
-      default:
-        return '';
+        return <div>Access denied</div>;
     }
   };
 
   return (
     <DashboardContainer>
-      <TopBar locationName={getLocationName()} />
+      <TopBar locationName="Dashboard" />
       <Content>
-        {renderRoleSpecificContent()}
+        {renderContent()}
       </Content>
     </DashboardContainer>
   );

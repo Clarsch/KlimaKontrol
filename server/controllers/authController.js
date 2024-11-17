@@ -1,14 +1,56 @@
 const jwt = require('jsonwebtoken');
 
-// Hardcoded users as per requirements
+// Updated data structure with areas
+const areas = {
+  "Aabenraa Sogn": [
+    "Aabenraa Kirke",
+    "Bov Kirke",
+    "Haderslev Kirke",
+    "Padborg Kirke",
+    "Rise Kirke"
+  ],
+  "Haderslev Sogn": [],
+  "Tønder Sogn": [],
+  "Sønderborg Sogn": []
+};
+
+// Hardcoded users with updated structure
 const users = {
-  admin: { password: "password123", role: "admin" },
-  michael: { password: "password123", role: "monitoring" },
-  aabenraa: { password: "password123", role: "collector", locations: ["Aabenraa Kirke"] },
-  bov: { password: "password123", role: "collector", locations: ["Bov Kirke"] },
-  haderslev: { password: "password123", role: "collector", locations: ["Haderslev Kirke"] },
-  padborg: { password: "password123", role: "collector", locations: ["Padborg Kirke"] },
-  rise: { password: "password123", role: "collector", locations: ["Rise Kirke"] }
+  admin: { 
+    password: "password123", 
+    role: "admin",
+    areas: Object.keys(areas)
+  },
+  michael: { 
+    password: "password123", 
+    role: "monitoring",
+    areas: Object.keys(areas)
+  },
+  aabenraa: { 
+    password: "password123", 
+    role: "collector", 
+    locations: ["Aabenraa Kirke"] 
+  },
+  bov: { 
+    password: "password123", 
+    role: "collector", 
+    locations: ["Bov Kirke"] 
+  },
+  haderslev: { 
+    password: "password123", 
+    role: "collector", 
+    locations: ["Haderslev Kirke"] 
+  },
+  padborg: { 
+    password: "password123", 
+    role: "collector", 
+    locations: ["Padborg Kirke"] 
+  },
+  rise: { 
+    password: "password123", 
+    role: "collector", 
+    locations: ["Rise Kirke"] 
+  }
 };
 
 const JWT_SECRET = 'your-secret-key'; // In production, this should be in environment variables
