@@ -6,17 +6,31 @@ import Upload from './pages/Upload';
 import { useAuth } from './contexts/AuthContext';
 import LocationDetail from './pages/LocationDetail';
 
-// Protected Route component with role check
+// Protected Route component with role check and auth verification
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   const { token, user } = useAuth();
   
-  if (!token) {
+  // If no token or no user data, redirect to login
+  if (!token || !user) {
     return <Navigate to="/" replace />;
   }
 
   // If roles are specified, check if user's role is allowed
-  if (allowedRoles.length > 0 && !allowedRoles.includes(user?.role)) {
-    return <Navigate to="/upload" replace />;
+  if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
+    // Redirect collectors to upload page, others to dashboard
+    return <Navigate to={user.role === 'collector' ? "/upload" : "/dashboard"} replace />;
+  }
+
+  return children;
+};
+
+// Public route component that redirects logged-in users to their appropriate page
+const PublicRoute = ({ children }) => {
+  const { token, user } = useAuth();
+
+  if (token && user) {
+    // Redirect to appropriate page based on role
+    return <Navigate to={user.role === 'collector' ? "/upload" : "/dashboard"} replace />;
   }
 
   return children;
@@ -27,7 +41,17 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<Login />} />
+          {/* Public route (login page) */}
+          <Route 
+            path="/" 
+            element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            } 
+          />
+
+          {/* Protected routes */}
           <Route
             path="/dashboard"
             element={
@@ -49,6 +73,21 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['admin', 'monitoring']}>
                 <LocationDetail />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Catch all route - redirect to appropriate page based on role */}
+          <Route
+            path="*"
+            element={
+              <ProtectedRoute>
+                {({ user }) => (
+                  <Navigate 
+                    to={user?.role === 'collector' ? "/upload" : "/dashboard"} 
+                    replace 
+                  />
+                )}
               </ProtectedRoute>
             }
           />
