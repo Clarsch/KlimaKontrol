@@ -1,16 +1,51 @@
 const fs = require('fs');
 const csv = require('csv-parse');
 const path = require('path');
-const warnings = require('../config/data/warnings');
+const warningsConfig = require('../config/data/warnings');
 const locationSettings = require('../config/data/settings');
 
-// Read actual data from files
+// Create necessary directories
+const DATA_DIR = path.join(__dirname, '..', 'data');
+const WARNINGS_DIR = path.join(DATA_DIR, 'warnings');
+const UPLOADS_DIR = path.join(DATA_DIR, 'uploads');
+
+// Ensure directories exist
+if (!fs.existsSync(DATA_DIR)) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+}
+if (!fs.existsSync(WARNINGS_DIR)) {
+  fs.mkdirSync(WARNINGS_DIR, { recursive: true });
+}
+if (!fs.existsSync(UPLOADS_DIR)) {
+  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+}
+
+// Function to load warnings
+const loadWarnings = () => {
+  const warningsFile = path.join(WARNINGS_DIR, 'warnings.json');
+  if (fs.existsSync(warningsFile)) {
+    return JSON.parse(fs.readFileSync(warningsFile, 'utf-8'));
+  }
+  return warningsConfig;
+};
+
+// Function to save warnings
+const saveWarnings = (warnings) => {
+  const warningsFile = path.join(WARNINGS_DIR, 'warnings.json');
+  fs.writeFileSync(warningsFile, JSON.stringify(warnings, null, 2));
+};
+
+// Initialize warnings from file or create empty
+let warnings = loadWarnings();
+
+// Read actual data from files for a specific location
 const readLocationData = async (locationId, timeRange) => {
-  const locationDir = path.join(__dirname, '..', 'data', locationId);
+  const locationDir = path.join(DATA_DIR, locationId);
   
   try {
     // Check if directory exists
     if (!fs.existsSync(locationDir)) {
+      console.log(`No data directory found for location: ${locationId}`);
       return [];
     }
 
@@ -57,12 +92,65 @@ const readLocationData = async (locationId, timeRange) => {
     );
 
   } catch (error) {
-    console.error('Error reading location data:', error);
+    console.error(`Error reading data for location ${locationId}:`, error);
     return [];
   }
 };
 
-// Export all the controller functions
+// Process uploaded data and check for threshold breaches
+const processData = (records, locationId) => {
+  const settings = locationSettings[locationId];
+  const thresholds = settings.thresholds;
+  const newWarnings = [];
+
+  records.forEach(record => {
+    const temp = parseFloat(record.temperature);
+    const humidity = parseFloat(record.relative_humidity);
+    
+    // Check temperature thresholds
+    if (temp < thresholds.temperature.min) {
+      newWarnings.push({
+        type: 'Temperature',
+        status: 'active',
+        message: `Temperature too low: ${temp}°C (min: ${thresholds.temperature.min}°C)`,
+        timestamp: record.record_time
+      });
+    } else if (temp > thresholds.temperature.max) {
+      newWarnings.push({
+        type: 'Temperature',
+        status: 'active',
+        message: `Temperature too high: ${temp}°C (max: ${thresholds.temperature.max}°C)`,
+        timestamp: record.record_time
+      });
+    }
+
+    // Check humidity thresholds
+    if (humidity < thresholds.humidity.min) {
+      newWarnings.push({
+        type: 'Humidity',
+        status: 'active',
+        message: `Humidity too low: ${humidity}% (min: ${thresholds.humidity.min}%)`,
+        timestamp: record.record_time
+      });
+    } else if (humidity > thresholds.humidity.max) {
+      newWarnings.push({
+        type: 'Humidity',
+        status: 'active',
+        message: `Humidity too high: ${humidity}% (max: ${thresholds.humidity.max}%)`,
+        timestamp: record.record_time
+      });
+    }
+  });
+
+  // Update warnings and save to file
+  if (newWarnings.length > 0) {
+    warnings[locationId] = [...(warnings[locationId] || []), ...newWarnings];
+    saveWarnings(warnings);
+  }
+
+  return newWarnings;
+};
+
 exports.handleUpload = async (req, res) => {
   try {
     if (!req.file) {
@@ -81,35 +169,48 @@ exports.handleUpload = async (req, res) => {
     csv.parse(fileContent, {
       columns: true,
       skip_empty_lines: true
-    }, (err, records) => {
+    }, async (err, records) => {
       if (err) {
+        console.error('CSV parsing error:', err);
         return res.status(400).json({ message: 'Invalid CSV format' });
       }
 
       // Validate data format
-      const isValid = records.every(record => {
+      let validationErrors = [];
+      const isValid = records.every((record, index) => {
         const temp = parseFloat(record.temperature);
         const humidity = parseFloat(record.relative_humidity);
         const pressure = parseFloat(record.air_pressure);
         
-        return (
-          // Validate temperature (-50°C to +50°C)
-          temp >= -50 && temp <= 50 &&
-          // Validate humidity (0-100%)
-          humidity >= 0 && humidity <= 100 &&
-          // Validate air pressure (970-1050 hPa)
-          pressure >= 970 && pressure <= 1050 &&
-          // Validate date format
-          !isNaN(Date.parse(record.record_time))
-        );
+        if (isNaN(temp) || temp < -50 || temp > 50) {
+          validationErrors.push(`Row ${index + 1}: Invalid temperature: ${record.temperature}`);
+          return false;
+        }
+        if (isNaN(humidity) || humidity < 0 || humidity > 100) {
+          validationErrors.push(`Row ${index + 1}: Invalid humidity: ${record.relative_humidity}`);
+          return false;
+        }
+        if (isNaN(pressure) || pressure < 900 || pressure > 1100) {
+          validationErrors.push(`Row ${index + 1}: Invalid pressure: ${record.air_pressure}`);
+          return false;
+        }
+        if (isNaN(Date.parse(record.record_time))) {
+          validationErrors.push(`Row ${index + 1}: Invalid date format: ${record.record_time}`);
+          return false;
+        }
+        return true;
       });
 
       if (!isValid) {
-        return res.status(400).json({ message: 'Invalid data in CSV file' });
+        console.error('Validation errors:', validationErrors);
+        return res.status(400).json({ 
+          message: 'Invalid data in CSV file',
+          errors: validationErrors
+        });
       }
 
       // Create directory for location if it doesn't exist
-      const locationDir = path.join(__dirname, '..', 'data', location);
+      const locationDir = path.join(DATA_DIR, location);
       if (!fs.existsSync(locationDir)) {
         fs.mkdirSync(locationDir, { recursive: true });
       }
@@ -119,12 +220,16 @@ exports.handleUpload = async (req, res) => {
       const savedFilePath = path.join(locationDir, `data_${timestamp}.csv`);
       fs.writeFileSync(savedFilePath, fileContent);
 
+      // Process data for warnings
+      const newWarnings = processData(records, location);
+
       // Clean up temporary upload file
       fs.unlinkSync(req.file.path);
 
       res.json({ 
         message: 'File uploaded and processed successfully',
-        recordCount: records.length
+        recordCount: records.length,
+        newWarnings: newWarnings.length
       });
     });
   } catch (error) {
@@ -178,17 +283,25 @@ exports.updateLocationSettings = async (req, res) => {
 
 exports.getLocationsStatus = async (req, res) => {
   try {
+    // Reload warnings from file
+    const currentWarnings = loadWarnings(); // Load to a new variable
+    
     const statuses = {};
-    Object.keys(warnings).forEach(location => {
-      const activeWarnings = warnings[location].filter(w => w.status === 'active');
+    Object.keys(currentWarnings).forEach(location => {
+      const activeWarnings = currentWarnings[location]?.filter(w => w.status === 'active') || [];
       statuses[location] = {
         hasActiveWarnings: activeWarnings.length > 0,
-        warnings: warnings[location],
+        warnings: currentWarnings[location] || [],
         activeWarningCount: activeWarnings.length
       };
     });
+    
+    // Update the global warnings variable
+    warnings = currentWarnings;
+    
     res.json(statuses);
   } catch (error) {
+    console.error('Error fetching locations status:', error);
     res.status(500).json({ message: 'Error fetching locations status' });
   }
 };

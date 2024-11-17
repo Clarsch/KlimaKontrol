@@ -227,6 +227,8 @@ const Upload = () => {
         }
       });
 
+      await axios.get('http://localhost:5001/api/data/locations/status');
+
       setSuccess(`Upload completed successfully! ${response.data.recordCount} records were processed.`);
       setFile(null);
     } catch (error) {

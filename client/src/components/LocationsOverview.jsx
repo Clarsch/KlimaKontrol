@@ -141,18 +141,27 @@ const WarningCount = styled.div`
 const LocationsOverview = ({ areas, expandedAreas, onAreaToggle }) => {
   const navigate = useNavigate();
   const [locationStatuses, setLocationStatuses] = useState({});
+  const [lastUpdate, setLastUpdate] = useState(Date.now());
+
+  const fetchLocationStatuses = async () => {
+    try {
+      const response = await axios.get('http://localhost:5001/api/data/locations/status');
+      setLocationStatuses(response.data);
+    } catch (error) {
+      console.error('Error fetching location statuses:', error);
+    }
+  };
 
   useEffect(() => {
-    const fetchLocationStatuses = async () => {
-      try {
-        const response = await axios.get('http://localhost:5001/api/data/locations/status');
-        setLocationStatuses(response.data);
-      } catch (error) {
-        console.error('Error fetching location statuses:', error);
-      }
-    };
-
     fetchLocationStatuses();
+  }, [lastUpdate]);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setLastUpdate(Date.now());
+    }, 5000);
+
+    return () => clearInterval(intervalId);
   }, []);
 
   return (

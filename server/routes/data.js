@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
+const path = require('path');
 const { 
   handleUpload, 
   getLocationData, 
@@ -9,8 +10,10 @@ const {
   updateLocationSettings 
 } = require('../controllers/dataController');
 
-// Configure multer for file upload
-const upload = multer({ dest: 'server/data/uploads/' });
+// Configure multer for file upload with proper path
+const upload = multer({ 
+  dest: path.join(__dirname, '..', 'data', 'uploads')
+});
 
 // File upload route
 router.post('/upload', upload.single('file'), handleUpload);
