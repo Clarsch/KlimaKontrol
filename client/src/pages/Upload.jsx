@@ -82,11 +82,17 @@ const ErrorMessage = styled.div`
 `;
 
 const SuccessMessage = styled.div`
-  color: #00FF00;
-  padding: 0.5rem;
+  color: #008000;
+  padding: 1rem;
   margin-top: 1rem;
   background-color: #E8FFE8;
   border-radius: 4px;
+  text-align: center;
+  
+  h3 {
+    margin: 0 0 0.5rem 0;
+    color: #005670;
+  }
 `;
 
 const ButtonsContainer = styled.div`
@@ -221,7 +227,7 @@ const Upload = () => {
         }
       });
 
-      setSuccess('File uploaded successfully!');
+      setSuccess(`Upload completed successfully! ${response.data.recordCount} records were processed.`);
       setFile(null);
     } catch (error) {
       setError(error.response?.data?.message || 'Error uploading file');
@@ -245,12 +251,9 @@ const Upload = () => {
 
   return (
     <PageContainer>
-      <TopBar locationName={user.locations[0] || "Upload Data"} />
+      <TopBar locationName={user?.locations?.[0] || "Upload Data"} />
       <UploadContainer>
-        <NavigationContainer>
-          <BackLink to="/dashboard">← Back to Dashboard</BackLink>
-          <Title>Upload Data for {user.locations[0]}</Title>
-        </NavigationContainer>
+        <Title>Upload Data for {user?.locations?.[0]}</Title>
 
         <DropZone
           onDragOver={handleDragOver}
@@ -292,7 +295,13 @@ const Upload = () => {
         </UploadButton>
 
         {error && <ErrorMessage>{error}</ErrorMessage>}
-        {success && <SuccessMessage>{success}</SuccessMessage>}
+        {success && (
+          <SuccessMessage>
+            <h3>Upload Successful!</h3>
+            <p>{success}</p>
+            <p>You can now upload another file if needed.</p>
+          </SuccessMessage>
+        )}
       </UploadContainer>
     </PageContainer>
   );

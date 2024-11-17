@@ -5,12 +5,19 @@ import Dashboard from './pages/Dashboard';
 import Upload from './pages/Upload';
 import { useAuth } from './contexts/AuthContext';
 
-// Protected Route component
-const ProtectedRoute = ({ children }) => {
-  const { token } = useAuth();
+// Protected Route component with role check
+const ProtectedRoute = ({ children, allowedRoles = [] }) => {
+  const { token, user } = useAuth();
+  
   if (!token) {
     return <Navigate to="/" replace />;
   }
+
+  // If roles are specified, check if user's role is allowed
+  if (allowedRoles.length > 0 && !allowedRoles.includes(user?.role)) {
+    return <Navigate to="/upload" replace />;
+  }
+
   return children;
 };
 
@@ -23,7 +30,7 @@ function App() {
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={['admin', 'monitoring']}>
                 <Dashboard />
               </ProtectedRoute>
             }
