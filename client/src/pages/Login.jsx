@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import TopBar from '../components/TopBar';
+import { API_URL } from '../config';
 
 const PageContainer = styled.div`
   height: 100vh;
@@ -73,8 +74,6 @@ const Login = () => {
   const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
-
-  const API_URL = 'http://localhost:5001';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
