@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import axios from 'axios';
 import TopBar from '../components/TopBar';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { format } from 'date-fns';
 
 const PageContainer = styled.div`
   min-height: 100vh;
@@ -40,13 +41,45 @@ const Card = styled.div`
 `;
 
 const WarningCard = styled(Card)`
-  border-left: 4px solid ${props => props.$status === 'active' ? '#FF0000' : '#FFA500'};
+  border-left: 4px solid ${props => props.$active ? '#FF0000' : '#00FF00'};
   margin-bottom: 1rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+const WarningHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const WarningType = styled.span`
+  font-weight: bold;
+  color: ${props => props.$active ? '#FF0000' : '#008000'};
+`;
+
+const WarningTimestamp = styled.span`
+  color: #666;
+  font-size: 0.9em;
+`;
+
+const WarningMessage = styled.p`
+  margin: 0;
+`;
+
+const DeactivateButton = styled.button`
+  padding: 0.5rem 1rem;
+  background-color: #FF0000;
+  color: white;
+  border: none;
+  border-radius: 4px;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  align-self: flex-end;
 
   &:hover {
-    transform: translateX(4px);
+    background-color: #CC0000;
   }
 `;
 
@@ -176,6 +209,13 @@ const BackButton = styled.button`
   }
 `;
 
+const DeactivationInfo = styled.div`
+  color: #666;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 0.5rem;
+`;
+
 const LocationDetail = () => {
   const { locationId } = useParams();
   const navigate = useNavigate();
@@ -191,23 +231,27 @@ const LocationDetail = () => {
   });
   const [settings, setSettings] = useState({ groundTemperature: 15 });
   const [isSavingSettings, setIsSavingSettings] = useState(false);
+  const [warnings, setWarnings] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [locationResponse, environmentalResponse] = await Promise.all([
+        const [locationResponse, environmentalResponse, warningsResponse] = await Promise.all([
           axios.get(`http://localhost:5001/api/data/location/${encodeURIComponent(locationId)}`),
           axios.get(`http://localhost:5001/api/data/environmental/${encodeURIComponent(locationId)}`, {
             params: { timeRange }
-          })
+          }),
+          axios.get(`http://localhost:5001/api/data/warnings/${encodeURIComponent(locationId)}`)
         ]);
 
         setLocationData(locationResponse.data);
         setEnvironmentalData(environmentalResponse.data);
+        setWarnings(warningsResponse.data);
         setSettings(locationResponse.data.settings || { groundTemperature: 15 });
       } catch (err) {
         setError('Error fetching data');
+        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -418,6 +462,38 @@ const LocationDetail = () => {
     });
   };
 
+  const handleDeactivateWarning = async (warningId) => {
+    try {
+      const userId = localStorage.getItem('userId'); // Or however you store the current user's ID
+      await axios.patch(`http://localhost:5001/api/data/warnings/${warningId}/deactivate`, {
+        userId
+      });
+      setWarnings(warnings.map(warning => 
+        warning.id === warningId 
+          ? { 
+              ...warning, 
+              active: false,
+              deactivatedBy: userId,
+              deactivatedAt: new Date()
+          }
+          : warning
+      ));
+    } catch (error) {
+      console.error('Error deactivating warning:', error);
+    }
+  };
+
+  const sortedWarnings = useMemo(() => {
+    return [...warnings].sort((a, b) => {
+      // Sort by active status first (active/red warnings first)
+      if (a.active !== b.active) {
+        return b.active ? 1 : -1;
+      }
+      // Then sort by timestamp (newest first)
+      return new Date(b.timestamp) - new Date(a.timestamp);
+    });
+  }, [warnings]);
+
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
 
@@ -501,13 +577,34 @@ const LocationDetail = () => {
           </Card>
 
           <Card>
-            <Title>Active Warnings</Title>
-            {locationData?.warnings?.filter(w => w.status === 'active').map(warning => (
-              <WarningCard key={warning.id} $status="active">
-                <SubTitle>{warning.type}</SubTitle>
-                <p>{warning.message}</p>
-              </WarningCard>
-            ))}
+            <Title>Warnings</Title>
+            {sortedWarnings.length === 0 ? (
+                <p>No warnings</p>
+            ) : (
+                sortedWarnings.map((warning) => (
+                    <WarningCard key={warning.id} $active={warning.active}>
+                        <WarningHeader>
+                            <WarningType $active={warning.active}>{warning.type}</WarningType>
+                            <WarningTimestamp>
+                                {format(new Date(warning.timestamp), 'MMM d, yyyy HH:mm')}
+                            </WarningTimestamp>
+                        </WarningHeader>
+                        <WarningMessage>{warning.message}</WarningMessage>
+                        {!warning.active && warning.deactivatedBy && (
+                            <DeactivationInfo>
+                                Deactivated by {warning.deactivatedBy} at {
+                                    format(new Date(warning.deactivatedAt), 'MMM d, yyyy HH:mm')
+                                }
+                            </DeactivationInfo>
+                        )}
+                        {warning.active && (
+                            <DeactivateButton onClick={() => handleDeactivateWarning(warning.id)}>
+                                Deactivate
+                            </DeactivateButton>
+                        )}
+                    </WarningCard>
+                ))
+            )}
           </Card>
         </MainSection>
 

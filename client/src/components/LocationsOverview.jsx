@@ -138,6 +138,13 @@ const WarningCount = styled.div`
   text-align: center;
 `;
 
+const StatusIndicator = styled.div`
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  color: ${props => props.$status === 'ok' ? '#00FF00' : '#FF0000'};
+  background-color: ${props => props.$status === 'ok' ? 'rgba(0, 255, 0, 0.1)' : 'rgba(255, 0, 0, 0.1)'};
+`;
+
 const LocationsOverview = ({ areas, expandedAreas, onAreaToggle }) => {
   const navigate = useNavigate();
   const [locationStatuses, setLocationStatuses] = useState({});
@@ -163,6 +170,23 @@ const LocationsOverview = ({ areas, expandedAreas, onAreaToggle }) => {
 
     return () => clearInterval(intervalId);
   }, []);
+
+  const renderWarningStatus = (locationWarnings) => {
+    if (!locationWarnings || locationWarnings.length === 0) {
+      return <StatusIndicator $status="ok">OK</StatusIndicator>;
+    }
+
+    const activeWarnings = locationWarnings.filter(w => w.active);
+    if (activeWarnings.length === 0) {
+      return <StatusIndicator $status="ok">OK</StatusIndicator>;
+    }
+
+    return (
+      <StatusIndicator $status="warning">
+        {activeWarnings.length} Active Warning{activeWarnings.length !== 1 ? 's' : ''}
+      </StatusIndicator>
+    );
+  };
 
   return (
     <div>
@@ -200,11 +224,13 @@ const LocationsOverview = ({ areas, expandedAreas, onAreaToggle }) => {
                   <LocationName>{location}</LocationName>
                   <LocationStatus>
                     <LocationDot 
-                      $hasWarning={locationStatuses[location]?.hasActiveWarnings}
+                      $hasWarning={locationStatuses[location]?.warnings?.some(w => w.active)}
                       $locationName={location}
                     />
-                    <WarningCount $hasWarnings={locationStatuses[location]?.hasActiveWarnings}>
-                      {locationStatuses[location]?.activeWarningCount || 0}
+                    <WarningCount 
+                      $hasWarnings={locationStatuses[location]?.warnings?.some(w => w.active)}
+                    >
+                      {locationStatuses[location]?.warnings?.filter(w => w.active).length || 0}
                     </WarningCount>
                   </LocationStatus>
                 </LocationRow>
