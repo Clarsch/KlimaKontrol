@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import axios from 'axios';
 import TopBar from '../components/TopBar';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { format } from 'date-fns';
+import { format, subMonths, subDays, subYears, startOfDay, endOfDay } from 'date-fns';
 
 const PageContainer = styled.div`
   min-height: 100vh;
@@ -154,6 +154,7 @@ const TimeButton = styled.button`
 const GraphCard = styled(Card)`
   height: 300px;
   margin-bottom: 1rem;
+  padding-bottom: 2.5rem;
 `;
 
 const GraphTitle = styled.h4`
@@ -216,6 +217,83 @@ const DeactivationInfo = styled.div`
   margin-top: 0.5rem;
 `;
 
+const CustomTooltip = styled.div`
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  .date-time {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #666;
+  }
+
+  .measurement {
+    color: #333;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+  }
+`;
+
+const CustomTooltipContent = ({ active, payload, label }) => {
+  if (!active || !payload || !payload.length) return null;
+
+  return (
+    <CustomTooltip>
+      <div className="date-time">
+        {format(label, 'MMM d, yyyy HH:mm')}
+      </div>
+      {payload.map((entry, index) => (
+        <div key={index} className="measurement">
+          <span>{entry.name}:</span>
+          <span>{entry.value} {entry.unit}</span>
+        </div>
+      ))}
+    </CustomTooltip>
+  );
+};
+
+const getTimeRange = (range) => {
+  const now = new Date();
+  switch (range) {
+    case '1day':
+      return {
+        start: startOfDay(now).getTime(),
+        end: endOfDay(now).getTime(),
+        tickFormat: 'HH:mm',
+        ticks: 24 // Show hourly ticks
+      };
+    case '1month':
+      return {
+        start: subMonths(now, 1).getTime(),
+        end: now.getTime(),
+        tickFormat: 'MMM dd',
+        ticks: 30 // Show daily ticks
+      };
+    case '6months':
+      return {
+        start: subMonths(now, 6).getTime(),
+        end: now.getTime(),
+        tickFormat: 'MMM dd',
+        ticks: 12 // Show bi-weekly ticks
+      };
+    case '1year':
+      return {
+        start: subYears(now, 1).getTime(),
+        end: now.getTime(),
+        tickFormat: 'MMM yyyy',
+        ticks: 12 // Show monthly ticks
+      };
+    default:
+      return null;
+  }
+};
+
 const LocationDetail = () => {
   const { locationId } = useParams();
   const navigate = useNavigate();
@@ -265,67 +343,87 @@ const LocationDetail = () => {
     return `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
   };
 
-  const renderGraph = (data, dataKey, unit, color, thresholds, groundTemp = null) => (
-    <ResponsiveContainer width="100%" height="100%">
-      <LineChart data={data} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis 
-          dataKey="record_time" 
-          tickFormatter={formatDate}
-          interval="preserveStartEnd"
-        />
-        <YAxis domain={[thresholds.min, thresholds.max]} />
-        <Tooltip 
-          labelFormatter={(label) => new Date(label).toLocaleString()}
-          formatter={(value) => [`${value} ${unit}`, dataKey]}
-        />
-        
-        {/* Threshold lines */}
-        <ReferenceLine 
-          y={thresholds.max} 
-          stroke="#FFA500" 
-          strokeDasharray="3 3"
-          label={{ 
-            value: `Max: ${thresholds.max}${unit}`,
-            position: 'right',
-            fill: '#FFA500'
-          }}
-        />
-        <ReferenceLine 
-          y={thresholds.min} 
-          stroke="#FFA500" 
-          strokeDasharray="3 3"
-          label={{ 
-            value: `Min: ${thresholds.min}${unit}`,
-            position: 'right',
-            fill: '#FFA500'
-          }}
-        />
+  const renderGraph = (data, dataKey, unit, color, thresholds, groundTemp = null) => {
+    const timeRangeConfig = getTimeRange(timeRange);
+    
+    const formattedData = data.map(point => ({
+      ...point,
+      record_time: new Date(point.record_time).getTime()
+    }));
 
-        {/* Ground temperature reference line (only for temperature graph) */}
-        {groundTemp !== null && (
+    const tickStep = (timeRangeConfig.end - timeRangeConfig.start) / (timeRangeConfig.ticks - 1);
+    const ticks = Array.from({ length: timeRangeConfig.ticks }, (_, i) => 
+      timeRangeConfig.start + (tickStep * i)
+    );
+
+    return (
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart 
+          data={formattedData} 
+          margin={{ top: 5, right: 20, bottom: 25, left: 0 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis 
+            dataKey="record_time"
+            type="number"
+            domain={[timeRangeConfig.start, timeRangeConfig.end]}
+            tickFormatter={(timestamp) => format(timestamp, timeRangeConfig.tickFormat)}
+            ticks={ticks}
+            scale="time"
+          />
+          <YAxis domain={[thresholds.min, thresholds.max]} />
+          <Tooltip 
+            content={<CustomTooltipContent />}
+            payload={[{ unit }]}
+          />
+          
+          {/* Threshold lines */}
           <ReferenceLine 
-            y={groundTemp} 
-            stroke="#005670" 
+            y={thresholds.max} 
+            stroke="#FFA500" 
             strokeDasharray="3 3"
             label={{ 
-              value: `Ground Temp: ${groundTemp}°C`,
+              value: `Max: ${thresholds.max}${unit}`,
               position: 'right',
-              fill: '#005670'
+              fill: '#FFA500'
             }}
           />
-        )}
+          <ReferenceLine 
+            y={thresholds.min} 
+            stroke="#FFA500" 
+            strokeDasharray="3 3"
+            label={{ 
+              value: `Min: ${thresholds.min}${unit}`,
+              position: 'right',
+              fill: '#FFA500'
+            }}
+          />
 
-        <Line 
-          type="monotone" 
-          dataKey={dataKey} 
-          stroke={color} 
-          dot={false}
-          strokeWidth={2}
-        />
-      </LineChart>
-    </ResponsiveContainer>
-  );
+          {/* Ground temperature reference line (only for temperature graph) */}
+          {groundTemp !== null && (
+            <ReferenceLine 
+              y={groundTemp} 
+              stroke="#005670" 
+              strokeDasharray="3 3"
+              label={{ 
+                value: `Ground Temp: ${groundTemp}°C`,
+                position: 'right',
+                fill: '#005670'
+              }}
+            />
+          )}
+
+          <Line 
+            type="monotone" 
+            dataKey={dataKey} 
+            stroke={color} 
+            dot={false}
+            strokeWidth={2}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    );
+  };
 
   const handleThresholdChange = (sensor, bound, value) => {
     setThresholds(prev => ({
@@ -367,91 +465,104 @@ const LocationDetail = () => {
     }
   };
 
-  const renderCombinedGraph = (data, thresholds, groundTemp) => (
-    <ResponsiveContainer width="100%" height="100%">
-      <LineChart data={data} margin={{ top: 5, right: 30, bottom: 5, left: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis 
-          dataKey="record_time" 
-          tickFormatter={formatDate}
-          interval="preserveStartEnd"
-        />
-        <YAxis 
-          yAxisId="temp" 
-          domain={[thresholds.temperature.min, thresholds.temperature.max]}
-          orientation="left"
-        />
-        <YAxis 
-          yAxisId="humidity" 
-          orientation="right" 
-          domain={[thresholds.humidity.min, thresholds.humidity.max]}
-        />
-        <YAxis 
-          yAxisId="pressure" 
-          orientation="right" 
-          domain={[970, 1050]}
-          hide // Hide the axis but keep it for the line
-        />
-        
-        <Tooltip 
-          labelFormatter={(label) => new Date(label).toLocaleString()}
-          formatter={(value, name) => {
-            switch(name) {
-              case 'temperature':
-                return [`${value}°C`, 'Temperature'];
-              case 'relative_humidity':
-                return [`${value}%`, 'Humidity'];
-              case 'air_pressure':
-                return [`${value} hPa`, 'Pressure'];
-              default:
-                return [value, name];
-            }
-          }}
-        />
+  const renderCombinedGraph = (data, thresholds, groundTemp) => {
+    const timeRangeConfig = getTimeRange(timeRange);
+    
+    const formattedData = data.map(point => ({
+      ...point,
+      record_time: new Date(point.record_time).getTime()
+    }));
 
-        {/* Ground temperature reference line */}
-        <ReferenceLine 
-          yAxisId="temp"
-          y={groundTemp} 
-          stroke="#005670" 
-          strokeDasharray="3 3"
-          label={{ 
-            value: `Ground Temp: ${groundTemp}°C`,
-            position: 'right',
-            fill: '#005670'
-          }}
-        />
+    const tickStep = (timeRangeConfig.end - timeRangeConfig.start) / (timeRangeConfig.ticks - 1);
+    const ticks = Array.from({ length: timeRangeConfig.ticks }, (_, i) => 
+      timeRangeConfig.start + (tickStep * i)
+    );
 
-        <Line 
-          yAxisId="temp"
-          type="monotone" 
-          dataKey="temperature" 
-          stroke="#FF6B6B" 
-          dot={false}
-          strokeWidth={2}
-          name="temperature"
-        />
-        <Line 
-          yAxisId="humidity"
-          type="monotone" 
-          dataKey="relative_humidity" 
-          stroke="#4ECDC4" 
-          dot={false}
-          strokeWidth={2}
-          name="relative_humidity"
-        />
-        <Line 
-          yAxisId="pressure"
-          type="monotone" 
-          dataKey="air_pressure" 
-          stroke="#45B7D1" 
-          dot={false}
-          strokeWidth={2}
-          name="air_pressure"
-        />
-      </LineChart>
-    </ResponsiveContainer>
-  );
+    return (
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart 
+          data={formattedData} 
+          margin={{ top: 5, right: 30, bottom: 25, left: 0 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis 
+            dataKey="record_time"
+            type="number"
+            domain={[timeRangeConfig.start, timeRangeConfig.end]}
+            tickFormatter={(timestamp) => format(timestamp, timeRangeConfig.tickFormat)}
+            ticks={ticks}
+            scale="time"
+          />
+          <YAxis 
+            yAxisId="temp" 
+            domain={[thresholds.temperature.min, thresholds.temperature.max]}
+            orientation="left"
+          />
+          <YAxis 
+            yAxisId="humidity" 
+            orientation="right" 
+            domain={[thresholds.humidity.min, thresholds.humidity.max]}
+          />
+          <YAxis 
+            yAxisId="pressure" 
+            orientation="right" 
+            domain={[970, 1050]}
+            hide // Hide the axis but keep it for the line
+          />
+          
+          <Tooltip 
+            content={<CustomTooltipContent />}
+            payload={[
+              { unit: '°C' },
+              { unit: '%' },
+              { unit: 'hPa' }
+            ]}
+          />
+
+          {/* Ground temperature reference line */}
+          <ReferenceLine 
+            yAxisId="temp"
+            y={groundTemp} 
+            stroke="#005670" 
+            strokeDasharray="3 3"
+            label={{ 
+              value: `Ground Temp: ${groundTemp}°C`,
+              position: 'right',
+              fill: '#005670'
+            }}
+          />
+
+          <Line 
+            yAxisId="temp"
+            type="monotone" 
+            dataKey="temperature" 
+            stroke="#FF6B6B" 
+            dot={false}
+            strokeWidth={2}
+            name="temperature"
+          />
+          <Line 
+            yAxisId="humidity"
+            type="monotone" 
+            dataKey="relative_humidity" 
+            stroke="#4ECDC4" 
+            dot={false}
+            strokeWidth={2}
+            name="relative_humidity"
+          />
+          <Line 
+            yAxisId="pressure"
+            type="monotone" 
+            dataKey="air_pressure" 
+            stroke="#45B7D1" 
+            dot={false}
+            strokeWidth={2}
+            name="air_pressure"
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    );
+  };
 
   const handleBack = () => {
     // Navigate back while preserving the dashboard state
