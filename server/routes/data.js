@@ -12,13 +12,41 @@ const {
 } = require('../controllers/dataController');
 const areas = require('../config/data/areas');
 
-// Configure multer for file upload with proper path
-const upload = multer({ 
-  dest: path.join(__dirname, '..', 'data', 'uploads')
+// Helper function to ensure directory exists
+const ensureDirectoryExists = (dirPath) => {
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+};
+
+// Configure multer for file upload
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = path.join(__dirname, '..', 'data', 'uploads');
+    ensureDirectoryExists(uploadDir);
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  }
 });
 
-// File upload route
-router.post('/upload', upload.single('file'), handleUpload);
+const upload = multer({ storage: storage });
+
+// Update file upload route
+router.post('/upload', upload.single('file'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+    
+    // Handle the uploaded file
+    handleUpload(req, res);
+  } catch (error) {
+    console.error('Upload error:', error);
+    res.status(500).json({ error: 'File upload failed' });
+  }
+});
 
 // Location data routes
 router.get('/location/:locationId', getLocationData);
@@ -28,28 +56,26 @@ router.get('/environmental/:locationId', getEnvironmentalData);
 // Add new route for updating location settings
 router.put('/location/:locationId/settings', updateLocationSettings);
 
-// Warnings routes - move these under /api/data/ instead of /api/warnings/
+// Update warnings route
 router.get('/warnings/:locationId', (req, res) => {
-    const { locationId } = req.params;
-    // Load warnings from the warnings.json file
-    const warningsFile = path.join(__dirname, '..', 'data', 'warnings', 'warnings.json');
-    console.log('Looking for warnings file:', warningsFile);
-    try {
-        if (fs.existsSync(warningsFile)) {
-            const allWarnings = JSON.parse(fs.readFileSync(warningsFile, 'utf-8'));
-            console.log('All warnings:', allWarnings);
-            console.log('Location ID:', locationId);
-            const locationWarnings = allWarnings[locationId] || [];
-            console.log('Location warnings:', locationWarnings);
-            res.json(locationWarnings);
-        } else {
-            console.log('No warnings file exists');
-            res.json([]); // Return empty array if no warnings file exists
-        }
-    } catch (error) {
-        console.error('Error reading warnings:', error);
-        res.status(500).json({ error: 'Error reading warnings' });
+  const { locationId } = req.params;
+  const warningsFile = path.join(__dirname, '..', 'data', 'warnings', 'warnings.json');
+  
+  try {
+    ensureDirectoryExists(path.dirname(warningsFile));
+    
+    let warnings = {};
+    if (fs.existsSync(warningsFile)) {
+      warnings = JSON.parse(fs.readFileSync(warningsFile, 'utf-8'));
+    } else {
+      fs.writeFileSync(warningsFile, JSON.stringify({}), 'utf-8');
     }
+    
+    res.json(warnings[locationId] || []);
+  } catch (error) {
+    console.error('Error reading warnings:', error);
+    res.status(500).json({ error: 'Error reading warnings' });
+  }
 });
 
 router.patch('/warnings/:warningId/deactivate', (req, res) => {

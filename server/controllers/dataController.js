@@ -316,26 +316,37 @@ exports.updateLocationSettings = async (req, res) => {
 
 exports.getLocationsStatus = async (req, res) => {
   try {
-    // Reload warnings from file
-    const currentWarnings = loadWarnings(); // Load to a new variable
+    // Read warnings file
+    const warningsFile = path.join(__dirname, '..', 'data', 'warnings', 'warnings.json');
+    let currentWarnings = {};
     
-    const statuses = {};
-    Object.keys(currentWarnings).forEach(location => {
-      const activeWarnings = currentWarnings[location]?.filter(w => w.status === 'active') || [];
-      statuses[location] = {
-        hasActiveWarnings: activeWarnings.length > 0,
-        warnings: currentWarnings[location] || [],
-        activeWarningCount: activeWarnings.length
+    if (fs.existsSync(warningsFile)) {
+      currentWarnings = JSON.parse(fs.readFileSync(warningsFile, 'utf-8'));
+    }
+
+    // Initialize response object
+    const locationStatuses = {};
+
+    // Get all locations from areas configuration
+    const areas = require('../config/data/areas');
+    const allLocations = areas.flatMap(area => area.locations);
+
+    // Process each location
+    allLocations.forEach(location => {
+      // Ensure currentWarnings[location] exists and is an array
+      const locationWarnings = currentWarnings[location] || [];
+      
+      locationStatuses[location] = {
+        warnings: locationWarnings,
+        hasActiveWarnings: locationWarnings.some(w => w.active),
+        activeWarningsCount: locationWarnings.filter(w => w.active).length
       };
     });
-    
-    // Update the global warnings variable
-    warnings = currentWarnings;
-    
-    res.json(statuses);
+
+    res.json(locationStatuses);
   } catch (error) {
-    console.error('Error fetching locations status:', error);
-    res.status(500).json({ message: 'Error fetching locations status' });
+    console.error('Error getting locations status:', error);
+    res.status(500).json({ error: 'Error getting locations status' });
   }
 };
 
