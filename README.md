@@ -11,3 +11,18 @@ It consist of two user flows:
 
 ![overview_demo](https://github.com/user-attachments/assets/1d24fd69-07c7-455c-8172-d07486b7fa17)
 
+
+## How to start project
+
+From the main folder you can the following commands with npm:
+
+Mandatory, first install dependencies: 
+
+* __npm run install-all__
+
+Then run one of:
+- npm run server
+- npm run client
+
+Or for both client and server simultaneously
+- npm run start
