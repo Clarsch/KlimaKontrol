@@ -10,6 +10,7 @@ const {
   getEnvironmentalData, 
   updateLocationSettings 
 } = require('../controllers/dataController');
+const areas = require('../config/data/areas');
 
 // Configure multer for file upload with proper path
 const upload = multer({ 
@@ -88,6 +89,16 @@ router.patch('/warnings/:warningId/deactivate', (req, res) => {
         console.error('Error updating warning:', error);
         res.status(500).json({ error: 'Error updating warning' });
     }
+});
+
+// GET /api/data/areas
+router.get('/areas', (req, res) => {
+  try {
+    res.json(areas);
+  } catch (error) {
+    console.error('Error fetching areas:', error);
+    res.status(500).json({ message: 'Error fetching areas data' });
+  }
 });
 
 module.exports = router; 

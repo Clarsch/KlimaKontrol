@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import TopBar from '../components/TopBar';
 import LocationsOverview from '../components/LocationsOverview';
 import { useLocation } from 'react-router-dom';
+import axios from 'axios';
 
 const DashboardContainer = styled.div`
   min-height: 100vh;
@@ -22,76 +23,10 @@ const Title = styled.h2`
   margin-bottom: 2rem;
 `;
 
-// Areas data (in real app, this would come from an API)
-const areas = {
-  "Aabenraa Sogn": [
-    "Aabenraa Sankt Nicolai Kirke",
-    "Løjt Kirke",
-    "Rise Kirke",
-    "Hjordkær Kirke",
-    "Bjolderup Kirke",
-    "Ensted Kirke",
-    "Varnæs Kirke",
-    "Felsted Kirke",
-    "Kliplev Kirke",
-    "Kværs Kirke",
-    "Holbøl Kirke",
-    "Bov Kirke",
-    "Kollund Kirke"
-  ],
-  "Haderslev Sogn": [
-    "Haderslev Domkirke",
-    "Gl. Haderslev Kirke",
-    "Sct. Severin Kirke",
-    "Vojens Kirke",
-    "Hammelev Kirke",
-    "Moltrup Kirke",
-    "Bjerning Kirke",
-    "Grarup Kirke",
-    "Halk Kirke",
-    "Øsby Kirke",
-    "Vilstrup Kirke",
-    "Starup Kirke",
-    "Vonsbæk Kirke"
-  ],
-  "Tønder Sogn": [
-    "Tønder Kristkirke",
-    "Abild Kirke",
-    "Møgeltønder Kirke",
-    "Ubjerg Kirke",
-    "Højer Kirke",
-    "Emmerlev Kirke",
-    "Daler Kirke",
-    "Visby Kirke",
-    "Hostrup Kirke",
-    "Højst Kirke",
-    "Bylderup Kirke",
-    "Burkal Kirke",
-    "Tinglev Kirke"
-  ],
-  "Sønderborg Sogn": [
-    "Sønderborg Christianskirke",
-    "Sankt Marie Kirke",
-    "Christians Kirke",
-    "Ulkebøl Kirke",
-    "Augustenborg Slotskirke",
-    "Hørup Kirke",
-    "Kegnæs Kirke",
-    "Lysabild Kirke",
-    "Tandslet Kirke",
-    "Asserballe Kirke",
-    "Notmark Kirke",
-    "Egen Kirke",
-    "Svenstrup Kirke",
-    "Havnbjerg Kirke",
-    "Nordborg Kirke",
-    "Oksbøl Kirke",
-  ]
-};
-
 const Dashboard = () => {
   const { user } = useAuth();
   const location = useLocation();
+  const [areas, setAreas] = useState({});
   const [expandedAreas, setExpandedAreas] = useState(() => {
     try {
       const saved = sessionStorage.getItem('dashboardState');
@@ -100,6 +35,24 @@ const Dashboard = () => {
       return {};
     }
   });
+
+  // Fetch areas data
+  useEffect(() => {
+    const fetchAreas = async () => {
+      try {
+        const response = await axios.get('http://localhost:5001/api/data/areas');
+        const areasObject = response.data.reduce((acc, area) => {
+          acc[area.name] = area.locations;
+          return acc;
+        }, {});
+        setAreas(areasObject);
+      } catch (error) {
+        console.error('Error fetching areas:', error);
+      }
+    };
+
+    fetchAreas();
+  }, []);
 
   // Save expanded areas state whenever it changes
   useEffect(() => {
@@ -139,7 +92,6 @@ const Dashboard = () => {
         const savedState = sessionStorage.getItem('dashboardState');
         if (savedState) {
           const { scrollPosition } = JSON.parse(savedState);
-          // Use a small timeout to ensure the DOM is ready
           setTimeout(() => {
             window.scrollTo(0, scrollPosition);
           }, 100);
@@ -148,7 +100,6 @@ const Dashboard = () => {
         console.error('Error restoring dashboard state:', error);
       }
     } else {
-      // Clear saved state if not preserving
       sessionStorage.removeItem('dashboardState');
       window.scrollTo(0, 0);
     }

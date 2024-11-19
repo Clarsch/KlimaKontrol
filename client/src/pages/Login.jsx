@@ -22,7 +22,7 @@ const ImageContainer = styled.div`
   overflow: hidden;
 `;
 
-const ChurchImage = styled.img`
+const FullPageImage = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -98,9 +98,9 @@ const Login = () => {
   return (
     <PageContainer>
       <ImageContainer>
-        <ChurchImage 
-          src="https://www.sonderborgnyt.dk/wp-content/uploads/2018/09/IMG_6190.jpg"
-          alt="Church" 
+        <FullPageImage 
+          src={import.meta.env.VITE_LANDING_PAGE_BACKGROUND_IMAGE_URL}
+          alt="Front page image" 
         />
       </ImageContainer>
       <TopBar>
