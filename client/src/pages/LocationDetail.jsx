@@ -10,6 +10,9 @@ const PageContainer = styled.div`
   min-height: 100vh;
   background-color: #f5f5f5;
   padding-top: 80px;
+  opacity: ${props => props.$visible ? 1 : 0};
+  transform: translateY(${props => props.$visible ? '0' : '20px'});
+  transition: opacity 0.3s ease, transform 0.3s ease;
 `;
 
 const Content = styled.div`
@@ -186,30 +189,6 @@ const SettingInput = styled.input`
   width: 100px;
 `;
 
-const BackButton = styled.button`
-  position: fixed;
-  top: 100px;
-  left: 2rem;
-  background: none;
-  border: none;
-  color: #005670;
-  font-size: 2rem;
-  cursor: pointer;
-  padding: 0.5rem;
-  z-index: 5;
-  display: flex;
-  align-items: center;
-  line-height: 1;
-
-  &:hover {
-    color: #004560;
-  }
-
-  &::before {
-    content: '←';
-  }
-`;
-
 const DeactivationInfo = styled.div`
   color: #666;
   font-size: 0.9em;
@@ -310,6 +289,21 @@ const LocationDetail = () => {
   const [settings, setSettings] = useState({ groundTemperature: 15 });
   const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [warnings, setWarnings] = useState([]);
+  const [isEntering, setIsEntering] = useState(true);
+  const [fadeIn, setFadeIn] = useState(false);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    setIsEntering(false);
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFadeIn(true);
+    }, 50);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -337,6 +331,12 @@ const LocationDetail = () => {
 
     fetchData();
   }, [locationId, timeRange]);
+
+  useEffect(() => {
+    // Fade in on mount
+    const timer = setTimeout(() => setVisible(true), 50);
+    return () => clearTimeout(timer);
+  }, []);
 
   const formatDate = (timestamp) => {
     const date = new Date(timestamp);
@@ -564,15 +564,6 @@ const LocationDetail = () => {
     );
   };
 
-  const handleBack = () => {
-    // Navigate back while preserving the dashboard state
-    navigate('/dashboard', { 
-      state: { 
-        preserveState: true 
-      }
-    });
-  };
-
   const handleDeactivateWarning = async (warningId) => {
     try {
       const userId = localStorage.getItem('userId'); // Or however you store the current user's ID
@@ -605,13 +596,17 @@ const LocationDetail = () => {
     });
   }, [warnings]);
 
+  const DetailContainer = styled.div`
+    opacity: ${props => props.fadeIn ? '1' : '0'};
+    transition: opacity 0.3s ease;
+  `;
+
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
 
   return (
-    <PageContainer>
+    <PageContainer $visible={visible}>
       <TopBar locationName={locationId} />
-      <BackButton onClick={handleBack} />
       <Content>
         <MainSection>
           <Card>

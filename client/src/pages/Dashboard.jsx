@@ -10,12 +10,23 @@ const DashboardContainer = styled.div`
   min-height: 100vh;
   background-color: #f5f5f5;
   padding-top: 80px;
+  opacity: ${props => props.$visible ? 1 : 0};
+  transform: translateY(${props => props.$visible ? '0' : '20px'});
+  transition: opacity 0.3s ease, transform 0.3s ease;
 `;
 
 const Content = styled.div`
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+
+  &.entering {
+    opacity: 0;
+    transform: translateY(20px);
+  }
 `;
 
 const Title = styled.h2`
@@ -35,6 +46,8 @@ const Dashboard = () => {
       return {};
     }
   });
+  const [isEntering, setIsEntering] = useState(true);
+  const [visible, setVisible] = useState(false);
 
   // Fetch areas data
   useEffect(() => {
@@ -105,6 +118,17 @@ const Dashboard = () => {
     }
   }, [location.state]);
 
+  useEffect(() => {
+    // Trigger enter animation
+    setIsEntering(false);
+  }, []);
+
+  useEffect(() => {
+    // Fade in on mount
+    const timer = setTimeout(() => setVisible(true), 50);
+    return () => clearTimeout(timer);
+  }, []);
+
   const handleAreaToggle = (areaName) => {
     setExpandedAreas(prev => ({
       ...prev,
@@ -132,9 +156,9 @@ const Dashboard = () => {
   };
 
   return (
-    <DashboardContainer>
+    <DashboardContainer $visible={visible}>
       <TopBar locationName="Dashboard" />
-      <Content>
+      <Content className={isEntering ? 'entering' : ''}>
         {renderContent()}
       </Content>
     </DashboardContainer>
