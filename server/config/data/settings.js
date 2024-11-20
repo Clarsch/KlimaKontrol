@@ -9,7 +9,7 @@ const locationSettings = allLocations.reduce((acc, location) => {
     thresholds: {
       temperature: { min: 2, max: 22 },
       humidity: { min: 45, max: 65 },
-      pressure: { min: 980, max: 1030 }
+      pressure: { min: 960, max: 1040 }
     }
   };
   return acc;

@@ -1,46 +1,49 @@
+// Import the locations
+const locations = require('./locations');
+
 const areas = [
   {
     id: 1,
     name: "California",
     locations: [
-      "Los Angeles",
-      "San Francisco",
-      "San Diego",
-      "Sacramento",
-      "San Jose"
+      "los-angeles",
+      "san-francisco",
+      "san-diego",
+      "sacramento",
+      "san-jose"
     ]
   },
   {
     id: 2,
     name: "Texas",
     locations: [
-      "Houston",
-      "Austin",
-      "Dallas",
-      "San Antonio",
-      "Fort Worth"
+      "houston",
+      "austin",
+      "dallas",
+      "san-antonio",
+      "fort-worth"
     ]
   },
   {
     id: 3,
     name: "Florida",
     locations: [
-      "Miami",
-      "Orlando",
-      "Tampa",
-      "Jacksonville",
-      "Fort Lauderdale"
+      "miami",
+      "orlando",
+      "tampa",
+      "jacksonville",
+      "fort-lauderdale"
     ]
   },
   {
     id: 4,
     name: "New York",
     locations: [
-      "New York City",
-      "Buffalo",
-      "Rochester",
-      "Syracuse",
-      "Albany"
+      "new-york-city",
+      "buffalo",
+      "rochester",
+      "syracuse",
+      "albany"
     ]
   }
 ];
