@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
 import TopBar from '../components/TopBar';
 import LocationsOverview from '../components/LocationsOverview';
+import LoadingState from '../components/LoadingState';
+import ErrorMessage from '../components/ErrorMessage';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 
@@ -37,7 +39,8 @@ const Title = styled.h2`
 const Dashboard = () => {
   const { user } = useAuth();
   const location = useLocation();
-  const [areas, setAreas] = useState({});
+  const [areas, setAreas] = useState([]);
+  const [locations, setLocations] = useState({});
   const [expandedAreas, setExpandedAreas] = useState(() => {
     try {
       const saved = sessionStorage.getItem('dashboardState');
@@ -48,24 +51,59 @@ const Dashboard = () => {
   });
   const [isEntering, setIsEntering] = useState(true);
   const [visible, setVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch locations data
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const response = await axios.get('http://localhost:5001/api/data/locations');
+        const locationsMap = response.data.reduce((acc, location) => {
+          acc[location.id] = {
+            id: location.id,
+            name: location.name,
+            settings: location.settings,
+            thresholds: location.thresholds,
+            warnings: location.warnings,
+            status: location.status,
+            lastUpdate: location.lastUpdate,
+            groundTemperature: location.groundTemperature,
+            environmentalData: location.environmentalData
+          };
+          return acc;
+        }, {});
+        setLocations(locationsMap);
+      } catch (error) {
+        setError('Failed to load locations');
+        console.error('Error fetching locations:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchLocations();
+  }, []);
 
   // Fetch areas data
   useEffect(() => {
     const fetchAreas = async () => {
       try {
         const response = await axios.get('http://localhost:5001/api/data/areas');
-        const areasObject = response.data.reduce((acc, area) => {
-          acc[area.name] = area.locations;
-          return acc;
-        }, {});
-        setAreas(areasObject);
+        setAreas(response.data);
       } catch (error) {
         console.error('Error fetching areas:', error);
+        setError('Failed to load areas');
       }
     };
 
-    fetchAreas();
-  }, []);
+    // Only fetch areas after locations are loaded
+    if (Object.keys(locations).length > 0) {
+      fetchAreas();
+    }
+  }, [locations]);
 
   // Save expanded areas state whenever it changes
   useEffect(() => {
@@ -137,6 +175,14 @@ const Dashboard = () => {
   };
 
   const renderContent = () => {
+    if (isLoading) {
+      return <LoadingState message="Loading locations..." />;
+    }
+
+    if (error) {
+      return <ErrorMessage>{error}</ErrorMessage>;
+    }
+
     switch (user?.role) {
       case 'admin':
       case 'monitoring':

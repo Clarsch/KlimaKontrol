@@ -1,484 +1,477 @@
-const locations = [
-    {
-        id: 'los-angeles',
-        name: 'Los Angeles',
-        config: {
-            groundTemperature: 20,
-            thresholds: {
-                temperature: {
-                    active: true,
-                    min: 2,
-                    max: 22
-                },
-                humidity: {
-                    active: true,
-                    min: 45,
-                    max: 65
-                },
-                airPressure: {
-                    active: false,
-                    min: 960,
-                    max: 1040
-                }
-            }
-        }
+module.exports = [
+  {
+    "id": "sf",
+    "name": "San Francisco",
+    "settings": {
+      "groundTemperature": 15
     },
-    {
-        id: 'san-francisco',
-        name: 'San Francisco',
-        config: {
-            groundTemperature: 15,
-            thresholds: {
-                temperature: {
-                    active: true,
-                    min: 2,
-                    max: 22
-                },
-                humidity: {
-                    active: true,
-                    min: 45,
-                    max: 65
-                },
-                airPressure: {
-                    active: false,
-                    min: 960,
-                    max: 1040
-                }
-            }
-        }
+    "thresholds": {
+      "temperature": {
+        "min": 5,
+        "max": 22
+      },
+      "humidity": {
+        "min": 45,
+        "max": 65
+      },
+      "pressure": {
+        "min": 950,
+        "max": 1040
+      }
     },
-    {
-        id: 'san-diego',
-        name: 'San Diego',
-        config: {
-            groundTemperature: 18,
-            thresholds: {
-                temperature: {
-                    active: true,
-                    min: 2,
-                    max: 22
-                },
-                humidity: {
-                    active: true,
-                    min: 45,
-                    max: 65
-                },
-                airPressure: {
-                    active: false,
-                    min: 960,
-                    max: 1040
-                }
-            }
-        }
+    "warnings": [],
+    "status": "ok",
+    "lastUpdate": null,
+    "environmentalData": []
+  },
+  {
+    "id": "la",
+    "name": "Los Angeles",
+    "settings": {
+      "groundTemperature": 15
     },
-    {
-        id: 'sacramento',
-        name: 'Sacramento',
-        config: {
-            groundTemperature: 17,
-            thresholds: {
-                temperature: {
-                    active: true,
-                    min: 2,
-                    max: 22
-                },
-                humidity: {
-                    active: true,
-                    min: 45,
-                    max: 65
-                },
-                airPressure: {
-                    active: false,
-                    min: 960,
-                    max: 1040
-                }
-            }
-        }
+    "thresholds": {
+      "temperature": {
+        "min": 5,
+        "max": 22
+      },
+      "humidity": {
+        "min": 45,
+        "max": 65
+      },
+      "pressure": {
+        "min": 950,
+        "max": 1040
+      }
     },
-    {
-        id: 'san-jose',
-        name: 'San Jose',
-        config: {
-            groundTemperature: 16,
-            thresholds: {
-                temperature: {
-                    active: true,
-                    min: 2,
-                    max: 22
-                },
-                humidity: {
-                    active: true,
-                    min: 45,
-                    max: 65
-                },
-                airPressure: {
-                    active: false,
-                    min: 960,
-                    max: 1040
-                }
-            }
-        }
+    "warnings": [],
+    "status": "ok",
+    "lastUpdate": null,
+    "environmentalData": []
+  },
+  {
+    "id": "nyc",
+    "name": "New York City",
+    "settings": {
+      "groundTemperature": 15
     },
-    {
-        id: 'houston',
-        name: 'Houston',
-        config: {
-            groundTemperature: 22,
-            thresholds: {
-                temperature: {
-                    active: true,
-                    min: 2,
-                    max: 22
-                },
-                humidity: {
-                    active: true,
-                    min: 45,
-                    max: 65
-                },
-                airPressure: {
-                    active: false,
-                    min: 960,
-                    max: 1040
-                }
-            }
-        }
+    "thresholds": {
+      "temperature": {
+        "min": 5,
+        "max": 22
+      },
+      "humidity": {
+        "min": 45,
+        "max": 65
+      },
+      "pressure": {
+        "min": 950,
+        "max": 1040
+      }
     },
-    {
-        id: 'austin',
-        name: 'Austin',
-        config: {
-            groundTemperature: 21,
-            thresholds: {
-                temperature: {
-                    active: true,
-                    min: 2,
-                    max: 22
-                },
-                humidity: {
-                    active: true,
-                    min: 45,
-                    max: 65
-                },
-                airPressure: {
-                    active: false,
-                    min: 960,
-                    max: 1040
-                }
-            }
-        }
+    "warnings": [],
+    "status": "ok",
+    "lastUpdate": null,
+    "environmentalData": []
+  },
+  {
+    "id": "buf",
+    "name": "Buffalo",
+    "settings": {
+      "groundTemperature": 15
     },
-    {
-        id: 'dallas',
-        name: 'Dallas',
-        config: {
-            groundTemperature: 20,
-            thresholds: {
-                temperature: {
-                    active: true,
-                    min: 2,
-                    max: 22
-                },
-                humidity: {
-                    active: true,
-                    min: 45,
-                    max: 65
-                },
-                airPressure: {
-                    active: false,
-                    min: 960,
-                    max: 1040
-                }
-            }
-        }
+    "thresholds": {
+      "temperature": {
+        "min": 5,
+        "max": 22
+      },
+      "humidity": {
+        "min": 45,
+        "max": 65
+      },
+      "pressure": {
+        "min": 950,
+        "max": 1040
+      }
     },
-    {
-        id: 'san-antonio',
-        name: 'San Antonio',
-        config: {
-            groundTemperature: 21,
-            thresholds: {
-                temperature: {
-                    active: true,
-                    min: 2,
-                    max: 22
-                },
-                humidity: {
-                    active: true,
-                    min: 45,
-                    max: 65
-                },
-                airPressure: {
-                    active: false,
-                    min: 960,
-                    max: 1040
-                }
-            }
-        }
+    "warnings": [],
+    "status": "ok",
+    "lastUpdate": null,
+    "environmentalData": []
+  },
+  {
+    "id": "alb",
+    "name": "Albany",
+    "settings": {
+      "groundTemperature": 15
     },
-    {
-        id: 'fort-worth',
-        name: 'Fort Worth',
-        config: {
-            groundTemperature: 20,
-            thresholds: {
-                temperature: {
-                    active: true,
-                    min: 2,
-                    max: 22
-                },
-                humidity: {
-                    active: true,
-                    min: 45,
-                    max: 65
-                },
-                airPressure: {
-                    active: false,
-                    min: 960,
-                    max: 1040
-                }
-            }
-        }
+    "thresholds": {
+      "temperature": {
+        "min": 5,
+        "max": 22
+      },
+      "humidity": {
+        "min": 45,
+        "max": 65
+      },
+      "pressure": {
+        "min": 950,
+        "max": 1040
+      }
     },
-    {
-        id: 'miami',
-        name: 'Miami',
-        config: {
-            groundTemperature: 24,
-            thresholds: {
-                temperature: {
-                    active: true,
-                    min: 2,
-                    max: 22
-                },
-                humidity: {
-                    active: true,
-                    min: 45,
-                    max: 65
-                },
-                airPressure: {
-                    active: false,
-                    min: 960,
-                    max: 1040
-                }
-            }
-        }
+    "warnings": [],
+    "status": "ok",
+    "lastUpdate": null,
+    "environmentalData": []
+  },
+  {
+    "id": "syr",
+    "name": "Syracuse",
+    "settings": {
+      "groundTemperature": 15
     },
-    {
-        id: 'orlando',
-        name: 'Orlando',
-        config: {
-            groundTemperature: 23,
-            thresholds: {
-                temperature: {
-                    active: true,
-                    min: 2,
-                    max: 22
-                },
-                humidity: {
-                    active: true,
-                    min: 45,
-                    max: 65
-                },
-                airPressure: {
-                    active: false,
-                    min: 960,
-                    max: 1040
-                }
-            }
-        }
+    "thresholds": {
+      "temperature": {
+        "min": 5,
+        "max": 22
+      },
+      "humidity": {
+        "min": 45,
+        "max": 65
+      },
+      "pressure": {
+        "min": 950,
+        "max": 1040
+      }
     },
-    {
-        id: 'tampa',
-        name: 'Tampa',
-        config: {
-            groundTemperature: 23,
-            thresholds: {
-                temperature: {
-                    active: true,
-                    min: 2,
-                    max: 22
-                },
-                humidity: {
-                    active: true,
-                    min: 45,
-                    max: 65
-                },
-                airPressure: {
-                    active: false,
-                    min: 960,
-                    max: 1040
-                }
-            }
-        }
+    "warnings": [],
+    "status": "ok",
+    "lastUpdate": null,
+    "environmentalData": []
+  },
+  {
+    "id": "hou",
+    "name": "Houston",
+    "settings": {
+      "groundTemperature": 15
     },
-    {
-        id: 'jacksonville',
-        name: 'Jacksonville',
-        config: {
-            groundTemperature: 22,
-            thresholds: {
-                temperature: {
-                    active: true,
-                    min: 2,
-                    max: 22
-                },
-                humidity: {
-                    active: true,
-                    min: 45,
-                    max: 65
-                },
-                airPressure: {
-                    active: false,
-                    min: 960,
-                    max: 1040
-                }
-            }
-        }
+    "thresholds": {
+      "temperature": {
+        "min": 5,
+        "max": 22
+      },
+      "humidity": {
+        "min": 45,
+        "max": 65
+      },
+      "pressure": {
+        "min": 950,
+        "max": 1040
+      }
     },
-    {
-        id: 'fort-lauderdale',
-        name: 'Fort Lauderdale',
-        config: {
-            groundTemperature: 24,
-            thresholds: {
-                temperature: {
-                    active: true,
-                    min: 2,
-                    max: 22
-                },
-                humidity: {
-                    active: true,
-                    min: 45,
-                    max: 65
-                },
-                airPressure: {
-                    active: false,
-                    min: 960,
-                    max: 1040
-                }
-            }
-        }
+    "warnings": [],
+    "status": "ok",
+    "lastUpdate": null,
+    "environmentalData": []
+  },
+  {
+    "id": "aus",
+    "name": "Austin",
+    "settings": {
+      "groundTemperature": 15
     },
-    {
-        id: 'new-york-city',
-        name: 'New York City',
-        config: {
-            groundTemperature: 12,
-            thresholds: {
-                temperature: {
-                    active: true,
-                    min: 2,
-                    max: 22
-                },
-                humidity: {
-                    active: true,
-                    min: 45,
-                    max: 65
-                },
-                airPressure: {
-                    active: false,
-                    min: 960,
-                    max: 1040
-                }
-            }
-        }
+    "thresholds": {
+      "temperature": {
+        "min": 5,
+        "max": 22
+      },
+      "humidity": {
+        "min": 45,
+        "max": 65
+      },
+      "pressure": {
+        "min": 950,
+        "max": 1040
+      }
     },
-    {
-        id: 'buffalo',
-        name: 'Buffalo',
-        config: {
-            groundTemperature: 10,
-            thresholds: {
-                temperature: {
-                    active: true,
-                    min: 2,
-                    max: 22
-                },
-                humidity: {
-                    active: true,
-                    min: 45,
-                    max: 65
-                },
-                airPressure: {
-                    active: false,
-                    min: 960,
-                    max: 1040
-                }
-            }
-        }
+    "warnings": [],
+    "status": "ok",
+    "lastUpdate": null,
+    "environmentalData": []
+  },
+  {
+    "id": "dal",
+    "name": "Dallas",
+    "settings": {
+      "groundTemperature": 15
     },
-    {
-        id: 'rochester',
-        name: 'Rochester',
-        config: {
-            groundTemperature: 10,
-            thresholds: {
-                temperature: {
-                    active: true,
-                    min: 2,
-                    max: 22
-                },
-                humidity: {
-                    active: true,
-                    min: 45,
-                    max: 65
-                },
-                airPressure: {
-                    active: false,
-                    min: 960,
-                    max: 1040
-                }
-            }
-        }
+    "thresholds": {
+      "temperature": {
+        "min": 5,
+        "max": 22
+      },
+      "humidity": {
+        "min": 45,
+        "max": 65
+      },
+      "pressure": {
+        "min": 950,
+        "max": 1040
+      }
     },
-    {
-        id: 'syracuse',
-        name: 'Syracuse',
-        config: {
-            groundTemperature: 10,
-            thresholds: {
-                temperature: {
-                    active: true,
-                    min: 2,
-                    max: 22
-                },
-                humidity: {
-                    active: true,
-                    min: 45,
-                    max: 65
-                },
-                airPressure: {
-                    active: false,
-                    min: 960,
-                    max: 1040
-                }
-            }
-        }
+    "warnings": [],
+    "status": "ok",
+    "lastUpdate": null,
+    "environmentalData": []
+  },
+  {
+    "id": "sat",
+    "name": "San Antonio",
+    "settings": {
+      "groundTemperature": 15
     },
-    {
-        id: 'albany',
-        name: 'Albany',
-        config: {
-            groundTemperature: 11,
-            thresholds: {
-                temperature: {
-                    active: true,
-                    min: 2,
-                    max: 22
-                },
-                humidity: {
-                    active: true,
-                    min: 45,
-                    max: 65
-                },
-                airPressure: {
-                    active: false,
-                    min: 960,
-                    max: 1040
-                }
-            }
-        }
-    }
+    "thresholds": {
+      "temperature": {
+        "min": 5,
+        "max": 22
+      },
+      "humidity": {
+        "min": 45,
+        "max": 65
+      },
+      "pressure": {
+        "min": 950,
+        "max": 1040
+      }
+    },
+    "warnings": [],
+    "status": "ok",
+    "lastUpdate": null,
+    "environmentalData": []
+  },
+  {
+    "id": "elp",
+    "name": "El Paso",
+    "settings": {
+      "groundTemperature": 15
+    },
+    "thresholds": {
+      "temperature": {
+        "min": 5,
+        "max": 22
+      },
+      "humidity": {
+        "min": 45,
+        "max": 65
+      },
+      "pressure": {
+        "min": 950,
+        "max": 1040
+      }
+    },
+    "warnings": [],
+    "status": "ok",
+    "lastUpdate": null,
+    "environmentalData": []
+  },
+  {
+    "id": "ftw",
+    "name": "Fort Worth",
+    "settings": {
+      "groundTemperature": 15
+    },
+    "thresholds": {
+      "temperature": {
+        "min": 5,
+        "max": 22
+      },
+      "humidity": {
+        "min": 45,
+        "max": 65
+      },
+      "pressure": {
+        "min": 950,
+        "max": 1040
+      }
+    },
+    "warnings": [],
+    "status": "ok",
+    "lastUpdate": null,
+    "environmentalData": []
+  },
+  {
+    "id": "cor",
+    "name": "Corpus Christi",
+    "settings": {
+      "groundTemperature": 15
+    },
+    "thresholds": {
+      "temperature": {
+        "min": 5,
+        "max": 22
+      },
+      "humidity": {
+        "min": 45,
+        "max": 65
+      },
+      "pressure": {
+        "min": 950,
+        "max": 1040
+      }
+    },
+    "warnings": [],
+    "status": "ok",
+    "lastUpdate": null,
+    "environmentalData": []
+  },
+  {
+    "id": "mia",
+    "name": "Miami",
+    "settings": {
+      "groundTemperature": 15
+    },
+    "thresholds": {
+      "temperature": {
+        "min": 5,
+        "max": 22
+      },
+      "humidity": {
+        "min": 45,
+        "max": 65
+      },
+      "pressure": {
+        "min": 950,
+        "max": 1040
+      }
+    },
+    "warnings": [],
+    "status": "ok",
+    "lastUpdate": null,
+    "environmentalData": []
+  },
+  {
+    "id": "orl",
+    "name": "Orlando",
+    "settings": {
+      "groundTemperature": 15
+    },
+    "thresholds": {
+      "temperature": {
+        "min": 5,
+        "max": 22
+      },
+      "humidity": {
+        "min": 45,
+        "max": 65
+      },
+      "pressure": {
+        "min": 950,
+        "max": 1040
+      }
+    },
+    "warnings": [],
+    "status": "ok",
+    "lastUpdate": null,
+    "environmentalData": []
+  },
+  {
+    "id": "tam",
+    "name": "Tampa",
+    "settings": {
+      "groundTemperature": 15
+    },
+    "thresholds": {
+      "temperature": {
+        "min": 5,
+        "max": 22
+      },
+      "humidity": {
+        "min": 45,
+        "max": 65
+      },
+      "pressure": {
+        "min": 950,
+        "max": 1040
+      }
+    },
+    "warnings": [],
+    "status": "ok",
+    "lastUpdate": null,
+    "environmentalData": []
+  },
+  {
+    "id": "jax",
+    "name": "Jacksonville",
+    "settings": {
+      "groundTemperature": 15
+    },
+    "thresholds": {
+      "temperature": {
+        "min": 5,
+        "max": 22
+      },
+      "humidity": {
+        "min": 45,
+        "max": 65
+      },
+      "pressure": {
+        "min": 950,
+        "max": 1040
+      }
+    },
+    "warnings": [],
+    "status": "ok",
+    "lastUpdate": null,
+    "environmentalData": []
+  },
+  {
+    "id": "sea",
+    "name": "Seattle",
+    "settings": {
+      "groundTemperature": 15
+    },
+    "thresholds": {
+      "temperature": {
+        "min": 5,
+        "max": 22
+      },
+      "humidity": {
+        "min": 45,
+        "max": 65
+      },
+      "pressure": {
+        "min": 950,
+        "max": 1040
+      }
+    },
+    "warnings": [],
+    "status": "ok",
+    "lastUpdate": null,
+    "environmentalData": []
+  },
+  {
+    "id": "spo",
+    "name": "Spokane",
+    "settings": {
+      "groundTemperature": 15
+    },
+    "thresholds": {
+      "temperature": {
+        "min": 5,
+        "max": 22
+      },
+      "humidity": {
+        "min": 45,
+        "max": 65
+      },
+      "pressure": {
+        "min": 950,
+        "max": 1040
+      }
+    },
+    "warnings": [],
+    "status": "ok",
+    "lastUpdate": null,
+    "environmentalData": []
+  }
 ];
-
-module.exports = locations; 

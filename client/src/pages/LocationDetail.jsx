@@ -3,8 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import axios from 'axios';
 import TopBar from '../components/TopBar';
+import LoadingState from '../components/LoadingState';
+import ErrorMessage from '../components/ErrorMessage';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { format, subMonths, subDays, subYears, startOfDay, endOfDay } from 'date-fns';
+import { withRetry, withOptimisticUpdate } from '../utils/apiHelpers';
+import { showSuccess } from '../components/SuccessMessage';
 
 const PageContainer = styled.div`
   min-height: 100vh;
@@ -225,7 +229,7 @@ const CustomTooltipContent = ({ active, payload, label }) => {
   return (
     <CustomTooltip>
       <div className="date-time">
-        {format(label, 'MMM d, yyyy HH:mm')}
+        {locationData?.name} - {format(label, 'MMM d, yyyy HH:mm')}
       </div>
       {payload.map((entry, index) => (
         <div key={index} className="measurement">
@@ -281,17 +285,19 @@ const LocationDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [timeRange, setTimeRange] = useState('1month');
-  const [thresholds, setThresholds] = useState({
-    temperature: { min: -20, max: 30 },
-    humidity: { min: 30, max: 70 },
-    pressure: { min: 980, max: 1030 }
-  });
-  const [settings, setSettings] = useState({ groundTemperature: 15 });
+  const [thresholds, setThresholds] = useState(null);
+  const [settings, setSettings] = useState(null);
   const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [warnings, setWarnings] = useState([]);
   const [isEntering, setIsEntering] = useState(true);
   const [fadeIn, setFadeIn] = useState(false);
   const [visible, setVisible] = useState(false);
+  const [optimisticUpdates, setOptimisticUpdates] = useState({
+    settings: null,
+    thresholds: null
+  });
+  const [unsavedThresholds, setUnsavedThresholds] = useState(null);
+  const [unsavedSettings, setUnsavedSettings] = useState(null);
 
   useEffect(() => {
     setIsEntering(false);
@@ -320,7 +326,8 @@ const LocationDetail = () => {
         setLocationData(locationResponse.data);
         setEnvironmentalData(environmentalResponse.data);
         setWarnings(warningsResponse.data);
-        setSettings(locationResponse.data.settings || { groundTemperature: 15 });
+        setThresholds(locationResponse.data.thresholds);
+        setSettings(locationResponse.data.settings);
       } catch (err) {
         setError('Error fetching data');
         console.error(err);
@@ -426,40 +433,89 @@ const LocationDetail = () => {
   };
 
   const handleThresholdChange = (sensor, bound, value) => {
-    setThresholds(prev => ({
-      ...prev,
+    const newValue = parseFloat(value);
+    setUnsavedThresholds(prev => ({
+      ...prev || thresholds,
       [sensor]: {
-        ...prev[sensor],
-        [bound]: parseFloat(value)
+        ...(prev || thresholds)[sensor],
+        [bound]: newValue
       }
     }));
   };
 
   const handleSaveThresholds = async () => {
+    if (!unsavedThresholds) return;
+
     try {
-      await axios.put(`http://localhost:5001/api/locations/${locationId}/thresholds`, thresholds);
-      // Show success message or update UI
+      await withRetry(
+        async () => {
+          const response = await axios.put(
+            `http://localhost:5001/api/data/location/${locationId}/thresholds`,
+            {
+              temperature: unsavedThresholds.temperature,
+              humidity: unsavedThresholds.humidity,
+              pressure: unsavedThresholds.pressure
+            }
+          );
+          return response;
+        },
+        3,
+        (attempt, max, delay) => {
+          console.log(`Retrying threshold update (${attempt}/${max}) in ${delay}ms`);
+        }
+      );
+      setThresholds(unsavedThresholds);
+      setUnsavedThresholds(null);
+      showSuccess('Thresholds updated successfully');
     } catch (error) {
-      // Handle error
+      console.error('Failed to update thresholds:', error);
+      setError('Failed to update thresholds');
     }
   };
 
   const handleSettingChange = (setting, value) => {
-    setSettings(prev => ({
-      ...prev,
-      [setting]: parseInt(value, 10)
+    const newValue = parseFloat(value);
+    setUnsavedSettings(prev => ({
+      ...prev || settings,
+      [setting]: newValue
     }));
   };
 
   const handleSaveSettings = async () => {
+    if (!unsavedSettings) return;
+
     try {
       setIsSavingSettings(true);
-      await axios.put(`http://localhost:5001/api/data/location/${locationId}/settings`, {
-        settings
-      });
-      // Show success message or update UI
+      await withRetry(
+        async () => {
+          console.log('Sending settings update:', {
+            settings: {
+              groundTemperature: parseFloat(unsavedSettings.groundTemperature)
+            }
+          });
+          
+          const response = await axios.put(
+            `http://localhost:5001/api/data/location/${locationId}/settings`,
+            {
+              settings: {
+                groundTemperature: parseFloat(unsavedSettings.groundTemperature)
+              }
+            }
+          );
+          return response;
+        },
+        3,
+        (attempt, max, delay) => {
+          console.log(`Retrying settings update (${attempt}/${max}) in ${delay}ms`);
+        }
+      );
+      
+      setSettings(unsavedSettings);
+      setUnsavedSettings(null);
+      showSuccess('Settings updated successfully');
     } catch (error) {
-      // Handle error
+      console.error('Failed to update settings:', error.response?.data || error);
+      setError(error.response?.data?.error || 'Failed to update settings');
     } finally {
       setIsSavingSettings(false);
     }
@@ -601,12 +657,12 @@ const LocationDetail = () => {
     transition: opacity 0.3s ease;
   `;
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
+  if (loading || !thresholds || !settings) return <LoadingState message="Loading location data..." />;
+  if (error) return <ErrorMessage>{error}</ErrorMessage>;
 
   return (
     <PageContainer $visible={visible}>
-      <TopBar locationName={locationId} />
+      <TopBar locationName={locationData?.name || 'Loading...'} />
       <Content>
         <MainSection>
           <Card>
@@ -639,7 +695,7 @@ const LocationDetail = () => {
             </TimeRangeSelector>
 
             <GraphCard>
-              <GraphTitle>Combined Temperature and Humidity</GraphTitle>
+              <GraphTitle>{locationData?.name} - Combined Temperature and Humidity</GraphTitle>
               {environmentalData && renderCombinedGraph(
                 environmentalData,
                 thresholds,
@@ -648,7 +704,7 @@ const LocationDetail = () => {
             </GraphCard>
 
             <GraphCard>
-              <GraphTitle>Temperature (°C)</GraphTitle>
+              <GraphTitle>{locationData?.name} - Temperature (°C)</GraphTitle>
               {environmentalData && renderGraph(
                 environmentalData,
                 'temperature',
@@ -660,7 +716,7 @@ const LocationDetail = () => {
             </GraphCard>
 
             <GraphCard>
-              <GraphTitle>Relative Humidity (%)</GraphTitle>
+              <GraphTitle>{locationData?.name} - Relative Humidity (%)</GraphTitle>
               {environmentalData && renderGraph(
                 environmentalData,
                 'relative_humidity',
@@ -671,7 +727,7 @@ const LocationDetail = () => {
             </GraphCard>
 
             <GraphCard>
-              <GraphTitle>Air Pressure (hPa)</GraphTitle>
+              <GraphTitle>{locationData?.name} - Air Pressure (hPa)</GraphTitle>
               {environmentalData && renderGraph(
                 environmentalData,
                 'air_pressure',
@@ -683,7 +739,7 @@ const LocationDetail = () => {
           </Card>
 
           <Card>
-            <Title>Warnings</Title>
+            <Title>Warnings for {locationData?.name}</Title>
             {sortedWarnings.length === 0 ? (
                 <p>No warnings</p>
             ) : (
@@ -716,18 +772,18 @@ const LocationDetail = () => {
 
         <SideSection>
           <SettingsCard>
-            <Title>Location Settings</Title>
+            <Title>Settings for {locationData?.name}</Title>
             <SettingRow>
-              <SettingLabel>Grund Temperatur:</SettingLabel>
+              <SettingLabel>Ground Temperature:</SettingLabel>
               <SettingInput
                 type="number"
-                value={settings.groundTemperature}
+                value={(unsavedSettings || settings).groundTemperature}
                 onChange={(e) => handleSettingChange('groundTemperature', e.target.value)}
               />
             </SettingRow>
             <SaveButton 
               onClick={handleSaveSettings}
-              disabled={isSavingSettings}
+              disabled={isSavingSettings || !unsavedSettings}
             >
               {isSavingSettings ? 'Saving...' : 'Save Settings'}
             </SaveButton>
@@ -741,7 +797,7 @@ const LocationDetail = () => {
                 <ThresholdLabel>Minimum:</ThresholdLabel>
                 <ThresholdInput
                   type="number"
-                  value={thresholds.temperature.min}
+                  value={(unsavedThresholds || thresholds).temperature.min}
                   onChange={(e) => handleThresholdChange('temperature', 'min', e.target.value)}
                 />
               </ThresholdRow>
@@ -749,7 +805,7 @@ const LocationDetail = () => {
                 <ThresholdLabel>Maximum:</ThresholdLabel>
                 <ThresholdInput
                   type="number"
-                  value={thresholds.temperature.max}
+                  value={(unsavedThresholds || thresholds).temperature.max}
                   onChange={(e) => handleThresholdChange('temperature', 'max', e.target.value)}
                 />
               </ThresholdRow>
@@ -761,7 +817,7 @@ const LocationDetail = () => {
                 <ThresholdLabel>Minimum:</ThresholdLabel>
                 <ThresholdInput
                   type="number"
-                  value={thresholds.humidity.min}
+                  value={(unsavedThresholds || thresholds).humidity.min}
                   onChange={(e) => handleThresholdChange('humidity', 'min', e.target.value)}
                 />
               </ThresholdRow>
@@ -769,7 +825,7 @@ const LocationDetail = () => {
                 <ThresholdLabel>Maximum:</ThresholdLabel>
                 <ThresholdInput
                   type="number"
-                  value={thresholds.humidity.max}
+                  value={(unsavedThresholds || thresholds).humidity.max}
                   onChange={(e) => handleThresholdChange('humidity', 'max', e.target.value)}
                 />
               </ThresholdRow>
@@ -781,7 +837,7 @@ const LocationDetail = () => {
                 <ThresholdLabel>Minimum:</ThresholdLabel>
                 <ThresholdInput
                   type="number"
-                  value={thresholds.pressure.min}
+                  value={(unsavedThresholds || thresholds).pressure.min}
                   onChange={(e) => handleThresholdChange('pressure', 'min', e.target.value)}
                 />
               </ThresholdRow>
@@ -789,13 +845,16 @@ const LocationDetail = () => {
                 <ThresholdLabel>Maximum:</ThresholdLabel>
                 <ThresholdInput
                   type="number"
-                  value={thresholds.pressure.max}
+                  value={(unsavedThresholds || thresholds).pressure.max}
                   onChange={(e) => handleThresholdChange('pressure', 'max', e.target.value)}
                 />
               </ThresholdRow>
             </ThresholdGroup>
 
-            <SaveButton onClick={handleSaveThresholds}>
+            <SaveButton 
+              onClick={handleSaveThresholds}
+              disabled={!unsavedThresholds}
+            >
               Save Thresholds
             </SaveButton>
           </Card>

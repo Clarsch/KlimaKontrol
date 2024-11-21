@@ -1,129 +1,229 @@
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
+const locations = require('../config/data/locations.js');
+const areas = require('../config/data/areas.js');
+const { validateLocationUpdate } = require('../middleware/validation');
+const { validateConfig } = require('../utils/configValidation');
+const fs = require('fs').promises;
 const path = require('path');
-const fs = require('fs');
-const { 
-  handleUpload, 
-  getLocationData, 
-  getLocationsStatus, 
-  getEnvironmentalData, 
-  updateLocationSettings 
-} = require('../controllers/dataController');
-const areas = require('../config/data/areas');
 
-// Helper function to ensure directory exists
-const ensureDirectoryExists = (dirPath) => {
-  if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath, { recursive: true });
-  }
-};
-
-// Configure multer for file upload
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const uploadDir = path.join(__dirname, '..', 'data', 'uploads');
-    ensureDirectoryExists(uploadDir);
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  }
-});
-
-const upload = multer({ storage: storage });
-
-// Update file upload route
-router.post('/upload', upload.single('file'), (req, res) => {
+// Get all locations
+router.get('/locations', (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded' });
-    }
-    
-    // Handle the uploaded file
-    handleUpload(req, res);
+    const locationsList = locations.map(location => ({
+      id: location.id,
+      name: location.name,
+      settings: location.settings,
+      thresholds: location.thresholds,
+      warnings: location.warnings,
+      status: location.status,
+      lastUpdate: location.lastUpdate,
+      environmentalData: location.environmentalData
+    }));
+
+    res.json(locationsList);
   } catch (error) {
-    console.error('Upload error:', error);
-    res.status(500).json({ error: 'File upload failed' });
+    console.error('Error fetching locations:', error);
+    res.status(500).json({ error: 'Failed to fetch locations' });
   }
 });
 
-// Location data routes
-router.get('/location/:locationId', getLocationData);
-router.get('/locations/status', getLocationsStatus);
-router.get('/environmental/:locationId', getEnvironmentalData);
-
-// Add new route for updating location settings
-router.put('/location/:locationId/settings', updateLocationSettings);
-
-// Update warnings route
-router.get('/warnings/:locationId', (req, res) => {
-  const { locationId } = req.params;
-  const warningsFile = path.join(__dirname, '..', 'data', 'warnings', 'warnings.json');
-  
+// Get specific location
+router.get('/location/:id', (req, res) => {
   try {
-    ensureDirectoryExists(path.dirname(warningsFile));
+    const location = locations.find(loc => loc.id === req.params.id);
     
-    let warnings = {};
-    if (fs.existsSync(warningsFile)) {
-      warnings = JSON.parse(fs.readFileSync(warningsFile, 'utf-8'));
-    } else {
-      fs.writeFileSync(warningsFile, JSON.stringify({}), 'utf-8');
+    if (!location) {
+      return res.status(404).json({ error: 'Location not found' });
     }
-    
-    res.json(warnings[locationId] || []);
+
+    res.json({
+      id: location.id,
+      name: location.name,
+      settings: location.settings,
+      thresholds: location.thresholds,
+      warnings: location.warnings,
+      status: location.status,
+      lastUpdate: location.lastUpdate,
+      environmentalData: location.environmentalData
+    });
   } catch (error) {
-    console.error('Error reading warnings:', error);
-    res.status(500).json({ error: 'Error reading warnings' });
+    console.error('Error fetching location:', error);
+    res.status(500).json({ error: 'Failed to fetch location' });
   }
 });
 
-router.patch('/warnings/:warningId/deactivate', (req, res) => {
-    const { warningId } = req.params;
-    const { userId } = req.body; // Get the user ID from the request
-    const warningsFile = path.join(__dirname, '..', 'data', 'warnings', 'warnings.json');
-    
-    try {
-        if (fs.existsSync(warningsFile)) {
-            const allWarnings = JSON.parse(fs.readFileSync(warningsFile, 'utf-8'));
-            
-            // Find and update the warning
-            let warningFound = false;
-            for (const locationId in allWarnings) {
-                const locationWarnings = allWarnings[locationId];
-                const warningIndex = locationWarnings.findIndex(w => w.id === warningId);
-                
-                if (warningIndex !== -1) {
-                    allWarnings[locationId][warningIndex].active = false;
-                    allWarnings[locationId][warningIndex].deactivatedBy = userId;
-                    allWarnings[locationId][warningIndex].deactivatedAt = new Date();
-                    warningFound = true;
-                    break;
-                }
-            }
-            
-            if (warningFound) {
-                fs.writeFileSync(warningsFile, JSON.stringify(allWarnings, null, 2));
-                res.json({ message: 'Warning deactivated successfully' });
-            } else {
-                res.status(404).json({ error: 'Warning not found' });
-            }
-        } else {
-            res.status(404).json({ error: 'No warnings found' });
-        }
-    } catch (error) {
-        console.error('Error updating warning:', error);
-        res.status(500).json({ error: 'Error updating warning' });
-    }
+// Get location statuses
+router.get('/locations/status', (req, res) => {
+  try {
+    const statuses = locations.reduce((acc, location) => {
+      acc[location.id] = {
+        hasActiveWarnings: location.warnings?.some(w => w.active) || false,
+        warnings: location.warnings || []
+      };
+      return acc;
+    }, {});
+
+    res.json(statuses);
+  } catch (error) {
+    console.error('Error fetching location statuses:', error);
+    res.status(500).json({ error: 'Failed to fetch location statuses' });
+  }
 });
 
-// GET /api/data/areas
+// Get all areas
 router.get('/areas', (req, res) => {
   try {
-    res.json(areas);
+    const areasList = areas.map(area => ({
+      name: area.name,
+      locations: area.locations.map(locId => {
+        const location = locations.find(l => l.id === locId);
+        return {
+          id: locId,
+          name: location?.name || locId
+        };
+      })
+    }));
+
+    res.json(areasList);
   } catch (error) {
     console.error('Error fetching areas:', error);
-    res.status(500).json({ message: 'Error fetching areas data' });
+    res.status(500).json({ error: 'Failed to fetch areas' });
+  }
+});
+
+// Update location settings
+router.put('/location/:id/settings', validateLocationUpdate, async (req, res) => {
+  try {
+    const locationIndex = locations.findIndex(loc => loc.id === req.params.id);
+    if (locationIndex === -1) {
+      return res.status(404).json({ error: 'Location not found' });
+    }
+
+    // Create updated location object
+    const updatedLocation = {
+      ...locations[locationIndex],
+      settings: {
+        ...locations[locationIndex].settings,
+        ...req.body.settings
+      }
+    };
+
+    // Validate the complete updated location
+    validateConfig(updatedLocation);
+
+    // Update in memory
+    locations[locationIndex] = updatedLocation;
+
+    // Update config file
+    const configPath = path.join(__dirname, '../config/data/locations.js');
+    const configContent = `module.exports = ${JSON.stringify(locations, null, 2)};`;
+    await fs.writeFile(configPath, configContent, 'utf8');
+
+    res.json(updatedLocation);
+  } catch (error) {
+    console.error('Error updating settings:', error);
+    res.status(500).json({ error: 'Failed to update settings: ' + error.message });
+  }
+});
+
+// Update thresholds endpoint
+router.put('/location/:id/thresholds', validateLocationUpdate, async (req, res) => {
+  try {
+    const locationIndex = locations.findIndex(loc => loc.id === req.params.id);
+    if (locationIndex === -1) {
+      return res.status(404).json({ error: 'Location not found' });
+    }
+
+    // Update location with new thresholds
+    const updatedLocation = {
+      ...locations[locationIndex],
+      thresholds: req.body  // The body should directly contain the thresholds object
+    };
+
+    // Update in memory
+    locations[locationIndex] = updatedLocation;
+
+    // Update config file
+    const configPath = path.join(__dirname, '../config/data/locations.js');
+    const configContent = `module.exports = ${JSON.stringify(locations, null, 2)};`;
+    await fs.writeFile(configPath, configContent, 'utf8');
+
+    res.json(updatedLocation);
+  } catch (error) {
+    console.error('Error updating thresholds:', error);
+    res.status(500).json({ error: 'Failed to update thresholds' });
+  }
+});
+
+// Add warnings endpoints
+router.get('/warnings/:locationId', (req, res) => {
+  try {
+    const location = locations.find(loc => loc.id === req.params.locationId);
+    
+    if (!location) {
+      return res.status(404).json({ error: 'Location not found' });
+    }
+
+    res.json(location.warnings || []);
+  } catch (error) {
+    console.error('Error fetching warnings:', error);
+    res.status(500).json({ error: 'Failed to fetch warnings' });
+  }
+});
+
+// Add endpoint to deactivate warnings
+router.patch('/warnings/:warningId/deactivate', async (req, res) => {
+  try {
+    const { userId } = req.body;
+    let warningFound = false;
+
+    // Find and update the warning in the locations data
+    for (let location of locations) {
+      const warningIndex = location.warnings.findIndex(w => w.id === req.params.warningId);
+      if (warningIndex !== -1) {
+        location.warnings[warningIndex] = {
+          ...location.warnings[warningIndex],
+          active: false,
+          deactivatedBy: userId,
+          deactivatedAt: new Date()
+        };
+        warningFound = true;
+        break;
+      }
+    }
+
+    if (!warningFound) {
+      return res.status(404).json({ error: 'Warning not found' });
+    }
+
+    // Update the config file
+    const configPath = path.join(__dirname, '../config/data/locations.js');
+    const configContent = `module.exports = ${JSON.stringify(locations, null, 2)};`;
+    await fs.writeFile(configPath, configContent, 'utf8');
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deactivating warning:', error);
+    res.status(500).json({ error: 'Failed to deactivate warning' });
+  }
+});
+
+// Add environmental data endpoint
+router.get('/environmental/:locationId', (req, res) => {
+  try {
+    const location = locations.find(loc => loc.id === req.params.locationId);
+    
+    if (!location) {
+      return res.status(404).json({ error: 'Location not found' });
+    }
+
+    // For now, return empty array or mock data
+    // In a real application, this would fetch from a database
+    res.json(location.environmentalData || []);
+  } catch (error) {
+    console.error('Error fetching environmental data:', error);
+    res.status(500).json({ error: 'Failed to fetch environmental data' });
   }
 });
 

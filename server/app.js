@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const authRoutes = require('./routes/auth');
 const dataRoutes = require('./routes/data');
+const { validateConfigFiles } = require('./middleware/configValidation');
 
 const app = express();
 
@@ -32,23 +33,39 @@ const createRequiredDirectories = () => {
   }
 };
 
-// Create directories on server start
-createRequiredDirectories();
+// Add config validation on startup
+const initializeServer = async () => {
+  try {
+    const isConfigValid = await validateConfigFiles();
+    if (!isConfigValid) {
+      console.error('Invalid configuration files. Server will not start.');
+      process.exit(1);
+    }
 
-app.use(cors());
-app.use(express.json());
+    createRequiredDirectories();
+    
+    app.use(cors());
+    app.use(express.json());
+    
+    // Routes
+    app.use('/api/auth', authRoutes);
+    app.use('/api/data', dataRoutes);
+    
+    // Error handling middleware
+    app.use((err, req, res, next) => {
+      console.error('Server error:', err);
+      res.status(500).json({ 
+        message: 'Internal server error', 
+        error: process.env.NODE_ENV === 'development' ? err.message : undefined 
+      });
+    });
 
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/data', dataRoutes);
+  } catch (error) {
+    console.error('Server initialization failed:', error);
+    process.exit(1);
+  }
+};
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Server error:', err);
-  res.status(500).json({ 
-    message: 'Internal server error', 
-    error: process.env.NODE_ENV === 'development' ? err.message : undefined 
-  });
-});
+initializeServer();
 
 module.exports = app;

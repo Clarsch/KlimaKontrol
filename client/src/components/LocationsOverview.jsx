@@ -83,7 +83,7 @@ const LocationDot = styled.div`
   }
 
   &:hover::after {
-    content: '${props => props.$locationName}';
+    content: '${props => props.$locationDisplayName}';
     position: absolute;
     bottom: 100%;
     left: 50%;
@@ -145,7 +145,12 @@ const StatusIndicator = styled.div`
   background-color: ${props => props.$status === 'ok' ? 'rgba(0, 255, 0, 0.1)' : 'rgba(255, 0, 0, 0.1)'};
 `;
 
-const LocationsOverview = ({ areas, expandedAreas, onAreaToggle }) => {
+const LocationsOverview = ({ areas = [], expandedAreas, onAreaToggle }) => {
+  if (!Array.isArray(areas)) {
+    console.error('Areas prop must be an array');
+    return null;
+  }
+
   const navigate = useNavigate();
   const [locationStatuses, setLocationStatuses] = useState({});
   const [lastUpdate, setLastUpdate] = useState(Date.now());
@@ -190,47 +195,49 @@ const LocationsOverview = ({ areas, expandedAreas, onAreaToggle }) => {
 
   return (
     <div>
-      {Object.entries(areas).map(([areaName, locations]) => (
-        <AreaContainer key={areaName}>
-          <AreaBar onClick={() => onAreaToggle(areaName)}>
+      {areas.map((area) => (
+        <AreaContainer key={area.name}>
+          <AreaBar onClick={() => onAreaToggle(area.name)}>
             <AreaHeader>
               <AreaLabel>
-                {areaName}
-                <Arrow $isExpanded={expandedAreas[areaName]} />
+                {area.name}
+                <Arrow $isExpanded={expandedAreas[area.name]} />
               </AreaLabel>
               <LocationsContainer>
-                {locations.map(location => (
+                {area.locations.map(location => (
                   <LocationDot
-                    key={location}
-                    $hasWarning={locationStatuses[location]?.hasActiveWarnings}
-                    $locationName={location}
-                    onClick={() => navigate(`/location/${encodeURIComponent(location)}`)}
+                    key={location.id}
+                    $hasWarning={locationStatuses[location.id]?.hasActiveWarnings}
+                    $locationDisplayName={location.name}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent area expansion when clicking dot
+                      navigate(`/location/${encodeURIComponent(location.id)}`);
+                    }}
                   />
                 ))}
               </LocationsContainer>
             </AreaHeader>
           </AreaBar>
           
-          <ExpandedArea $isExpanded={expandedAreas[areaName]}>
-            {locations.map(location => {
-              const warnings = locationStatuses[location]?.warnings || [];
-              const activeWarnings = warnings.filter(w => w.status === 'active').length;
+          <ExpandedArea $isExpanded={expandedAreas[area.name]}>
+            {area.locations.map(location => {
+              const warnings = locationStatuses[location.id]?.warnings || [];
               
               return (
                 <LocationRow 
-                  key={location}
-                  onClick={() => navigate(`/location/${encodeURIComponent(location)}`)}
+                  key={location.id}
+                  onClick={() => navigate(`/location/${encodeURIComponent(location.id)}`)}
                 >
-                  <LocationName>{location}</LocationName>
+                  <LocationName>{location.name}</LocationName>
                   <LocationStatus>
                     <LocationDot 
-                      $hasWarning={locationStatuses[location]?.warnings?.some(w => w.active)}
-                      $locationName={location}
+                      $hasWarning={locationStatuses[location.id]?.warnings?.some(w => w.active)}
+                      $locationDisplayName={location.name}
                     />
                     <WarningCount 
-                      $hasWarnings={locationStatuses[location]?.warnings?.some(w => w.active)}
+                      $hasWarnings={locationStatuses[location.id]?.warnings?.some(w => w.active)}
                     >
-                      {locationStatuses[location]?.warnings?.filter(w => w.active).length || 0}
+                      {locationStatuses[location.id]?.warnings?.filter(w => w.active).length || 0}
                     </WarningCount>
                   </LocationStatus>
                 </LocationRow>
