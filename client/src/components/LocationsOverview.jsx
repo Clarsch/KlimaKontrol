@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import PropTypes from 'prop-types';
 
 const AreaContainer = styled.div`
   margin: 1rem 0;
@@ -145,109 +146,96 @@ const StatusIndicator = styled.div`
   background-color: ${props => props.$status === 'ok' ? 'rgba(0, 255, 0, 0.1)' : 'rgba(255, 0, 0, 0.1)'};
 `;
 
-const LocationsOverview = ({ areas = [], expandedAreas, onAreaToggle }) => {
-  if (!Array.isArray(areas)) {
-    console.error('Areas prop must be an array');
-    return null;
-  }
-
-  const navigate = useNavigate();
-  const [locationStatuses, setLocationStatuses] = useState({});
-  const [lastUpdate, setLastUpdate] = useState(Date.now());
-
-  const fetchLocationStatuses = async () => {
-    try {
-      const response = await axios.get('http://localhost:5001/api/data/locations/status');
-      setLocationStatuses(response.data);
-    } catch (error) {
-      console.error('Error fetching location statuses:', error);
-    }
-  };
-
-  useEffect(() => {
-    fetchLocationStatuses();
-  }, [lastUpdate]);
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setLastUpdate(Date.now());
-    }, 5000);
-
-    return () => clearInterval(intervalId);
-  }, []);
-
-  const renderWarningStatus = (locationWarnings) => {
-    if (!locationWarnings || locationWarnings.length === 0) {
-      return <StatusIndicator $status="ok">OK</StatusIndicator>;
-    }
-
-    const activeWarnings = locationWarnings.filter(w => w.active);
-    if (activeWarnings.length === 0) {
-      return <StatusIndicator $status="ok">OK</StatusIndicator>;
-    }
+const LocationsOverview = ({ 
+    areas = [], 
+    locationStatuses = {}, 
+    expandedAreas, 
+    onAreaToggle 
+}) => {
+    const navigate = useNavigate();
 
     return (
-      <StatusIndicator $status="warning">
-        {activeWarnings.length} Active Warning{activeWarnings.length !== 1 ? 's' : ''}
-      </StatusIndicator>
-    );
-  };
+        <div>
+            {areas.map((area) => (
+                <AreaContainer key={area.name}>
+                    <AreaBar onClick={() => onAreaToggle(area.name)}>
+                        <AreaHeader>
+                            <AreaLabel>
+                                {area.name}
+                                <Arrow $isExpanded={expandedAreas[area.name]} />
+                            </AreaLabel>
+                            <LocationsContainer>
+                                {area.locations.map(location => (
+                                    <LocationDot
+                                        key={location.id}
+                                        $hasWarning={locationStatuses[location.id]?.hasActiveWarnings}
+                                        $locationDisplayName={locationStatuses[location.id]?.name || `Unknown Location (${location.id})`}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigate(`/location/${encodeURIComponent(location.id)}`);
+                                        }}
+                                    />
+                                ))}
+                            </LocationsContainer>
+                        </AreaHeader>
+                    </AreaBar>
+                    
+                    <ExpandedArea $isExpanded={expandedAreas[area.name]}>
+                        {area.locations.map(location => {
+                            const locationStatus = locationStatuses[location.id];
+                            if (!locationStatus) {
+                                return (
+                                    <LocationRow key={location.id}>
+                                        <LocationName>Error: No status data for location {location.id}</LocationName>
+                                    </LocationRow>
+                                );
+                            }
 
-  return (
-    <div>
-      {areas.map((area) => (
-        <AreaContainer key={area.name}>
-          <AreaBar onClick={() => onAreaToggle(area.name)}>
-            <AreaHeader>
-              <AreaLabel>
-                {area.name}
-                <Arrow $isExpanded={expandedAreas[area.name]} />
-              </AreaLabel>
-              <LocationsContainer>
-                {area.locations.map(location => (
-                  <LocationDot
-                    key={location.id}
-                    $hasWarning={locationStatuses[location.id]?.hasActiveWarnings}
-                    $locationDisplayName={location.name}
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevent area expansion when clicking dot
-                      navigate(`/location/${encodeURIComponent(location.id)}`);
-                    }}
-                  />
-                ))}
-              </LocationsContainer>
-            </AreaHeader>
-          </AreaBar>
-          
-          <ExpandedArea $isExpanded={expandedAreas[area.name]}>
-            {area.locations.map(location => {
-              const warnings = locationStatuses[location.id]?.warnings || [];
-              
-              return (
-                <LocationRow 
-                  key={location.id}
-                  onClick={() => navigate(`/location/${encodeURIComponent(location.id)}`)}
-                >
-                  <LocationName>{location.name}</LocationName>
-                  <LocationStatus>
-                    <LocationDot 
-                      $hasWarning={locationStatuses[location.id]?.warnings?.some(w => w.active)}
-                      $locationDisplayName={location.name}
-                    />
-                    <WarningCount 
-                      $hasWarnings={locationStatuses[location.id]?.warnings?.some(w => w.active)}
-                    >
-                      {locationStatuses[location.id]?.warnings?.filter(w => w.active).length || 0}
-                    </WarningCount>
-                  </LocationStatus>
-                </LocationRow>
-              );
-            })}
-          </ExpandedArea>
-        </AreaContainer>
-      ))}
-    </div>
-  );
+                            return (
+                                <LocationRow 
+                                    key={location.id}
+                                    onClick={() => navigate(`/location/${encodeURIComponent(location.id)}`)}
+                                >
+                                    <LocationName>{locationStatus.name}</LocationName>
+                                    <LocationStatus>
+                                        <LocationDot 
+                                            key={`dot-${location.id}`}
+                                            $hasWarning={locationStatus.warnings?.some(w => w.active)}
+                                            $locationDisplayName={locationStatus.name}
+                                        />
+                                        <WarningCount 
+                                            key={`count-${location.id}`}
+                                            $hasWarnings={locationStatus.warnings?.some(w => w.active)}
+                                        >
+                                            {locationStatus.warnings?.filter(w => w.active).length || 0}
+                                        </WarningCount>
+                                    </LocationStatus>
+                                </LocationRow>
+                            );
+                        })}
+                    </ExpandedArea>
+                </AreaContainer>
+            ))}
+        </div>
+    );
+};
+
+LocationsOverview.propTypes = {
+  areas: PropTypes.arrayOf(PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    locations: PropTypes.arrayOf(PropTypes.shape({
+      id: PropTypes.string.isRequired
+    })).isRequired
+  })).isRequired,
+  locationStatuses: PropTypes.objectOf(PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    hasActiveWarnings: PropTypes.bool.isRequired,
+    warnings: PropTypes.arrayOf(PropTypes.shape({
+      active: PropTypes.bool.isRequired
+    })).isRequired
+  })).isRequired,
+  expandedAreas: PropTypes.object.isRequired,
+  onAreaToggle: PropTypes.func.isRequired
 };
 
 export default LocationsOverview; 

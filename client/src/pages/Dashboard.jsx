@@ -40,7 +40,6 @@ const Dashboard = () => {
   const { user } = useAuth();
   const location = useLocation();
   const [areas, setAreas] = useState([]);
-  const [locations, setLocations] = useState({});
   const [expandedAreas, setExpandedAreas] = useState(() => {
     try {
       const saved = sessionStorage.getItem('dashboardState');
@@ -53,57 +52,26 @@ const Dashboard = () => {
   const [visible, setVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [locationStatuses, setLocationStatuses] = useState({});
 
-  // Fetch locations data
+  // Single fetch for areas with their locations
   useEffect(() => {
-    const fetchLocations = async () => {
+    const fetchAreas = async () => {
       try {
         setIsLoading(true);
         setError(null);
-        const response = await axios.get('http://localhost:5001/api/data/locations');
-        const locationsMap = response.data.reduce((acc, location) => {
-          acc[location.id] = {
-            id: location.id,
-            name: location.name,
-            settings: location.settings,
-            thresholds: location.thresholds,
-            warnings: location.warnings,
-            status: location.status,
-            lastUpdate: location.lastUpdate,
-            groundTemperature: location.groundTemperature,
-            environmentalData: location.environmentalData
-          };
-          return acc;
-        }, {});
-        setLocations(locationsMap);
+        const response = await axios.get('http://localhost:5001/api/data/areas');
+        setAreas(response.data);
       } catch (error) {
-        setError('Failed to load locations');
-        console.error('Error fetching locations:', error);
+        console.error('Error fetching areas:', error);
+        setError('Failed to load areas data');
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchLocations();
+    fetchAreas();
   }, []);
-
-  // Fetch areas data
-  useEffect(() => {
-    const fetchAreas = async () => {
-      try {
-        const response = await axios.get('http://localhost:5001/api/data/areas');
-        setAreas(response.data);
-      } catch (error) {
-        console.error('Error fetching areas:', error);
-        setError('Failed to load areas');
-      }
-    };
-
-    // Only fetch areas after locations are loaded
-    if (Object.keys(locations).length > 0) {
-      fetchAreas();
-    }
-  }, [locations]);
 
   // Save expanded areas state whenever it changes
   useEffect(() => {
@@ -174,6 +142,26 @@ const Dashboard = () => {
     }));
   };
 
+  // Add refresh interval constant
+  const STATUS_REFRESH_INTERVAL = 5000;
+
+  // Separate status fetching effect
+  useEffect(() => {
+    const fetchLocationStatuses = async () => {
+      try {
+        const response = await axios.get('http://localhost:5001/api/data/locations/status');
+        setLocationStatuses(response.data);
+      } catch (error) {
+        console.error('Error fetching location statuses:', error);
+        // Don't set error state here as it would override the main error display
+      }
+    };
+
+    fetchLocationStatuses(); // Initial fetch
+    const intervalId = setInterval(fetchLocationStatuses, STATUS_REFRESH_INTERVAL);
+    return () => clearInterval(intervalId);
+  }, []);
+
   const renderContent = () => {
     if (isLoading) {
       return <LoadingState message="Loading locations..." />;
@@ -190,7 +178,8 @@ const Dashboard = () => {
           <>
             <Title>Locations Overview</Title>
             <LocationsOverview 
-              areas={areas} 
+              areas={areas}
+              locationStatuses={locationStatuses}
               expandedAreas={expandedAreas}
               onAreaToggle={handleAreaToggle}
             />
