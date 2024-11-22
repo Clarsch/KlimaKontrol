@@ -164,7 +164,8 @@ const TimeButton = styled.button`
 const GraphCard = styled(Card)`
   height: 300px;
   margin-bottom: 1rem;
-  padding-bottom: 2.5rem;
+  padding: 1rem 0.5rem 2.5rem 0.5rem;
+  overflow: visible;
 `;
 
 const GraphTitle = styled.h4`
@@ -234,17 +235,25 @@ const CustomTooltipContent = ({ active, payload, label, locationName, unit }) =>
       <div className="date-time">
         {locationName} - {format(new Date(label), 'MMM d, yyyy HH:mm')}
       </div>
-      {payload.map((entry, index) => (
-        <div key={index} className="measurement">
-          <span>{entry.name}:</span>
-          <span>
-            {entry.value.toFixed(1)} 
-            {entry.name === 'temperature' ? '°C' : 
-             entry.name === 'relative_humidity' ? '%' : 
-             entry.name === 'air_pressure' ? 'hPa' : ''}
-          </span>
-        </div>
-      ))}
+      {payload.map((entry, index) => {
+        const value = parseFloat(entry.value);
+        if (isNaN(value)) return null;
+
+        const valueUnit = entry.name === 'temperature' ? '°C' : 
+                         entry.name === 'relative_humidity' ? '%' : 
+                         entry.name === 'air_pressure' ? 'hPa' : '';
+
+        const displayName = entry.name.split('_')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+
+        return (
+          <div key={index} className="measurement">
+            <span>{displayName}:</span>
+            <span>{value.toFixed(1)} {valueUnit}</span>
+          </div>
+        );
+      })}
     </CustomTooltip>
   );
 };
@@ -253,7 +262,7 @@ CustomTooltipContent.propTypes = {
   active: PropTypes.bool,
   payload: PropTypes.arrayOf(PropTypes.shape({
     name: PropTypes.string,
-    value: PropTypes.number
+    value: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
   })),
   label: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   locationName: PropTypes.string,
@@ -395,7 +404,12 @@ const LocationDetail = () => {
       <ResponsiveContainer width="100%" height="100%">
         <LineChart 
           data={formattedData} 
-          margin={{ top: 5, right: 20, bottom: 25, left: 0 }}
+          margin={{ 
+            top: 5, 
+            right: 60, 
+            bottom: 25, 
+            left: 0 
+          }}
         >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis 
@@ -423,7 +437,7 @@ const LocationDetail = () => {
             stroke="#FFA500" 
             strokeDasharray="3 3"
             label={{ 
-              value: `Max: ${thresholds.max}${unit}`,
+              value: `${thresholds.max}${unit}`,
               position: 'right',
               fill: '#FFA500'
             }}
@@ -433,7 +447,7 @@ const LocationDetail = () => {
             stroke="#FFA500" 
             strokeDasharray="3 3"
             label={{ 
-              value: `Min: ${thresholds.min}${unit}`,
+              value: `${thresholds.min}${unit}`,
               position: 'right',
               fill: '#FFA500'
             }}
@@ -446,7 +460,7 @@ const LocationDetail = () => {
               stroke="#005670" 
               strokeDasharray="3 3"
               label={{ 
-                value: `Ground Temp: ${groundTemp}°C`,
+                value: `${groundTemp}°C`,
                 position: 'right',
                 fill: '#005670'
               }}
@@ -567,7 +581,12 @@ const LocationDetail = () => {
       <ResponsiveContainer width="100%" height="100%">
         <LineChart 
           data={formattedData} 
-          margin={{ top: 5, right: 30, bottom: 25, left: 0 }}
+          margin={{ 
+            top: 5, 
+            right: 60, 
+            bottom: 25, 
+            left: 0 
+          }}
         >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis 
@@ -611,7 +630,7 @@ const LocationDetail = () => {
             stroke="#005670" 
             strokeDasharray="3 3"
             label={{ 
-              value: `Ground Temp: ${groundTemp}°C`,
+              value: `${groundTemp}°C`,
               position: 'right',
               fill: '#005670'
             }}
