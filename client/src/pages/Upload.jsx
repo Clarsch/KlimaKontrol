@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
@@ -159,6 +159,8 @@ const FileContent = styled.div`
   }
 `;
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const Upload = () => {
   const { user } = useAuth();
   const [file, setFile] = useState(null);
@@ -166,6 +168,44 @@ const Upload = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [locationConfig, setLocationConfig] = useState(null);
+
+  useEffect(() => {
+    const fetchLocationConfig = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/api/data/locations`);
+        console.log('Fetched locations:', response.data);
+        setLocationConfig(response.data);
+      } catch (error) {
+        console.error('Error fetching location config:', error);
+        setError('Error loading location configuration. Please try again later.');
+      }
+    };
+
+    fetchLocationConfig();
+  }, []);
+
+  const getLocationId = (locationName) => {
+    if (!locationConfig) return null;
+    
+    console.log('Looking up location:', {
+      searchName: locationName,
+      availableLocations: locationConfig
+    });
+    
+    const location = locationConfig.find(loc => 
+      loc.name.toLowerCase() === locationName?.toLowerCase()
+    );
+    
+    if (!location) {
+      console.warn('Location not found:', {
+        searchName: locationName,
+        availableLocations: locationConfig.map(l => l.name)
+      });
+    }
+    
+    return location?.id;
+  };
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -212,26 +252,48 @@ const Upload = () => {
       return;
     }
 
+    const locationId = getLocationId(user.locations[0]);
+    if (!locationId) {
+      setError(`Invalid location: ${user.locations[0]}`);
+      return;
+    }
+
     setIsUploading(true);
     setError('');
     setSuccess('');
 
+    console.log('Upload attempt:', {
+      userLocation: user.locations[0],
+      locationId,
+      fileName: file.name
+    });
+
     const formData = new FormData();
+    formData.append('location', locationId);
     formData.append('file', file);
-    formData.append('location', user.locations[0]);
 
     try {
-      const response = await axios.post('http://localhost:5001/api/data/upload', formData, {
+      const response = await axios.post(`${API_URL}/api/data/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
 
-      await axios.get('http://localhost:5001/api/data/locations/status');
+      if (response.status === 400) {
+        console.error('Upload validation failed:', response.data);
+        setError(response.data.message || 'Invalid file or data format');
+        return;
+      }
 
+      await axios.get(`${API_URL}/api/data/locations/status`);
       setSuccess(`Upload completed successfully! ${response.data.recordCount} records were processed.`);
       setFile(null);
     } catch (error) {
+      console.error('Upload error details:', {
+        response: error.response?.data,
+        locationId,
+        config: error.config
+      });
       setError(error.response?.data?.message || 'Error uploading file');
     } finally {
       setIsUploading(false);

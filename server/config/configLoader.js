@@ -84,6 +84,26 @@ class ConfigLoader {
             throw new Error(`Failed to save configuration: ${configName}`);
         }
     }
+
+    async validateLocation(locationId) {
+        try {
+            const locations = await this.loadConfig('locations');
+            const location = locations.find(loc => loc.id === locationId);
+            
+            if (!location) {
+                console.error('Invalid location:', {
+                    providedId: locationId,
+                    availableLocations: locations.map(l => l.id)
+                });
+                return false;
+            }
+            
+            return true;
+        } catch (error) {
+            console.error('Location validation error:', error);
+            return false;
+        }
+    }
 }
 
 module.exports = new ConfigLoader(); 

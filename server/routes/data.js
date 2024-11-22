@@ -4,6 +4,57 @@ const configLoader = require('../config/configLoader');
 const { validateLocationUpdate } = require('../middleware/validation');
 const fs = require('fs').promises;
 const path = require('path');
+const multer = require('multer');
+const csv = require('csv-parse');
+
+// Import the processData function
+const { processData } = require('../utils/dataProcessor');
+
+// Configure multer for file upload
+const upload = multer({
+    storage: multer.diskStorage({
+        destination: async function (req, file, cb) {
+            try {
+                const location = req.body.location;
+                if (!location) {
+                    return cb(new Error('Location is required'));
+                }
+
+                // Get location config and validate
+                const locationConfig = await configLoader.loadConfig('locations');
+                const locationExists = locationConfig.some(loc => loc.id === location);
+
+                if (!locationExists) {
+                    console.error('Location validation failed:', {
+                        providedLocation: location,
+                        availableLocations: locationConfig.map(l => l.id)
+                    });
+                    return cb(new Error(`Location not found in configuration: ${location}`));
+                }
+
+                const locationDir = path.join(__dirname, '..', 'data', location);
+                await fs.mkdir(locationDir, { recursive: true });
+                cb(null, locationDir);
+            } catch (error) {
+                console.error('Destination error:', error);
+                cb(error);
+            }
+        },
+        filename: function (req, file, cb) {
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            cb(null, `data_${timestamp}.csv`);
+        }
+    }),
+    fileFilter: (req, file, cb) => {
+        if (!file.originalname.endsWith('.csv')) {
+            return cb(new Error('Only CSV files are allowed'));
+        }
+        cb(null, true);
+    },
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5MB limit
+    }
+}).single('file');
 
 // Get areas with their complete location data
 router.get('/areas', async (req, res) => {
@@ -205,6 +256,172 @@ router.patch('/warnings/:warningId/deactivate', async (req, res) => {
     } catch (error) {
         console.error('Failed to deactivate warning:', error);
         res.status(500).json({ error: 'Failed to deactivate warning' });
+    }
+});
+
+// Update the upload endpoint
+router.post('/upload', function(req, res) {
+    console.log('Upload request received:', {
+        body: req.body,
+        files: req.files,
+        headers: req.headers
+    });
+
+    upload(req, res, async function(err) {
+        if (err instanceof multer.MulterError) {
+            console.error('Multer error:', err);
+            return res.status(400).json({
+                message: 'File upload error',
+                error: err.message,
+                details: err
+            });
+        } else if (err) {
+            console.error('Upload error:', err);
+            return res.status(400).json({
+                message: err.message || 'Error uploading file',
+                error: err
+            });
+        }
+
+        try {
+            await handleFileUpload(req, res);
+        } catch (error) {
+            console.error('File processing error:', error);
+            res.status(500).json({ 
+                message: 'Error processing file',
+                error: error.message 
+            });
+        }
+    });
+});
+
+// Separate function to handle the file processing
+async function handleFileUpload(req, res) {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: 'No file uploaded' });
+        }
+
+        const location = req.body.location?.toLowerCase();
+        if (!location) {
+            return res.status(400).json({ message: 'Location is required' });
+        }
+
+        // Get location config for thresholds
+        const locationConfig = await configLoader.loadConfig('locations');
+        
+        // Case-insensitive location search
+        const locationData = locationConfig.find(loc => 
+            loc.id.toLowerCase() === location.toLowerCase()
+        );
+        
+        if (!locationData) {
+            console.error('Invalid location:', location, 'Available locations:', 
+                locationConfig.map(l => l.id));
+            return res.status(400).json({ 
+                message: 'Invalid location',
+                detail: `Location '${location}' not found in configuration`
+            });
+        }
+
+        // Read and parse the uploaded file
+        const fileContent = await fs.readFile(req.file.path, 'utf-8');
+        
+        // Parse CSV and validate data
+        const records = await new Promise((resolve, reject) => {
+            csv.parse(fileContent, {
+                columns: true,
+                skip_empty_lines: true
+            }, (err, data) => {
+                if (err) reject(err);
+                else resolve(data);
+            });
+        });
+
+        // Validate data format
+        let validationErrors = [];
+        records.forEach((record, index) => {
+            const temp = parseFloat(record.temperature);
+            const humidity = parseFloat(record.relative_humidity);
+            const pressure = parseFloat(record.air_pressure);
+            
+            if (isNaN(temp) || temp < -50 || temp > 50) {
+                validationErrors.push(`Row ${index + 1}: Invalid temperature: ${record.temperature}`);
+            }
+            if (isNaN(humidity) || humidity < 0 || humidity > 100) {
+                validationErrors.push(`Row ${index + 1}: Invalid humidity: ${record.relative_humidity}`);
+            }
+            if (isNaN(pressure) || pressure < 900 || pressure > 1100) {
+                validationErrors.push(`Row ${index + 1}: Invalid pressure: ${record.air_pressure}`);
+            }
+            if (isNaN(Date.parse(record.record_time))) {
+                validationErrors.push(`Row ${index + 1}: Invalid date format: ${record.record_time}`);
+            }
+        });
+
+        if (validationErrors.length > 0) {
+            // Clean up uploaded file if validation fails
+            await fs.unlink(req.file.path);
+            return res.status(400).json({ 
+                message: 'Invalid data in CSV file',
+                errors: validationErrors
+            });
+        }
+
+        // Process data for warnings using location thresholds
+        const warnings = processData(records, location, locationData.thresholds);
+
+        // Update environmental data file
+        const envDataPath = path.join(__dirname, '..', 'data', 'environmental', `${location}.json`);
+        let existingData = [];
+        try {
+            const existingContent = await fs.readFile(envDataPath, 'utf8');
+            existingData = JSON.parse(existingContent);
+        } catch (error) {
+            if (error.code !== 'ENOENT') throw error;
+        }
+
+        // Merge and sort data
+        const mergedData = [...existingData, ...records].sort((a, b) => 
+            new Date(a.record_time) - new Date(b.record_time)
+        );
+
+        // Save merged environmental data
+        await fs.writeFile(envDataPath, JSON.stringify(mergedData, null, 2));
+
+        res.json({ 
+            message: 'File uploaded and processed successfully',
+            recordCount: records.length,
+            newWarnings: warnings.length
+        });
+
+    } catch (error) {
+        console.error('File processing error:', error);
+        if (req.file) {
+            await fs.unlink(req.file.path).catch(console.error);
+        }
+        res.status(500).json({ 
+            message: 'Error processing file',
+            error: error.message 
+        });
+    }
+}
+
+// Add this endpoint to get all locations
+router.get('/locations', async (req, res) => {
+    try {
+        const locationConfig = await configLoader.loadConfig('locations');
+        
+        // Map the locations to include only necessary data
+        const locations = locationConfig.map(location => ({
+            id: location.id,
+            name: location.name
+        }));
+        
+        res.json(locations);
+    } catch (error) {
+        console.error('Failed to load locations:', error);
+        res.status(500).json({ error: 'Failed to load locations configuration' });
     }
 });
 

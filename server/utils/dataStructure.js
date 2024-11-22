@@ -24,7 +24,7 @@ async function verifyDataStructure() {
         }
     }
 
-    // Create files
+    // Create initial files
     for (const [filePath, defaultContent] of files) {
         const fullPath = path.join(__dirname, '..', filePath);
         try {

@@ -64,7 +64,8 @@ function createRequiredDirectories() {
 
     const warningsFile = path.join(__dirname, 'data', 'warnings', 'warnings.json');
     if (!fs.existsSync(warningsFile)) {
-        fs.writeFileSync(warningsFile, JSON.stringify({}), 'utf8');
+        console.log(`Creating warnings file: ${warningsFile}`);
+        fs.writeFileSync(warningsFile, JSON.stringify({}, null, 2), 'utf8');
     }
 }
 
