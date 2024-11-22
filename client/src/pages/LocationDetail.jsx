@@ -9,6 +9,9 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { format, subMonths, subDays, subYears, startOfDay, endOfDay } from 'date-fns';
 import { withRetry, withOptimisticUpdate } from '../utils/apiHelpers';
 import { showSuccess } from '../components/SuccessMessage';
+import PropTypes from 'prop-types';
+import GraphErrorBoundary from '../components/GraphErrorBoundary';
+import { API_URL } from '../config';
 
 const PageContainer = styled.div`
   min-height: 100vh;
@@ -223,22 +226,38 @@ const CustomTooltip = styled.div`
   }
 `;
 
-const CustomTooltipContent = ({ active, payload, label }) => {
+const CustomTooltipContent = ({ active, payload, label, locationName, unit }) => {
   if (!active || !payload || !payload.length) return null;
 
   return (
     <CustomTooltip>
       <div className="date-time">
-        {locationData?.name} - {format(label, 'MMM d, yyyy HH:mm')}
+        {locationName} - {format(new Date(label), 'MMM d, yyyy HH:mm')}
       </div>
       {payload.map((entry, index) => (
         <div key={index} className="measurement">
           <span>{entry.name}:</span>
-          <span>{entry.value} {entry.unit}</span>
+          <span>
+            {entry.value.toFixed(1)} 
+            {entry.name === 'temperature' ? '°C' : 
+             entry.name === 'relative_humidity' ? '%' : 
+             entry.name === 'air_pressure' ? 'hPa' : ''}
+          </span>
         </div>
       ))}
     </CustomTooltip>
   );
+};
+
+CustomTooltipContent.propTypes = {
+  active: PropTypes.bool,
+  payload: PropTypes.arrayOf(PropTypes.shape({
+    name: PropTypes.string,
+    value: PropTypes.number
+  })),
+  label: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  locationName: PropTypes.string,
+  unit: PropTypes.string
 };
 
 const getTimeRange = (range) => {
@@ -276,6 +295,11 @@ const getTimeRange = (range) => {
       return null;
   }
 };
+
+const DetailContainer = styled.div`
+  opacity: ${props => props.fadeIn ? '1' : '0'};
+  transition: opacity 0.3s ease;
+`;
 
 const LocationDetail = () => {
   const { locationId } = useParams();
@@ -316,11 +340,15 @@ const LocationDetail = () => {
       try {
         setLoading(true);
         const [locationResponse, environmentalResponse, warningsResponse] = await Promise.all([
-          axios.get(`http://localhost:5001/api/data/location/${encodeURIComponent(locationId)}`),
-          axios.get(`http://localhost:5001/api/data/environmental/${encodeURIComponent(locationId)}`, {
+          axios.get(`${API_URL}/api/data/location/${encodeURIComponent(locationId)}`),
+          axios.get(`${API_URL}/api/data/environmental/${encodeURIComponent(locationId)}`, {
             params: { timeRange }
           }),
-          axios.get(`http://localhost:5001/api/data/warnings/${encodeURIComponent(locationId)}`)
+          axios.get(`${API_URL}/api/data/warnings/${encodeURIComponent(locationId)}`)
+            .catch(error => {
+              console.warn('No warnings found:', error);
+              return { data: [] }; // Return empty array if warnings endpoint fails
+            })
         ]);
 
         setLocationData(locationResponse.data);
@@ -329,8 +357,8 @@ const LocationDetail = () => {
         setThresholds(locationResponse.data.thresholds);
         setSettings(locationResponse.data.settings);
       } catch (err) {
-        setError('Error fetching data');
-        console.error(err);
+        setError(err.response?.data?.error || 'Error fetching data');
+        console.error('Error fetching location data:', err);
       } finally {
         setLoading(false);
       }
@@ -380,8 +408,13 @@ const LocationDetail = () => {
           />
           <YAxis domain={[thresholds.min, thresholds.max]} />
           <Tooltip 
-            content={<CustomTooltipContent />}
-            payload={[{ unit }]}
+            content={(props) => (
+              <CustomTooltipContent 
+                {...props} 
+                locationName={locationData?.name}
+                unit={unit}
+              />
+            )}
           />
           
           {/* Threshold lines */}
@@ -450,12 +483,8 @@ const LocationDetail = () => {
       await withRetry(
         async () => {
           const response = await axios.put(
-            `http://localhost:5001/api/data/location/${locationId}/thresholds`,
-            {
-              temperature: unsavedThresholds.temperature,
-              humidity: unsavedThresholds.humidity,
-              pressure: unsavedThresholds.pressure
-            }
+            `${API_URL}/api/data/location/${locationId}/thresholds`,
+            unsavedThresholds  // Send just the thresholds object
           );
           return response;
         },
@@ -567,12 +596,12 @@ const LocationDetail = () => {
           />
           
           <Tooltip 
-            content={<CustomTooltipContent />}
-            payload={[
-              { unit: '°C' },
-              { unit: '%' },
-              { unit: 'hPa' }
-            ]}
+            content={(props) => (
+              <CustomTooltipContent 
+                {...props} 
+                locationName={locationData?.name}
+              />
+            )}
           />
 
           {/* Ground temperature reference line */}
@@ -622,8 +651,8 @@ const LocationDetail = () => {
 
   const handleDeactivateWarning = async (warningId) => {
     try {
-      const userId = localStorage.getItem('userId'); // Or however you store the current user's ID
-      await axios.patch(`http://localhost:5001/api/data/warnings/${warningId}/deactivate`, {
+      const userId = localStorage.getItem('userId');
+      await axios.patch(`${API_URL}/api/data/warnings/${warningId}/deactivate`, {
         userId
       });
       setWarnings(warnings.map(warning => 
@@ -651,11 +680,6 @@ const LocationDetail = () => {
       return new Date(b.timestamp) - new Date(a.timestamp);
     });
   }, [warnings]);
-
-  const DetailContainer = styled.div`
-    opacity: ${props => props.fadeIn ? '1' : '0'};
-    transition: opacity 0.3s ease;
-  `;
 
   if (loading || !thresholds || !settings) return <LoadingState message="Loading location data..." />;
   if (error) return <ErrorMessage>{error}</ErrorMessage>;
@@ -695,12 +719,14 @@ const LocationDetail = () => {
             </TimeRangeSelector>
 
             <GraphCard>
-              <GraphTitle>{locationData?.name} - Combined Temperature and Humidity</GraphTitle>
-              {environmentalData && renderCombinedGraph(
-                environmentalData,
-                thresholds,
-                settings.groundTemperature
-              )}
+              <GraphTitle>{locationData?.name} - Combined Data</GraphTitle>
+              <GraphErrorBoundary>
+                {environmentalData && renderCombinedGraph(
+                  environmentalData,
+                  thresholds,
+                  settings.groundTemperature
+                )}
+              </GraphErrorBoundary>
             </GraphCard>
 
             <GraphCard>

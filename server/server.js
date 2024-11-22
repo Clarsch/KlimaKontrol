@@ -1,8 +1,10 @@
 const express = require('express');
 const cors = require('cors');
+const { verifyDataStructure } = require('./utils/dataStructure');
 
 async function startServer() {
     try {
+        await verifyDataStructure();
         const app = await require('./app');
         const port = process.env.PORT || 5001;
         

@@ -69,6 +69,21 @@ class ConfigLoader {
             throw error;
         }
     }
+
+    async saveConfig(configName, data) {
+        try {
+            const filePath = path.join(this.externalConfigPath, `${configName}.js`);
+            const configContent = `module.exports = ${JSON.stringify(data, null, 2)};`;
+            
+            await fs.writeFile(filePath, configContent);
+            this.cache.set(configName, data);
+            
+            console.log(`Saved config: ${configName}`);
+        } catch (error) {
+            console.error(`Error saving config ${configName}:`, error);
+            throw new Error(`Failed to save configuration: ${configName}`);
+        }
+    }
 }
 
 module.exports = new ConfigLoader(); 
