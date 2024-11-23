@@ -185,26 +185,10 @@ const Upload = () => {
     fetchLocationConfig();
   }, []);
 
-  const getLocationId = (locationName) => {
-    if (!locationConfig) return null;
-    
-    console.log('Looking up location:', {
-      searchName: locationName,
-      availableLocations: locationConfig
-    });
-    
-    const location = locationConfig.find(loc => 
-      loc.name.toLowerCase() === locationName?.toLowerCase()
-    );
-    
-    if (!location) {
-      console.warn('Location not found:', {
-        searchName: locationName,
-        availableLocations: locationConfig.map(l => l.name)
-      });
-    }
-    
-    return location?.id;
+  const getLocationName = (locationId) => {
+    if (!locationConfig) return "Loading...";
+    const location = locationConfig.find(loc => loc.id === locationId);
+    return location?.name || "Unknown Location";
   };
 
   const handleDragOver = (e) => {
@@ -252,26 +236,22 @@ const Upload = () => {
       return;
     }
 
-    const locationId = getLocationId(user.locations[0]);
-    if (!locationId) {
-      setError(`Invalid location: ${user.locations[0]}`);
-      return;
-    }
-
+    const locationId = user.locations[0];
+    
     setIsUploading(true);
     setError('');
     setSuccess('');
 
     console.log('Upload attempt:', {
-      userLocation: user.locations[0],
       locationId,
+      locationName: getLocationName(locationId),
       fileName: file.name
     });
 
     const formData = new FormData();
     formData.append('location', locationId);
     formData.append('file', file);
-
+    
     try {
       const response = await axios.post(`${API_URL}/api/data/upload`, formData, {
         headers: {
@@ -315,9 +295,9 @@ const Upload = () => {
 
   return (
     <PageContainer>
-      <TopBar locationName={user?.locations?.[0] || "Upload Data"} />
+      <TopBar locationName={getLocationName(user?.locations?.[0])} />
       <UploadContainer>
-        <Title>Upload Data for {user?.locations?.[0]}</Title>
+        <Title>Upload Data for {getLocationName(user?.locations?.[0])}</Title>
 
         <DropZone
           onDragOver={handleDragOver}
