@@ -162,7 +162,7 @@ const TimeButton = styled.button`
 `;
 
 const GraphCard = styled(Card)`
-  height: 300px;
+  height: 330px;
   margin-bottom: 1rem;
   padding: 1rem 0.5rem 2.5rem 0.5rem;
   overflow: visible;
@@ -395,32 +395,50 @@ const LocationDetail = () => {
       record_time: new Date(point.record_time).getTime()
     }));
 
-    const tickStep = (timeRangeConfig.end - timeRangeConfig.start) / (timeRangeConfig.ticks - 1);
-    const ticks = Array.from({ length: timeRangeConfig.ticks }, (_, i) => 
-      timeRangeConfig.start + (tickStep * i)
-    );
+    const dataMin = Math.min(...formattedData.map(d => parseFloat(d[dataKey])));
+    const dataMax = Math.max(...formattedData.map(d => parseFloat(d[dataKey])));
+    
+    const yMin = Math.min(thresholds.min, dataMin);
+    const yMax = Math.max(thresholds.max, dataMax);
+    
+    const domainPadding = (yMax - yMin) * 0.05;
+
+    // Calculate Y-axis ticks
+    const yAxisTicks = [];
+    const tickCount = 5;
+    const tickInterval = (yMax - yMin) / (tickCount - 1);
+    for (let i = 0; i < tickCount; i++) {
+      yAxisTicks.push(Math.round((yMin + (i * tickInterval)) * 10) / 10);
+    }
 
     return (
       <ResponsiveContainer width="100%" height="100%">
         <LineChart 
           data={formattedData} 
-          margin={{ 
-            top: 5, 
-            right: 60, 
-            bottom: 25, 
-            left: 0 
-          }}
+          margin={{ top: 5, right: 60, bottom: 25, left: 0 }}
         >
-          <CartesianGrid strokeDasharray="3 3" />
+          <CartesianGrid 
+            strokeDasharray="3 3"
+            horizontal={true}
+            vertical={true}
+          />
           <XAxis 
             dataKey="record_time"
             type="number"
             domain={[timeRangeConfig.start, timeRangeConfig.end]}
             tickFormatter={(timestamp) => format(timestamp, timeRangeConfig.tickFormat)}
-            ticks={ticks}
             scale="time"
+            interval="preserveStartEnd"
           />
-          <YAxis domain={[thresholds.min, thresholds.max]} />
+          <YAxis 
+            domain={[
+              Math.floor(yMin - domainPadding), 
+              Math.ceil(yMax + domainPadding)
+            ]}
+            ticks={yAxisTicks}
+            allowDecimals={true}
+            interval="preserveStartEnd"
+          />
           <Tooltip 
             content={(props) => (
               <CustomTooltipContent 
@@ -572,40 +590,67 @@ const LocationDetail = () => {
       record_time: new Date(point.record_time).getTime()
     }));
 
-    const tickStep = (timeRangeConfig.end - timeRangeConfig.start) / (timeRangeConfig.ticks - 1);
-    const ticks = Array.from({ length: timeRangeConfig.ticks }, (_, i) => 
-      timeRangeConfig.start + (tickStep * i)
-    );
+    const tempMin = Math.min(...formattedData.map(d => parseFloat(d.temperature)));
+    const tempMax = Math.max(...formattedData.map(d => parseFloat(d.temperature)));
+    const humidityMin = Math.min(...formattedData.map(d => parseFloat(d.relative_humidity)));
+    const humidityMax = Math.max(...formattedData.map(d => parseFloat(d.relative_humidity)));
+    
+    const tempPadding = (Math.max(tempMax, thresholds.temperature.max) - 
+                        Math.min(tempMin, thresholds.temperature.min)) * 0.05;
+    const humidityPadding = (Math.max(humidityMax, thresholds.humidity.max) - 
+                            Math.min(humidityMin, thresholds.humidity.min)) * 0.05;
+
+    // Calculate ticks for both axes
+    const tempTicks = [];
+    const humidityTicks = [];
+    const tickCount = 5;
+
+    const tempInterval = (tempMax - tempMin) / (tickCount - 1);
+    const humidityInterval = (humidityMax - humidityMin) / (tickCount - 1);
+
+    for (let i = 0; i < tickCount; i++) {
+      tempTicks.push(Math.round((tempMin + (i * tempInterval)) * 10) / 10);
+      humidityTicks.push(Math.round((humidityMin + (i * humidityInterval)) * 10) / 10);
+    }
 
     return (
       <ResponsiveContainer width="100%" height="100%">
         <LineChart 
           data={formattedData} 
-          margin={{ 
-            top: 5, 
-            right: 60, 
-            bottom: 25, 
-            left: 0 
-          }}
+          margin={{ top: 5, right: 60, bottom: 25, left: 0 }}
         >
-          <CartesianGrid strokeDasharray="3 3" />
+          <CartesianGrid 
+            strokeDasharray="3 3"
+            horizontal={true}
+            vertical={true}
+          />
           <XAxis 
             dataKey="record_time"
             type="number"
             domain={[timeRangeConfig.start, timeRangeConfig.end]}
             tickFormatter={(timestamp) => format(timestamp, timeRangeConfig.tickFormat)}
-            ticks={ticks}
             scale="time"
+            interval="preserveStartEnd"
           />
           <YAxis 
             yAxisId="temp" 
-            domain={[thresholds.temperature.min, thresholds.temperature.max]}
+            domain={[
+              Math.floor(Math.min(tempMin, thresholds.temperature.min) - tempPadding),
+              Math.ceil(Math.max(tempMax, thresholds.temperature.max) + tempPadding)
+            ]}
+            ticks={tempTicks}
             orientation="left"
+            interval="preserveStartEnd"
           />
           <YAxis 
             yAxisId="humidity" 
-            orientation="right" 
-            domain={[thresholds.humidity.min, thresholds.humidity.max]}
+            domain={[
+              Math.floor(Math.min(humidityMin, thresholds.humidity.min) - humidityPadding),
+              Math.ceil(Math.max(humidityMax, thresholds.humidity.max) + humidityPadding)
+            ]}
+            ticks={humidityTicks}
+            orientation="right"
+            interval="preserveStartEnd"
           />
           <YAxis 
             yAxisId="pressure" 
