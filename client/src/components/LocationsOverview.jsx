@@ -73,7 +73,7 @@ const LocationsContainer = styled.div`
 const LocationDot = styled.div`
   width: 16px;
   height: 16px;
-  background-color: ${props => props.$hasWarning ? '#FF0000' : '#00FF00'};
+  background-color: ${props => props.$hasWarning ? '#FF0000' : '#44FF44'};
   border-radius: 50%;
   transition: transform 0.2s ease;
   position: relative;
@@ -84,7 +84,7 @@ const LocationDot = styled.div`
   }
 
   &:hover::after {
-    content: '${props => props.$locationDisplayName}';
+    content: '${props => props.$locationDisplayName}${props => props.$warningCount ? ` (${props.$warningCount} warnings)` : ''}';
     position: absolute;
     bottom: 100%;
     left: 50%;
@@ -165,17 +165,23 @@ const LocationsOverview = ({
                                 <Arrow $isExpanded={expandedAreas[area.name]} />
                             </AreaLabel>
                             <LocationsContainer>
-                                {area.locations.map(location => (
-                                    <LocationDot
-                                        key={location.id}
-                                        $hasWarning={locationStatuses[location.id]?.hasActiveWarnings}
-                                        $locationDisplayName={locationStatuses[location.id]?.name || `Unknown Location (${location.id})`}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            navigate(`/location/${encodeURIComponent(location.id)}`);
-                                        }}
-                                    />
-                                ))}
+                                {area.locations.map(location => {
+                                    const status = locationStatuses[location.id];
+                                    const warningCount = status?.warnings?.length || 0;
+                                    
+                                    return (
+                                        <LocationDot
+                                            key={location.id}
+                                            $hasWarning={warningCount > 0}
+                                            $locationDisplayName={status?.name || `Unknown Location (${location.id})`}
+                                            $warningCount={warningCount}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                navigate(`/location/${encodeURIComponent(location.id)}`);
+                                            }}
+                                        />
+                                    );
+                                })}
                             </LocationsContainer>
                         </AreaHeader>
                     </AreaBar>
@@ -198,16 +204,8 @@ const LocationsOverview = ({
                                 >
                                     <LocationName>{locationStatus.name}</LocationName>
                                     <LocationStatus>
-                                        <LocationDot 
-                                            key={`dot-${location.id}`}
-                                            $hasWarning={locationStatus.warnings?.some(w => w.active)}
-                                            $locationDisplayName={locationStatus.name}
-                                        />
-                                        <WarningCount 
-                                            key={`count-${location.id}`}
-                                            $hasWarnings={locationStatus.warnings?.some(w => w.active)}
-                                        >
-                                            {locationStatus.warnings?.filter(w => w.active).length || 0}
+                                        <WarningCount $hasWarnings={locationStatus.warnings?.length > 0}>
+                                            {locationStatus.warnings?.length || 0}
                                         </WarningCount>
                                     </LocationStatus>
                                 </LocationRow>

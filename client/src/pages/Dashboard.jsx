@@ -7,6 +7,7 @@ import LoadingState from '../components/LoadingState';
 import ErrorMessage from '../components/ErrorMessage';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
+import { fetchActiveWarnings } from '../api/dataService';
 
 const DashboardContainer = styled.div`
   min-height: 100vh;
@@ -53,6 +54,7 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [locationStatuses, setLocationStatuses] = useState({});
+  const [locations, setLocations] = useState([]);
 
   // Single fetch for areas with their locations
   useEffect(() => {
@@ -145,7 +147,7 @@ const Dashboard = () => {
   // Add refresh interval constant
   const STATUS_REFRESH_INTERVAL = 5000;
 
-  // Separate status fetching effect
+  // Update the useEffect for fetching location statuses
   useEffect(() => {
     const fetchLocationStatuses = async () => {
       try {
@@ -153,11 +155,10 @@ const Dashboard = () => {
         setLocationStatuses(response.data);
       } catch (error) {
         console.error('Error fetching location statuses:', error);
-        // Don't set error state here as it would override the main error display
       }
     };
 
-    fetchLocationStatuses(); // Initial fetch
+    fetchLocationStatuses();
     const intervalId = setInterval(fetchLocationStatuses, STATUS_REFRESH_INTERVAL);
     return () => clearInterval(intervalId);
   }, []);

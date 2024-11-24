@@ -71,11 +71,27 @@ router.get('/areas', async (req, res) => {
 router.get('/locations/status', async (req, res) => {
     try {
         const locationConfig = await configLoader.loadConfig('locations');
+        const warningsPath = path.join(__dirname, '..', 'data', 'warnings', 'warnings.json');
+        
+        // Read warnings file
+        let warningsData = {};
+        try {
+            const warningsContent = await fs.readFile(warningsPath, 'utf8');
+            warningsData = JSON.parse(warningsContent);
+        } catch (error) {
+            if (error.code !== 'ENOENT') {
+                throw error;
+            }
+        }
+
         const statusMap = locationConfig.reduce((acc, location) => {
+            const locationWarnings = warningsData[location.id] || [];
+            const activeWarnings = locationWarnings.filter(w => w.active);
+            
             acc[location.id] = {
                 name: location.name,
-                hasActiveWarnings: false,
-                warnings: [],
+                hasActiveWarnings: activeWarnings.length > 0,
+                warnings: activeWarnings,
                 lastUpdate: new Date().toISOString()
             };
             return acc;
@@ -445,6 +461,42 @@ router.get('/locations', async (req, res) => {
         console.error('Failed to load locations:', error);
         res.status(500).json({ error: 'Failed to load locations configuration' });
     }
+});
+
+// Replace the existing /warnings/active route with this:
+router.get('/warnings/active', async (req, res) => {
+  try {
+    const warningsPath = path.join(__dirname, '..', 'data', 'warnings', 'warnings.json');
+    
+    // Read warnings file
+    let warnings = [];
+    try {
+      const warningsContent = await fs.readFile(warningsPath, 'utf8');
+      const warningsData = JSON.parse(warningsContent);
+      
+      // Transform the warnings data structure into a flat array of active warnings
+      Object.entries(warningsData).forEach(([locationId, locationWarnings]) => {
+        const activeWarnings = locationWarnings
+          .filter(warning => warning.active)
+          .map(warning => ({
+            ...warning,
+            locationId
+          }));
+        warnings.push(...activeWarnings);
+      });
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        warnings = [];
+      } else {
+        throw error;
+      }
+    }
+    
+    res.json(warnings);
+  } catch (error) {
+    console.error('Error fetching active warnings:', error);
+    res.status(500).json({ error: 'Failed to fetch active warnings' });
+  }
 });
 
 module.exports = router; 
