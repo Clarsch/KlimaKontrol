@@ -34,6 +34,18 @@ async function verifyDataStructure() {
             console.log(`Created file: ${fullPath}`);
         }
     }
+
+    // Validate warnings file structure
+    const warningsPath = path.join(__dirname, '..', 'data', 'warnings', 'warnings.json');
+    try {
+        const warningsContent = await fs.readFile(warningsPath, 'utf8');
+        JSON.parse(warningsContent); // Validate JSON structure
+    } catch (error) {
+        if (error.code === 'ENOENT' || error instanceof SyntaxError) {
+            await fs.writeFile(warningsPath, '{}');
+            console.log(`Reset warnings file: ${warningsPath}`);
+        }
+    }
 }
 
 module.exports = { verifyDataStructure }; 

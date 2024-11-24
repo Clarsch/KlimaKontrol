@@ -371,6 +371,25 @@ async function handleFileUpload(req, res) {
         // Process data for warnings using location thresholds
         const warnings = processData(records, location, locationData.thresholds);
 
+        // Add this code to save warnings
+        const warningsPath = path.join(__dirname, '..', 'data', 'warnings', 'warnings.json');
+        let existingWarnings = {};
+        try {
+            const warningsContent = await fs.readFile(warningsPath, 'utf8');
+            existingWarnings = JSON.parse(warningsContent);
+        } catch (error) {
+            if (error.code !== 'ENOENT') throw error;
+        }
+
+        // Add new warnings to existing ones
+        existingWarnings[location] = [
+            ...(existingWarnings[location] || []),
+            ...warnings
+        ];
+
+        // Save updated warnings
+        await fs.writeFile(warningsPath, JSON.stringify(existingWarnings, null, 2));
+
         // Update environmental data file
         const envDataPath = path.join(__dirname, '..', 'data', 'environmental', `${location}.json`);
         let existingData = [];
@@ -388,6 +407,9 @@ async function handleFileUpload(req, res) {
 
         // Save merged environmental data
         await fs.writeFile(envDataPath, JSON.stringify(mergedData, null, 2));
+
+        console.log(`Created ${warnings.length} warnings for location ${location}:`, 
+            warnings.map(w => ({type: w.type, message: w.message})));
 
         res.json({ 
             message: 'File uploaded and processed successfully',

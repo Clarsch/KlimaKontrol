@@ -4,6 +4,7 @@ const path = require('path');
 const warningsConfig = require('../config/data/warnings');
 const locationSettings = require('../config/data/settings');
 const { checkThresholds } = require('../config/data/warnings');
+const { processData } = require('../utils/dataProcessor');
 
 // Create necessary directories
 const DATA_DIR = path.join(__dirname, '..', 'data');
@@ -98,92 +99,6 @@ const readLocationData = async (locationId, timeRange) => {
   }
 };
 
-// Process uploaded data and check for threshold breaches
-const processData = (records, locationId) => {
-  const settings = locationSettings[locationId];
-  const thresholds = settings.thresholds;
-  const newWarnings = [];
-
-  records.forEach(record => {
-    const temp = parseFloat(record.temperature);
-    const humidity = parseFloat(record.relative_humidity);
-    
-    // Check temperature thresholds
-    if (temp < thresholds.temperature.min) {
-      newWarnings.push({
-        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-        locationId: locationId,
-        type: 'Temperature',
-        message: `Temperature too low: ${temp}°C (min: ${thresholds.temperature.min}°C)`,
-        timestamp: record.record_time,
-        active: true,
-        value: temp,
-        threshold: thresholds.temperature.min
-      });
-    } else if (temp > thresholds.temperature.max) {
-      newWarnings.push({
-        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-        locationId: locationId,
-        type: 'Temperature',
-        message: `Temperature too high: ${temp}°C (max: ${thresholds.temperature.max}°C)`,
-        timestamp: record.record_time,
-        active: true,
-        value: temp,
-        threshold: thresholds.temperature.max
-      });
-    }
-
-    // Check humidity thresholds
-    if (humidity < thresholds.humidity.min) {
-      newWarnings.push({
-        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-        locationId: locationId,
-        type: 'Humidity',
-        message: `Humidity too low: ${humidity}% (min: ${thresholds.humidity.min}%)`,
-        timestamp: record.record_time,
-        active: true,
-        value: humidity,
-        threshold: thresholds.humidity.min
-      });
-    } else if (humidity > thresholds.humidity.max) {
-      newWarnings.push({
-        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-        locationId: locationId,
-        type: 'Humidity',
-        message: `Humidity too high: ${humidity}% (max: ${thresholds.humidity.max}%)`,
-        timestamp: record.record_time,
-        active: true,
-        value: humidity,
-        threshold: thresholds.humidity.max
-      });
-    }
-  });
-
-  // Load existing warnings
-  const warningsFile = path.join(WARNINGS_DIR, 'warnings.json');
-  let allWarnings = {};
-  
-  if (fs.existsSync(warningsFile)) {
-    try {
-      allWarnings = JSON.parse(fs.readFileSync(warningsFile, 'utf-8'));
-    } catch (error) {
-      console.error('Error reading warnings file:', error);
-    }
-  }
-
-  // Add new warnings to existing ones
-  allWarnings[locationId] = [...(allWarnings[locationId] || []), ...newWarnings];
-
-  // Save updated warnings
-  try {
-    fs.writeFileSync(warningsFile, JSON.stringify(allWarnings, null, 2));
-  } catch (error) {
-    console.error('Error saving warnings:', error);
-  }
-
-  return newWarnings;
-};
-
 exports.handleUpload = async (req, res) => {
   try {
     if (!req.file) {
@@ -254,7 +169,7 @@ exports.handleUpload = async (req, res) => {
       fs.writeFileSync(savedFilePath, fileContent);
 
       // Process data for warnings
-      const newWarnings = processData(records, location);
+      const newWarnings = processData(records, location, locationSettings[location].thresholds);
 
       // Clean up temporary upload file
       fs.unlinkSync(req.file.path);
