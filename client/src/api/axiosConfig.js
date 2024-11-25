@@ -8,35 +8,7 @@ const axiosInstance = axios.create({
   headers: {
     'Content-Type': 'application/json',
     'ngrok-skip-browser-warning': 'true'
-  },
-  withCredentials: false
+  }
 });
-
-// Add request interceptor for debugging
-axiosInstance.interceptors.request.use(
-  (config) => {
-    console.log('Making request to:', config.url, 'with headers:', config.headers);
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// Add response interceptor for debugging
-axiosInstance.interceptors.response.use(
-  (response) => {
-    console.log('Response from:', response.config.url, 'Data:', response.data);
-    return response;
-  },
-  (error) => {
-    console.error('Request failed:', {
-      message: error.message,
-      config: error.config,
-      response: error.response
-    });
-    return Promise.reject(error);
-  }
-);
 
 export default axiosInstance; 

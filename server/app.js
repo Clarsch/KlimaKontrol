@@ -21,44 +21,15 @@ async function initializeApp() {
         
         // CORS configuration
         const corsOptions = {
-            origin: function (origin, callback) {
-                console.log('Incoming request from origin:', origin);
-                
-                const allowedOrigins = [
-                    'https://klima-kontrol-five.vercel.app',
-                    'http://localhost:5173',
-                    undefined
-                ];
-                
-                if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
-                    console.log('Origin allowed:', origin);
-                    callback(null, true);
-                } else {
-                    console.log('Origin rejected:', origin);
-                    callback(new Error('Not allowed by CORS'));
-                }
-            },
-            credentials: false,
+            origin: ['https://klima-kontrol-five.vercel.app', 'http://localhost:5173'],
             methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-            allowedHeaders: [
-                'Content-Type', 
-                'Authorization', 
-                'ngrok-skip-browser-warning'
-            ],
-            exposedHeaders: ['Access-Control-Allow-Origin'],
-            optionsSuccessStatus: 200,
-            preflightContinue: false
+            allowedHeaders: ['Content-Type', 'Authorization', 'ngrok-skip-browser-warning'],
+            optionsSuccessStatus: 200
         };
 
-        // Apply CORS middleware before any routes
+        // Apply CORS middleware before anything else
         app.use(cors(corsOptions));
         
-        // Handle preflight requests explicitly
-        app.options('*', (req, res, next) => {
-            console.log('Handling OPTIONS request');
-            res.status(200).end();
-        });
-
         // Add middleware to log all requests
         app.use((req, res, next) => {
             console.log(`${req.method} ${req.path} - Origin: ${req.headers.origin}`);
