@@ -26,9 +26,8 @@ async function initializeApp() {
                 path: req.path,
                 origin: req.headers.origin
             });
-
             // Force headers through ngrok
-            res.setHeader('Access-Control-Allow-Origin', 'http://possible-key-bluebird.ngrok-free.app:5173');
+            res.setHeader('Access-Control-Allow-Origin', 'https://klima-kontrol-five.vercel.app');
             res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
             res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, ngrok-skip-browser-warning');
             res.setHeader('Access-Control-Max-Age', '86400'); // Cache preflight for 24 hours
