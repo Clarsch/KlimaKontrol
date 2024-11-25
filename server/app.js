@@ -28,7 +28,7 @@ async function initializeApp() {
             credentials: true,
             optionsSuccessStatus: 200,
             methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-            allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+            allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'ngrok-skip-browser-warning'],
             exposedHeaders: ['Access-Control-Allow-Origin']
         };
 
