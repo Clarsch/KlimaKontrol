@@ -19,16 +19,26 @@ async function initializeApp() {
         const app = express();
         createRequiredDirectories();
         
-        // CORS configuration
-        const corsOptions = {
-            origin: ['https://klima-kontrol-five.vercel.app', 'http://localhost:5173'],
-            methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-            allowedHeaders: ['Content-Type', 'Authorization', 'ngrok-skip-browser-warning'],
-            optionsSuccessStatus: 200
-        };
+        // CORS configuration - place this BEFORE any other middleware
+        app.use((req, res, next) => {
+            // Force headers through ngrok
+            res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
+            res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+            res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, ngrok-skip-browser-warning');
+            res.setHeader('Access-Control-Max-Age', '86400'); // Cache preflight for 24 hours
+            
+            // Handle preflight requests
+            if (req.method === 'OPTIONS') {
+                console.log('Handling OPTIONS request from:', req.headers.origin);
+                res.status(200).end();
+                return;
+            }
+            
+            next();
+        });
 
-        // Apply CORS middleware before anything else
-        app.use(cors(corsOptions));
+        // Remove the cors middleware since we're handling it manually
+        // app.use(cors(corsOptions));
         
         // Add middleware to log all requests
         app.use((req, res, next) => {
