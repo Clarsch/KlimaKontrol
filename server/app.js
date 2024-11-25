@@ -21,15 +21,22 @@ async function initializeApp() {
         
         // CORS configuration
         const corsOptions = {
-            origin: [
-                'https://klima-kontrol-five.vercel.app',
-                'http://localhost:5173'
-            ],
-            credentials: true,
-            optionsSuccessStatus: 200,
-            methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-            allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'ngrok-skip-browser-warning'],
-            exposedHeaders: ['Access-Control-Allow-Origin']
+            origin: function (origin, callback) {
+                const allowedOrigins = [
+                    'https://klima-kontrol-five.vercel.app',
+                    'http://localhost:5173',
+                    undefined // Allow requests with no origin (like mobile apps or curl requests)
+                ];
+                if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+                    callback(null, true);
+                } else {
+                    callback(new Error('Not allowed by CORS'));
+                }
+            },
+            credentials: false,
+            methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+            allowedHeaders: ['Content-Type', 'Authorization', 'ngrok-skip-browser-warning'],
+            optionsSuccessStatus: 200
         };
 
         app.use(cors(corsOptions));
