@@ -6,8 +6,7 @@ import LocationsOverview from '../components/LocationsOverview';
 import LoadingState from '../components/LoadingState';
 import ErrorMessage from '../components/ErrorMessage';
 import { useLocation } from 'react-router-dom';
-import axios from 'axios';
-import { fetchActiveWarnings } from '../api/dataService';
+import axiosInstance from '../api/axiosConfig';
 
 const DashboardContainer = styled.div`
   min-height: 100vh;
@@ -62,7 +61,7 @@ const Dashboard = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const response = await axios.get('http://localhost:5001/api/data/areas');
+        const response = await axiosInstance.get('/api/data/areas');
         setAreas(response.data);
       } catch (error) {
         console.error('Error fetching areas:', error);
@@ -151,7 +150,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchLocationStatuses = async () => {
       try {
-        const response = await axios.get('http://localhost:5001/api/data/locations/status');
+        const response = await axiosInstance.get('/api/data/locations/status');
         setLocationStatuses(response.data);
       } catch (error) {
         console.error('Error fetching location statuses:', error);

@@ -149,14 +149,14 @@ const StatusIndicator = styled.div`
 const LocationsOverview = ({ 
     areas = [], 
     locationStatuses = {}, 
-    expandedAreas, 
+    expandedAreas = {}, 
     onAreaToggle 
 }) => {
     const navigate = useNavigate();
 
     return (
         <div>
-            {areas.map((area) => (
+            {Array.isArray(areas) && areas.map((area) => (
                 <AreaContainer key={area.name}>
                     <AreaBar onClick={() => onAreaToggle(area.name)}>
                         <AreaHeader>
@@ -165,7 +165,7 @@ const LocationsOverview = ({
                                 <Arrow $isExpanded={expandedAreas[area.name]} />
                             </AreaLabel>
                             <LocationsContainer>
-                                {area.locations.map(location => {
+                                {Array.isArray(area.locations) && area.locations.map(location => {
                                     const status = locationStatuses[location.id];
                                     const warningCount = status?.warnings?.length || 0;
                                     
@@ -187,7 +187,7 @@ const LocationsOverview = ({
                     </AreaBar>
                     
                     <ExpandedArea $isExpanded={expandedAreas[area.name]}>
-                        {area.locations.map(location => {
+                        {Array.isArray(area.locations) && area.locations.map(location => {
                             const locationStatus = locationStatuses[location.id];
                             if (!locationStatus) {
                                 return (

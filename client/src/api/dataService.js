@@ -1,12 +1,12 @@
-const API_URL = import.meta.env.VITE_API_URL;
+import axiosInstance from './axiosConfig';
 
 export const fetchActiveWarnings = async () => {
   try {
-    const response = await fetch(`${API_URL}/api/data/warnings/active`);
+    const response = await axiosInstance.get('/api/data/warnings/active');
     if (!response.ok) {
       throw new Error('Failed to fetch active warnings');
     }
-    return await response.json();
+    return response.data;
   } catch (error) {
     console.error('Error fetching active warnings:', error);
     throw error;

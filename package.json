@@ -6,8 +6,9 @@
   "scripts": {
     "server": "cd server && npm start",
     "client": "cd client && npm run dev",
-    "demo": "cd client && npm run demo",
+    "demo": "concurrently \"npm run server\" \"npm run client --mode demo\"",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "prod": "concurrently \"npm run server\" \"npm run client --mode production\"",
     "install-all": "npm install && cd client && npm install && cd ../server && npm install",
     "start": "npm run dev"
   },

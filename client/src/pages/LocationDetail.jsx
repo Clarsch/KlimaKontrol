@@ -11,7 +11,7 @@ import { withRetry, withOptimisticUpdate } from '../utils/apiHelpers';
 import { showSuccess } from '../components/SuccessMessage';
 import PropTypes from 'prop-types';
 import GraphErrorBoundary from '../components/GraphErrorBoundary';
-import { API_URL } from '../config';
+import axiosInstance from '../api/axiosConfig';
 
 const PageContainer = styled.div`
   min-height: 100vh;
@@ -349,11 +349,11 @@ const LocationDetail = () => {
       try {
         setLoading(true);
         const [locationResponse, environmentalResponse, warningsResponse] = await Promise.all([
-          axios.get(`${API_URL}/api/data/location/${encodeURIComponent(locationId)}`),
-          axios.get(`${API_URL}/api/data/environmental/${encodeURIComponent(locationId)}`, {
+          axiosInstance.get(`/api/data/location/${encodeURIComponent(locationId)}`),
+          axiosInstance.get(`/api/data/environmental/${encodeURIComponent(locationId)}`, {
             params: { timeRange }
           }),
-          axios.get(`${API_URL}/api/data/warnings/${encodeURIComponent(locationId)}`)
+          axiosInstance.get(`/api/data/warnings/${encodeURIComponent(locationId)}`)
             .catch(error => {
               console.warn('No warnings found:', error);
               return { data: [] }; // Return empty array if warnings endpoint fails
@@ -514,8 +514,8 @@ const LocationDetail = () => {
     try {
       await withRetry(
         async () => {
-          const response = await axios.put(
-            `${API_URL}/api/data/location/${locationId}/thresholds`,
+          const response = await axiosInstance.put(
+            `/api/data/location/${locationId}/thresholds`,
             unsavedThresholds  // Send just the thresholds object
           );
           return response;
@@ -555,8 +555,8 @@ const LocationDetail = () => {
             }
           });
           
-          const response = await axios.put(
-            `http://localhost:5001/api/data/location/${locationId}/settings`,
+          const response = await axiosInstance.put(
+            `/api/data/location/${locationId}/settings`,
             {
               settings: {
                 groundTemperature: parseFloat(unsavedSettings.groundTemperature)
@@ -716,7 +716,7 @@ const LocationDetail = () => {
   const handleDeactivateWarning = async (warningId) => {
     try {
       const userId = localStorage.getItem('userId');
-      await axios.patch(`${API_URL}/api/data/warnings/${warningId}/deactivate`, {
+      await axiosInstance.patch(`/api/data/warnings/${warningId}/deactivate`, {
         userId
       });
       setWarnings(warnings.map(warning => 

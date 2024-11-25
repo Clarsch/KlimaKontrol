@@ -26,3 +26,4 @@ Then run one of:
 
 Or for both client and server simultaneously
 - npm run start
+

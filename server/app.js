@@ -19,7 +19,22 @@ async function initializeApp() {
         const app = express();
         createRequiredDirectories();
         
-        app.use(cors());
+        // CORS configuration
+        const corsOptions = {
+            origin: [
+                'https://klima-kontrol-five.vercel.app',
+                'http://localhost:5173'
+            ],
+            credentials: true,
+            optionsSuccessStatus: 200,
+            methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+            allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+            exposedHeaders: ['Access-Control-Allow-Origin']
+        };
+
+        app.use(cors(corsOptions));
+        app.options('*', cors(corsOptions));
+        
         app.use(express.json());
         
         // Routes
@@ -49,7 +64,6 @@ async function initializeApp() {
 function createRequiredDirectories() {
     const directories = [
         'data',
-        'data/uploads',
         'data/warnings',
         'data/environmental'
     ];

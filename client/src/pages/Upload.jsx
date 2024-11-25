@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import TopBar from '../components/TopBar';
 import { Link } from 'react-router-dom';
+import axiosInstance from '../api/axiosConfig';
 
 const PageContainer = styled.div`
   min-height: 100vh;
@@ -159,7 +160,6 @@ const FileContent = styled.div`
   }
 `;
 
-const API_URL = import.meta.env.VITE_API_URL;
 
 const Upload = () => {
   const { user } = useAuth();
@@ -173,7 +173,7 @@ const Upload = () => {
   useEffect(() => {
     const fetchLocationConfig = async () => {
       try {
-        const response = await axios.get(`${API_URL}/api/data/locations`);
+        const response = await axiosInstance.get(`/api/data/locations`);
         console.log('Fetched locations:', response.data);
         setLocationConfig(response.data);
       } catch (error) {
@@ -253,7 +253,7 @@ const Upload = () => {
     formData.append('file', file);
     
     try {
-      const response = await axios.post(`${API_URL}/api/data/upload`, formData, {
+      const response = await axiosInstance.post(`/api/data/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -265,7 +265,7 @@ const Upload = () => {
         return;
       }
 
-      await axios.get(`${API_URL}/api/data/locations/status`);
+      await axiosInstance.get(`/api/data/locations/status`);
       setSuccess(`Upload completed successfully! ${response.data.recordCount} records were processed.`);
       setFile(null);
     } catch (error) {

@@ -4,8 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import TopBar from '../components/TopBar';
-import { API_URL } from '../config';
-
+import axiosInstance from '../api/axiosConfig';
 const PageContainer = styled.div`
   height: 100vh;
   display: flex;
@@ -78,7 +77,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${API_URL}/api/auth/login`, {
+      const response = await axiosInstance.post(`/api/auth/login`, {
         username,
         password
       });

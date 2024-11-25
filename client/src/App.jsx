@@ -36,6 +36,17 @@ const PublicRoute = ({ children }) => {
   return children;
 };
 
+// Create a new component for the catch-all route
+const CatchAllRedirect = () => {
+  const { user } = useAuth();
+  return (
+    <Navigate 
+      to={user?.role === 'collector' ? "/upload" : "/dashboard"} 
+      replace 
+    />
+  );
+};
+
 function App() {
   return (
     <AuthProvider>
@@ -82,12 +93,7 @@ function App() {
             path="*"
             element={
               <ProtectedRoute>
-                {({ user }) => (
-                  <Navigate 
-                    to={user?.role === 'collector' ? "/upload" : "/dashboard"} 
-                    replace 
-                  />
-                )}
+                <CatchAllRedirect />
               </ProtectedRoute>
             }
           />
