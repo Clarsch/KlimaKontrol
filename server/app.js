@@ -22,14 +22,19 @@ async function initializeApp() {
         // CORS configuration
         const corsOptions = {
             origin: function (origin, callback) {
+                console.log('Incoming request from origin:', origin);
+                
                 const allowedOrigins = [
                     'https://klima-kontrol-five.vercel.app',
                     'http://localhost:5173',
-                    undefined // Allow requests with no origin (like mobile apps or curl requests)
+                    undefined
                 ];
+                
                 if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+                    console.log('Origin allowed:', origin);
                     callback(null, true);
                 } else {
+                    console.log('Origin rejected:', origin);
                     callback(new Error('Not allowed by CORS'));
                 }
             },
@@ -38,15 +43,28 @@ async function initializeApp() {
             allowedHeaders: [
                 'Content-Type', 
                 'Authorization', 
-                'ngrok-skip-browser-warning',
-                'Access-Control-Allow-Origin'
+                'ngrok-skip-browser-warning'
             ],
-            optionsSuccessStatus: 200
+            exposedHeaders: ['Access-Control-Allow-Origin'],
+            optionsSuccessStatus: 200,
+            preflightContinue: false
         };
 
+        // Apply CORS middleware before any routes
         app.use(cors(corsOptions));
-        app.options('*', cors(corsOptions));
         
+        // Handle preflight requests explicitly
+        app.options('*', (req, res, next) => {
+            console.log('Handling OPTIONS request');
+            res.status(200).end();
+        });
+
+        // Add middleware to log all requests
+        app.use((req, res, next) => {
+            console.log(`${req.method} ${req.path} - Origin: ${req.headers.origin}`);
+            next();
+        });
+
         app.use(express.json());
         
         // Routes
