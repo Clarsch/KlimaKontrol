@@ -20,34 +20,11 @@ async function initializeApp() {
         createRequiredDirectories();
         
         // CORS configuration - place this BEFORE any other middleware
-        app.use((req, res, next) => {
-            console.log('Incoming request:', {
-                method: req.method,
-                path: req.path,
-                origin: req.headers.origin
-            });
-            // Force headers through ngrok
-            res.setHeader('Access-Control-Allow-Origin', 'https://klima-kontrol-five.vercel.app');
-            res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-            res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, ngrok-skip-browser-warning');
-            res.setHeader('Access-Control-Max-Age', '86400'); // Cache preflight for 24 hours
-            
-            // Log the headers we're setting
-            console.log('Setting CORS headers:', {
-                'Access-Control-Allow-Origin': res.getHeader('Access-Control-Allow-Origin'),
-                'Access-Control-Allow-Methods': res.getHeader('Access-Control-Allow-Methods'),
-                'Access-Control-Allow-Headers': res.getHeader('Access-Control-Allow-Headers')
-            });
-            
-            // Handle preflight requests
-            if (req.method === 'OPTIONS') {
-                console.log('Handling OPTIONS request from:', req.headers.origin);
-                res.status(200).end();
-                return;
-            }
-            
-            next();
-        });
+        app.use(cors({
+            origin: 'https://klima-kontrol-five.vercel.app', // your client app's URL
+            methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+            credentials: true
+        }));
 
         // Remove the cors middleware since we're handling it manually
         // app.use(cors(corsOptions));
