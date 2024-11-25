@@ -21,11 +21,24 @@ async function initializeApp() {
         
         // CORS configuration - place this BEFORE any other middleware
         app.use((req, res, next) => {
+            console.log('Incoming request:', {
+                method: req.method,
+                path: req.path,
+                origin: req.headers.origin
+            });
+
             // Force headers through ngrok
-            res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
+            res.setHeader('Access-Control-Allow-Origin', 'http://possible-key-bluebird.ngrok-free.app:5173');
             res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
             res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, ngrok-skip-browser-warning');
             res.setHeader('Access-Control-Max-Age', '86400'); // Cache preflight for 24 hours
+            
+            // Log the headers we're setting
+            console.log('Setting CORS headers:', {
+                'Access-Control-Allow-Origin': res.getHeader('Access-Control-Allow-Origin'),
+                'Access-Control-Allow-Methods': res.getHeader('Access-Control-Allow-Methods'),
+                'Access-Control-Allow-Headers': res.getHeader('Access-Control-Allow-Headers')
+            });
             
             // Handle preflight requests
             if (req.method === 'OPTIONS') {
