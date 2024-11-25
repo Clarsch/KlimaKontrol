@@ -20,14 +20,16 @@ async function initializeApp() {
         createRequiredDirectories();
         
         // CORS configuration - place this BEFORE any other middleware
-        app.use(cors({
-            origin: 'https://klima-kontrol-five.vercel.app', // your client app's URL
-            methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-            credentials: true
-        }));
+        const corsOptions = {
+            origin: [
+                'http://localhost:5173',
+                'https://klima-kontrol-five.vercel.app'
+            ].filter(Boolean),
+            credentials: true,
+            methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+        };
 
-        // Remove the cors middleware since we're handling it manually
-        // app.use(cors(corsOptions));
+        app.use(cors(corsOptions));
         
         // Add middleware to log all requests
         app.use((req, res, next) => {
