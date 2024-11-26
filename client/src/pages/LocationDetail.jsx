@@ -310,6 +310,110 @@ const DetailContainer = styled.div`
   transition: opacity 0.3s ease;
 `;
 
+const WarningsHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+`;
+
+const DeactivateAllButton = styled.button`
+  background-color: #FF0000;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+
+  &:hover {
+    background-color: #CC0000;
+  }
+
+  &:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+`;
+
+const WarningsOverlay = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+`;
+
+const ConfirmationModal = styled.div`
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 450px;
+  width: 90%;
+  position: relative;
+`;
+
+const ModalTitle = styled.h3`
+  color: #005670;
+  margin: 0;
+  font-size: 1.2rem;
+`;
+
+const ModalText = styled.p`
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+`;
+
+const ModalButtons = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+`;
+
+const CancelButton = styled.button`
+  background-color: #ccc;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #999;
+  }
+`;
+
+const ConfirmButton = styled(DeactivateAllButton)`
+  margin: 0;
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+`;
+
+const ModalWrapper = styled.div`
+  position: fixed;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1001;
+`;
+
 const LocationDetail = () => {
   const { locationId } = useParams();
   const navigate = useNavigate();
@@ -331,6 +435,8 @@ const LocationDetail = () => {
   });
   const [unsavedThresholds, setUnsavedThresholds] = useState(null);
   const [unsavedSettings, setUnsavedSettings] = useState(null);
+  const [isDeactivatingAll, setIsDeactivatingAll] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   useEffect(() => {
     setIsEntering(false);
@@ -734,6 +840,36 @@ const LocationDetail = () => {
     }
   };
 
+  const handleDeactivateAllWarnings = async () => {
+    try {
+      setIsDeactivatingAll(true);
+      const activeWarnings = sortedWarnings.filter(w => w.active);
+      const userId = localStorage.getItem('userId');
+
+      // Deactivate each warning sequentially
+      for (const warning of activeWarnings) {
+        await axiosInstance.patch(`/api/data/warnings/${warning.id}/deactivate`, {
+          userId
+        });
+      }
+
+      // Update local state
+      setWarnings(warnings.map(warning => ({
+        ...warning,
+        active: false,
+        deactivatedBy: userId,
+        deactivatedAt: new Date().toISOString()
+      })));
+
+      showSuccess('All warnings have been deactivated');
+    } catch (error) {
+      console.error('Error deactivating all warnings:', error);
+    } finally {
+      setIsDeactivatingAll(false);
+      setShowConfirmation(false);
+    }
+  };
+
   const sortedWarnings = useMemo(() => {
     return [...warnings].sort((a, b) => {
       // Sort by active status first (active/red warnings first)
@@ -829,33 +965,77 @@ const LocationDetail = () => {
           </Card>
 
           <Card>
-            <Title>Warnings for {locationData?.name}</Title>
-            {sortedWarnings.length === 0 ? (
+            <WarningsHeader>
+              <Title>Warnings for {locationData?.name}</Title>
+              {sortedWarnings.filter(w => w.active).length > 1 && (
+                <DeactivateAllButton 
+                  onClick={() => setShowConfirmation(true)}
+                  disabled={isDeactivatingAll}
+                >
+                  Deactivate All Warnings
+                </DeactivateAllButton>
+              )}
+            </WarningsHeader>
+            <div style={{ position: 'relative' }}>
+              {isDeactivatingAll && (
+                <WarningsOverlay>
+                  <LoadingState message="Deactivating warnings..." />
+                </WarningsOverlay>
+              )}
+              {sortedWarnings.length === 0 ? (
                 <p>No warnings</p>
-            ) : (
+              ) : (
                 sortedWarnings.map((warning) => (
-                    <WarningCard key={warning.id} $active={warning.active}>
-                        <WarningHeader>
-                            <WarningType $active={warning.active}>{warning.type}</WarningType>
-                            <WarningTimestamp>
-                                {format(new Date(warning.timestamp), 'MMM d, yyyy HH:mm')}
-                            </WarningTimestamp>
-                        </WarningHeader>
-                        <WarningMessage>{warning.message}</WarningMessage>
-                        {!warning.active && warning.deactivatedBy && (
-                            <DeactivationInfo>
-                                Deactivated by {warning.deactivatedBy} at {
-                                    format(new Date(warning.deactivatedAt), 'MMM d, yyyy HH:mm')
-                                }
-                            </DeactivationInfo>
-                        )}
-                        {warning.active && (
-                            <DeactivateButton onClick={() => handleDeactivateWarning(warning.id)}>
-                                Deactivate
-                            </DeactivateButton>
-                        )}
-                    </WarningCard>
+                  <WarningCard key={warning.id} $active={warning.active}>
+                    <WarningHeader>
+                      <WarningType $active={warning.active}>{warning.type}</WarningType>
+                      <WarningTimestamp>
+                        {format(new Date(warning.timestamp), 'MMM d, yyyy HH:mm')}
+                      </WarningTimestamp>
+                    </WarningHeader>
+                    <WarningMessage>{warning.message}</WarningMessage>
+                    {!warning.active && warning.deactivatedBy && (
+                      <DeactivationInfo>
+                        Deactivated by {warning.deactivatedBy} at {
+                          format(new Date(warning.deactivatedAt), 'MMM d, yyyy HH:mm')
+                        }
+                      </DeactivationInfo>
+                    )}
+                    {warning.active && (
+                      <DeactivateButton onClick={() => handleDeactivateWarning(warning.id)}>
+                        Deactivate
+                      </DeactivateButton>
+                    )}
+                  </WarningCard>
                 ))
+              )}
+            </div>
+
+            {showConfirmation && (
+              <>
+                <ModalOverlay onClick={() => setShowConfirmation(false)} />
+                <ModalWrapper
+                  style={{
+                    top: `${window.scrollY + (window.innerHeight / 2)}px`
+                  }}
+                >
+                  <ConfirmationModal>
+                    <ModalTitle>Deactivate All Warnings</ModalTitle>
+                    <ModalText>
+                      You are about to deactivate all active warnings for {locationData?.name}. 
+                      This action cannot be undone. Please confirm!
+                    </ModalText>
+                    <ModalButtons>
+                      <CancelButton onClick={() => setShowConfirmation(false)}>
+                        Cancel
+                      </CancelButton>
+                      <ConfirmButton onClick={handleDeactivateAllWarnings}>
+                        Deactivate All
+                      </ConfirmButton>
+                    </ModalButtons>
+                  </ConfirmationModal>
+                </ModalWrapper>
+              </>
             )}
           </Card>
         </MainSection>
