@@ -1,4 +1,5 @@
 # KlimaKontrol
+**_Current version is for demo purposes only!_**
 
 _The KlimaKontrol project is a monitoring solution that will give you an overview of certain climate factors on given locations and create warnings when thresholds are exceeded.
 The purpose is to monitor the indoor climate on different locations and create an fast and easy overview over in which locations the client need to interact with the indoor climate to avoid costly errors like excessive heating bills or damages like mold._
@@ -27,4 +28,4 @@ Then run one of:
 Or for both client and server simultaneously
 - npm run start
 
-# We do now have a working solution which can be demoed
+
