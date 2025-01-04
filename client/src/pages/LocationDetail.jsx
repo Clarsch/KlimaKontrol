@@ -300,6 +300,13 @@ const getTimeRange = (range) => {
         tickFormat: 'MMM yyyy',
         ticks: 12 // Show monthly ticks
       };
+    case '2year':
+      return {
+        start: subYears(now, 2).getTime(),
+        end: now.getTime(),
+        tickFormat: 'MMM yyyy',
+        ticks: 12 // Show monthly ticks
+      };
     default:
       return null;
   }
@@ -916,6 +923,12 @@ const LocationDetail = () => {
               >
                 1 Year
               </TimeButton>
+              <TimeButton 
+                $active={timeRange === '2year'} 
+                onClick={() => setTimeRange('2year')}
+              >
+                2 Year
+              </TimeButton>
             </TimeRangeSelector>
 
             <GraphCard>
@@ -1064,14 +1077,6 @@ const LocationDetail = () => {
             <ThresholdGroup>
               <SubTitle>Temperature (°C)</SubTitle>
               <ThresholdRow>
-                <ThresholdLabel>Minimum:</ThresholdLabel>
-                <ThresholdInput
-                  type="number"
-                  value={(unsavedThresholds || thresholds).temperature.min}
-                  onChange={(e) => handleThresholdChange('temperature', 'min', e.target.value)}
-                />
-              </ThresholdRow>
-              <ThresholdRow>
                 <ThresholdLabel>Maximum:</ThresholdLabel>
                 <ThresholdInput
                   type="number"
@@ -1079,18 +1084,18 @@ const LocationDetail = () => {
                   onChange={(e) => handleThresholdChange('temperature', 'max', e.target.value)}
                 />
               </ThresholdRow>
-            </ThresholdGroup>
-
-            <ThresholdGroup>
-              <SubTitle>Humidity (%)</SubTitle>
               <ThresholdRow>
                 <ThresholdLabel>Minimum:</ThresholdLabel>
                 <ThresholdInput
                   type="number"
-                  value={(unsavedThresholds || thresholds).humidity.min}
-                  onChange={(e) => handleThresholdChange('humidity', 'min', e.target.value)}
+                  value={(unsavedThresholds || thresholds).temperature.min}
+                  onChange={(e) => handleThresholdChange('temperature', 'min', e.target.value)}
                 />
               </ThresholdRow>
+            </ThresholdGroup>
+
+            <ThresholdGroup>
+              <SubTitle>Humidity (%)</SubTitle>
               <ThresholdRow>
                 <ThresholdLabel>Maximum:</ThresholdLabel>
                 <ThresholdInput
@@ -1099,24 +1104,32 @@ const LocationDetail = () => {
                   onChange={(e) => handleThresholdChange('humidity', 'max', e.target.value)}
                 />
               </ThresholdRow>
-            </ThresholdGroup>
-
-            <ThresholdGroup>
-              <SubTitle>Air Pressure (hPa)</SubTitle>
               <ThresholdRow>
                 <ThresholdLabel>Minimum:</ThresholdLabel>
                 <ThresholdInput
                   type="number"
-                  value={(unsavedThresholds || thresholds).pressure.min}
-                  onChange={(e) => handleThresholdChange('pressure', 'min', e.target.value)}
+                  value={(unsavedThresholds || thresholds).humidity.min}
+                  onChange={(e) => handleThresholdChange('humidity', 'min', e.target.value)}
                 />
               </ThresholdRow>
+            </ThresholdGroup>
+
+            <ThresholdGroup>
+              <SubTitle>Air Pressure (hPa)</SubTitle>
               <ThresholdRow>
                 <ThresholdLabel>Maximum:</ThresholdLabel>
                 <ThresholdInput
                   type="number"
                   value={(unsavedThresholds || thresholds).pressure.max}
                   onChange={(e) => handleThresholdChange('pressure', 'max', e.target.value)}
+                />
+              </ThresholdRow>
+              <ThresholdRow>
+                <ThresholdLabel>Minimum:</ThresholdLabel>
+                <ThresholdInput
+                  type="number"
+                  value={(unsavedThresholds || thresholds).pressure.min}
+                  onChange={(e) => handleThresholdChange('pressure', 'min', e.target.value)}
                 />
               </ThresholdRow>
             </ThresholdGroup>
