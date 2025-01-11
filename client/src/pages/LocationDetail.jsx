@@ -421,6 +421,212 @@ const ModalWrapper = styled.div`
   z-index: 1001;
 `;
 
+const Sidebar = ({locationData}) => {
+
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
+  const [isEntering, setIsEntering] = useState(true);
+  const [fadeIn, setFadeIn] = useState(false);
+  const [optimisticUpdates, setOptimisticUpdates] = useState({
+    settings: null,
+    thresholds: null
+  });
+  const [unsavedThresholds, setUnsavedThresholds] = useState(null);
+  const [unsavedSettings, setUnsavedSettings] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  const handleThresholdChange = (sensor, bound, value) => {
+    const newValue = parseFloat(value);
+    setUnsavedThresholds(prev => ({
+      ...prev || thresholds,
+      [sensor]: {
+        ...(prev || thresholds)[sensor],
+        [bound]: newValue
+      }
+    }));
+  };
+
+  const handleSaveThresholds = async () => {
+    if (!unsavedThresholds) return;
+
+    try {
+      await withRetry(
+        async () => {
+          const response = await axiosInstance.put(
+            `/api/data/location/${locationId}/thresholds`,
+            unsavedThresholds  // Send just the thresholds object
+          );
+          return response;
+        },
+        3,
+        (attempt, max, delay) => {
+          console.log(`Retrying threshold update (${attempt}/${max}) in ${delay}ms`);
+        }
+      );
+      setThresholds(unsavedThresholds);
+      setUnsavedThresholds(null);
+      showSuccess('Thresholds updated successfully');
+    } catch (error) {
+      console.error('Failed to update thresholds:', error);
+      setError('Failed to update thresholds');
+    }
+  };
+
+  const handleSettingChange = (setting, value) => {
+    const newValue = parseFloat(value);
+    setUnsavedSettings(prev => ({
+      ...prev || settings,
+      [setting]: newValue
+    }));
+  };
+
+  const handleSaveSettings = async () => {
+    if (!unsavedSettings) return;
+
+    try {
+      setIsSavingSettings(true);
+      await withRetry(
+        async () => {
+          console.log('Sending settings update:', {
+            settings: {
+              groundTemperature: parseFloat(unsavedSettings.groundTemperature)
+            }
+          });
+          
+          const response = await axiosInstance.put(
+            `/api/data/location/${locationId}/settings`,
+            {
+              settings: {
+                groundTemperature: parseFloat(unsavedSettings.groundTemperature)
+              }
+            }
+          );
+          return response;
+        },
+        3,
+        (attempt, max, delay) => {
+          console.log(`Retrying settings update (${attempt}/${max}) in ${delay}ms`);
+        }
+      );
+      
+      setSettings(unsavedSettings);
+      setUnsavedSettings(null);
+      showSuccess('Settings updated successfully');
+    } catch (error) {
+      console.error('Failed to update settings:', error.response?.data || error);
+      setError(error.response?.data?.error || 'Failed to update settings');
+    } finally {
+      setIsSavingSettings(false);
+    }
+  };
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  }
+
+  return (
+    <div className={`sidebar ${isSidebarOpen ? 'expanded' : 'minimized'}`}>
+      {isSidebarOpen && (
+        <SideSection>
+        <SettingsCard>
+        <Title>Settings for {locationData?.name}</Title>
+        <SettingRow>
+        <SettingLabel>Ground Temperature:</SettingLabel>
+        <SettingInput
+        type="number"
+        value={(unsavedSettings || settings).groundTemperature}
+        onChange={(e) => handleSettingChange('groundTemperature', e.target.value)}
+        />
+        </SettingRow>
+        <SaveButton 
+        onClick={handleSaveSettings}
+        disabled={isSavingSettings || !unsavedSettings}
+        >
+        {isSavingSettings ? 'Saving...' : 'Save Settings'}
+        </SaveButton>
+        </SettingsCard>
+
+        <Card>
+        <Title>Thresholds</Title>
+        <ThresholdGroup>
+        <SubTitle>Temperature (°C)</SubTitle>
+        <ThresholdRow>
+        <ThresholdLabel>Maximum:</ThresholdLabel>
+        <ThresholdInput
+        type="number"
+        value={(unsavedThresholds || thresholds).temperature.max}
+        onChange={(e) => handleThresholdChange('temperature', 'max', e.target.value)}
+        />
+        </ThresholdRow>
+        <ThresholdRow>
+        <ThresholdLabel>Minimum:</ThresholdLabel>
+        <ThresholdInput
+        type="number"
+        value={(unsavedThresholds || thresholds).temperature.min}
+        onChange={(e) => handleThresholdChange('temperature', 'min', e.target.value)}
+        />
+        </ThresholdRow>
+        </ThresholdGroup>
+
+        <ThresholdGroup>
+        <SubTitle>Humidity (%)</SubTitle>
+        <ThresholdRow>
+        <ThresholdLabel>Maximum:</ThresholdLabel>
+        <ThresholdInput
+        type="number"
+        value={(unsavedThresholds || thresholds).humidity.max}
+        onChange={(e) => handleThresholdChange('humidity', 'max', e.target.value)}
+        />
+        </ThresholdRow>
+        <ThresholdRow>
+        <ThresholdLabel>Minimum:</ThresholdLabel>
+        <ThresholdInput
+        type="number"
+        value={(unsavedThresholds || thresholds).humidity.min}
+        onChange={(e) => handleThresholdChange('humidity', 'min', e.target.value)}
+        />
+        </ThresholdRow>
+        </ThresholdGroup>
+
+        <ThresholdGroup>
+        <SubTitle>Air Pressure (hPa)</SubTitle>
+        <ThresholdRow>
+        <ThresholdLabel>Maximum:</ThresholdLabel>
+        <ThresholdInput
+        type="number"
+        value={(unsavedThresholds || thresholds).pressure.max}
+        onChange={(e) => handleThresholdChange('pressure', 'max', e.target.value)}
+        />
+        </ThresholdRow>
+        <ThresholdRow>
+        <ThresholdLabel>Minimum:</ThresholdLabel>
+        <ThresholdInput
+        type="number"
+        value={(unsavedThresholds || thresholds).pressure.min}
+        onChange={(e) => handleThresholdChange('pressure', 'min', e.target.value)}
+        />
+        </ThresholdRow>
+        </ThresholdGroup>
+
+        <SaveButton 
+        onClick={handleSaveThresholds}
+        disabled={!unsavedThresholds}
+        >
+        Save Thresholds
+        </SaveButton>
+        </Card>
+        </SideSection>
+        )
+      }
+
+      <button onClick={toggleSidebar}>
+        {isSidebarOpen ? 'Minimize' : 'Expand'}
+      </button>
+
+    </div>
+  );
+
+}
+
 const LocationDetail = () => {
   const { locationId } = useParams();
   const navigate = useNavigate();
@@ -431,17 +637,8 @@ const LocationDetail = () => {
   const [timeRange, setTimeRange] = useState('1month');
   const [thresholds, setThresholds] = useState(null);
   const [settings, setSettings] = useState(null);
-  const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [warnings, setWarnings] = useState([]);
-  const [isEntering, setIsEntering] = useState(true);
-  const [fadeIn, setFadeIn] = useState(false);
   const [visible, setVisible] = useState(false);
-  const [optimisticUpdates, setOptimisticUpdates] = useState({
-    settings: null,
-    thresholds: null
-  });
-  const [unsavedThresholds, setUnsavedThresholds] = useState(null);
-  const [unsavedSettings, setUnsavedSettings] = useState(null);
   const [isDeactivatingAll, setIsDeactivatingAll] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
 
@@ -610,90 +807,6 @@ const LocationDetail = () => {
     );
   };
 
-  const handleThresholdChange = (sensor, bound, value) => {
-    const newValue = parseFloat(value);
-    setUnsavedThresholds(prev => ({
-      ...prev || thresholds,
-      [sensor]: {
-        ...(prev || thresholds)[sensor],
-        [bound]: newValue
-      }
-    }));
-  };
-
-  const handleSaveThresholds = async () => {
-    if (!unsavedThresholds) return;
-
-    try {
-      await withRetry(
-        async () => {
-          const response = await axiosInstance.put(
-            `/api/data/location/${locationId}/thresholds`,
-            unsavedThresholds  // Send just the thresholds object
-          );
-          return response;
-        },
-        3,
-        (attempt, max, delay) => {
-          console.log(`Retrying threshold update (${attempt}/${max}) in ${delay}ms`);
-        }
-      );
-      setThresholds(unsavedThresholds);
-      setUnsavedThresholds(null);
-      showSuccess('Thresholds updated successfully');
-    } catch (error) {
-      console.error('Failed to update thresholds:', error);
-      setError('Failed to update thresholds');
-    }
-  };
-
-  const handleSettingChange = (setting, value) => {
-    const newValue = parseFloat(value);
-    setUnsavedSettings(prev => ({
-      ...prev || settings,
-      [setting]: newValue
-    }));
-  };
-
-  const handleSaveSettings = async () => {
-    if (!unsavedSettings) return;
-
-    try {
-      setIsSavingSettings(true);
-      await withRetry(
-        async () => {
-          console.log('Sending settings update:', {
-            settings: {
-              groundTemperature: parseFloat(unsavedSettings.groundTemperature)
-            }
-          });
-          
-          const response = await axiosInstance.put(
-            `/api/data/location/${locationId}/settings`,
-            {
-              settings: {
-                groundTemperature: parseFloat(unsavedSettings.groundTemperature)
-              }
-            }
-          );
-          return response;
-        },
-        3,
-        (attempt, max, delay) => {
-          console.log(`Retrying settings update (${attempt}/${max}) in ${delay}ms`);
-        }
-      );
-      
-      setSettings(unsavedSettings);
-      setUnsavedSettings(null);
-      showSuccess('Settings updated successfully');
-    } catch (error) {
-      console.error('Failed to update settings:', error.response?.data || error);
-      setError(error.response?.data?.error || 'Failed to update settings');
-    } finally {
-      setIsSavingSettings(false);
-    }
-  };
 
   const renderCombinedGraph = (data, thresholds, groundTemp) => {
     const timeRangeConfig = getTimeRange(timeRange);
@@ -1053,95 +1166,7 @@ const LocationDetail = () => {
           </Card>
         </MainSection>
 
-        <SideSection>
-          <SettingsCard>
-            <Title>Settings for {locationData?.name}</Title>
-            <SettingRow>
-              <SettingLabel>Ground Temperature:</SettingLabel>
-              <SettingInput
-                type="number"
-                value={(unsavedSettings || settings).groundTemperature}
-                onChange={(e) => handleSettingChange('groundTemperature', e.target.value)}
-              />
-            </SettingRow>
-            <SaveButton 
-              onClick={handleSaveSettings}
-              disabled={isSavingSettings || !unsavedSettings}
-            >
-              {isSavingSettings ? 'Saving...' : 'Save Settings'}
-            </SaveButton>
-          </SettingsCard>
-
-          <Card>
-            <Title>Thresholds</Title>
-            <ThresholdGroup>
-              <SubTitle>Temperature (°C)</SubTitle>
-              <ThresholdRow>
-                <ThresholdLabel>Maximum:</ThresholdLabel>
-                <ThresholdInput
-                  type="number"
-                  value={(unsavedThresholds || thresholds).temperature.max}
-                  onChange={(e) => handleThresholdChange('temperature', 'max', e.target.value)}
-                />
-              </ThresholdRow>
-              <ThresholdRow>
-                <ThresholdLabel>Minimum:</ThresholdLabel>
-                <ThresholdInput
-                  type="number"
-                  value={(unsavedThresholds || thresholds).temperature.min}
-                  onChange={(e) => handleThresholdChange('temperature', 'min', e.target.value)}
-                />
-              </ThresholdRow>
-            </ThresholdGroup>
-
-            <ThresholdGroup>
-              <SubTitle>Humidity (%)</SubTitle>
-              <ThresholdRow>
-                <ThresholdLabel>Maximum:</ThresholdLabel>
-                <ThresholdInput
-                  type="number"
-                  value={(unsavedThresholds || thresholds).humidity.max}
-                  onChange={(e) => handleThresholdChange('humidity', 'max', e.target.value)}
-                />
-              </ThresholdRow>
-              <ThresholdRow>
-                <ThresholdLabel>Minimum:</ThresholdLabel>
-                <ThresholdInput
-                  type="number"
-                  value={(unsavedThresholds || thresholds).humidity.min}
-                  onChange={(e) => handleThresholdChange('humidity', 'min', e.target.value)}
-                />
-              </ThresholdRow>
-            </ThresholdGroup>
-
-            <ThresholdGroup>
-              <SubTitle>Air Pressure (hPa)</SubTitle>
-              <ThresholdRow>
-                <ThresholdLabel>Maximum:</ThresholdLabel>
-                <ThresholdInput
-                  type="number"
-                  value={(unsavedThresholds || thresholds).pressure.max}
-                  onChange={(e) => handleThresholdChange('pressure', 'max', e.target.value)}
-                />
-              </ThresholdRow>
-              <ThresholdRow>
-                <ThresholdLabel>Minimum:</ThresholdLabel>
-                <ThresholdInput
-                  type="number"
-                  value={(unsavedThresholds || thresholds).pressure.min}
-                  onChange={(e) => handleThresholdChange('pressure', 'min', e.target.value)}
-                />
-              </ThresholdRow>
-            </ThresholdGroup>
-
-            <SaveButton 
-              onClick={handleSaveThresholds}
-              disabled={!unsavedThresholds}
-            >
-              Save Thresholds
-            </SaveButton>
-          </Card>
-        </SideSection>
+        <Sidebar locationData={locationData || null} />
       </Content>
     </PageContainer>
   );
