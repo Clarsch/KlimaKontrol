@@ -15,5 +15,5 @@ export const formatMeasurement = (value, type) => {
 };
 
 export const formatTimestamp = (timestamp) => {
-  return format(new Date(timestamp), 'MMM d, yyyy HH:mm');
+  return format(new Date(timestamp), t('date_time_format'));
 }; 

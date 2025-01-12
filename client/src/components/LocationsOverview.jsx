@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 
 const AreaContainer = styled.div`
   margin: 1rem 0;
@@ -152,6 +153,7 @@ const LocationsOverview = ({
     expandedAreas = {}, 
     onAreaToggle 
 }) => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
 
     return (
@@ -173,7 +175,7 @@ const LocationsOverview = ({
                                         <LocationDot
                                             key={location.id}
                                             $hasWarning={warningCount > 0}
-                                            $locationDisplayName={status?.name || `Unknown Location (${location.id})`}
+                                            $locationDisplayName={status?.name || t('unknown_location', {locationName: location.id})}
                                             $warningCount={warningCount}
                                             onClick={(e) => {
                                                 e.stopPropagation();
@@ -192,7 +194,7 @@ const LocationsOverview = ({
                             if (!locationStatus) {
                                 return (
                                     <LocationRow key={location.id}>
-                                        <LocationName>Error: No status data for location {location.id}</LocationName>
+                                        <LocationName>{t('no_status_for_location', {locationName: location.id})}</LocationName>
                                     </LocationRow>
                                 );
                             }

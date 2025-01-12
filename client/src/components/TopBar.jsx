@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const TopBarContainer = styled.div`
   background-color: rgba(255, 255, 255, 0.95);
@@ -102,6 +103,7 @@ const LogoutButton = styled.button`
 `;
 
 const TopBar = ({ children, locationName }) => {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -131,12 +133,12 @@ const TopBar = ({ children, locationName }) => {
   return (
     <TopBarContainer $visible={visible}>
       {showBackButton && <BackArrow onClick={handleBack} />}
-      <AppTitle>Klima Kontrol</AppTitle>
+      <AppTitle>{t('project_name')}</AppTitle>
       {user && locationName && <LocationName>{locationName}</LocationName>}
       {user ? (
         <UserSection>
-          <UserInfo>Welcome, {user.username}</UserInfo>
-          <LogoutButton onClick={logout}>Logout</LogoutButton>
+          <UserInfo>{t('welcome_greeting', {name: user.name || user.username})}</UserInfo>
+          <LogoutButton onClick={logout}>{t('logout')}</LogoutButton>
         </UserSection>
       ) : (
         children

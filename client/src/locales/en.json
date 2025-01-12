@@ -1,7 +1,7 @@
 
 {
-    "title": "Climate Control",
-    "greeting": "Welcome, {{name}}",
+    "project_name": "Climate Control",
+    "welcome_greeting": "Welcome, {{name}}",
     "areas": "Areas",
     "upload_data_for_location": "Upload data for location",
     "loading_locations":"Loading locations",
@@ -21,8 +21,53 @@
     "upload_another_msg":"You can now upload another file if needed.",
     
 
-    "login":"Login"
-    
+    "thresholds_updated_successfully_msg":"Thresholds updated successfully",
+    "thresholds_update_failed_msg":"Failed to update thresholds",
+    "settings_updated_successfully_msg":"Settings updated successfully",
+    "settings_update_failed_msg":"Failed to update settings",
+    "all_warnings_deactivated_msg":"All warnings have been deactivated",
+    "loading_location_data":"Loading location data",
+    "loading":"Loading",
+    "environmental_data_title":"Environmental Data",
+    "1_day":"1 Day",
+    "1_month":"1 Month",
+    "6_months":"6 Months",
+    "1_year":"1 Year",
+    "2_years":"2 Years",
+    "combined_data":"Combined Data",
+    "temperature":"Temperature",
+    "relative_humidity":"Relative Humidity",
+    "air_pressure":"Air Pressure",
+    "warnings_for":"Warnings for",
+    "deactivate_all_warnings":"Deactivate All Warnings",
+    "deactivating_warnings":"Deactivating warnings",
+    "no_warnings":"No warnings",
+    "deactivated_by":"Deactivated by {{userName}} at {{dateTimeDeactivated}} ",
+    "deactivate":"Deactivate",
+    "deactivate_all":"Deactivate All",
+    "deactivate_all_warning_msg":"You are about to deactivate all active warnings for {{locationName}}. This action cannot be undone. Please confirm!",
+    "cancel":"Cancel",
 
+    "settings_for":"Settings for {{locationName}}",
+    "ground_temperature_title":"Basis Temperature",
+    "save_settings":"Save Settings",
+    "saving":"Saving",
+    "thresholds_title":"Thresholds",
+    "maximum":"Maximum",
+    "minimum":"Minimum",
+    "save_thresholds":"Save Thresholds",
+    
+    "something_went_wrong_msg":"Something went wrong",
+    "unexpected_error_msg":"An unexpected error occurred",
+    "retry":"Retry",
+    "failed_to_load_graph_error_msg":"Failed to load graph. Please try refreshing the page.",
+    "unknown_location":"Unknown Location {{locationId}}",
+    "no_status_for_location":"Error: No status data for location {{locationId}}",
+
+    "logout":"Logout",
+    "login":"Login",
+    "":"",
+
+    "date_time_format":"'MMM d, yyyy HH:mm'"
     
 }

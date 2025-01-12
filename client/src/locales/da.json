@@ -1,6 +1,6 @@
 {
-    "title": "Klima Kontrol",
-    "greeting": "Velkommen, {{name}}",
+    "project_name": "Klima Kontrol",
+    "welcome_greeting": "Velkommen, {{name}}",
     "areas": "Områder",
     "upload_data_for_location": "Upload data for lokation",
     "loading_locations":"Henter lokationer",
@@ -18,7 +18,54 @@
     "upload_successful":"Uploadet Succesfuldt!",
     "upload_another_msg":"Du kan nu uploade en ny fil.",
     
+    "thresholds_updated_successfully_msg":"Grænseværdier opdateret succesfuldt",
+    "thresholds_update_failed_msg":"Opdatering af grænseværdier mislykkedes",
+    "settings_updated_successfully_msg":"Indstillinger opdateret succesfuldt",
+    "settings_update_failed_msg":"Opdatering af indstillinger mislykkedes",
+    "all_warnings_deactivated_msg":"Alle advarsler er deaktiveret",
+    "loading_location_data":"Henter lokationsdata",
+    "loading":"Henter",
+    "environmental_data_title":"Klima Data",
+    "1_day":"1 Dag",
+    "1_month":"1 Måned",
+    "6_months":"6 Måneder",
+    "1_year":"1 År",
+    "2_years":"2 År",
+    "combined_data":"Kombineret Data",
+    "temperature":"Temperatur",
+    "relative_humidity":"Relativ Fugtighed",
+    "air_pressure":"Lufttryk",
+    "warnings_for":"Advarsler for {{locationName}}",
+    "deactivate_all_warnings":"Deaktiver alle advarsler",
+    "deactivating_warnings":"Deaktiverer advarsler",
+    "no_warnings":"Ingen advarsler",
+    "deactivated_by":"Deaktiveret af {{userName}} d. {{dateTimeDeactivated}} ",
+    "deactivate":"Deaktiver",
+    "deactivate_all":"Deaktiver alle",
+    "deactivate_all_warning_msg":"Advarsel! Du er ved at deaktivere alle advarsler for {{locationName}}. Dette kan ikke fortrydes. Bekræft at du vil forsætte!",
+    "cancel":"Annuller",
+
+    "settings_for":"Indstillinger for {{locationName}}",
+    "ground_temperature_title":"Basis Temperatur",
+    "save_settings":"Gem indstillinger",
+    "saving":"Gemmer",
+    "thresholds_title":"Grænseværdier",
+    "maximum":"Maximum",
+    "minimum":"Minimum",
+    "save_thresholds":"Gem grænseværdier",
+
     
-    "login":"Log ind"
+    "something_went_wrong_msg":"Noget gik galt",
+    "unexpected_error_msg":"Der er sket uventet fejl",
+    "retry":"Prøv igen",
+    "failed_to_load_graph_error_msg":"Grafer kunne ikke hentes. Genindlæs siden.",
+    "unknown_location":"Ukendt lokation {{locationId}}",
+    "no_status_for_location":"Fejl: Ingen status data for følgende lokation: {{locationId}}",
+    
+    "logout":"Log ud",
+    "login":"Log ind",
+    "":"",
+
+    "date_time_format":"'MMM d, yyyy HH:mm'"
 
 }

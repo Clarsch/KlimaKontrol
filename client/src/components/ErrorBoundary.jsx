@@ -1,3 +1,4 @@
+import { t } from 'i18next';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -56,9 +57,9 @@ class ErrorBoundary extends React.Component {
     if (this.state.hasError) {
       return (
         <ErrorContainer>
-          <ErrorTitle>Something went wrong</ErrorTitle>
-          <ErrorMessage>{this.state.error?.message || 'An unexpected error occurred'}</ErrorMessage>
-          <RetryButton onClick={this.handleRetry}>Retry</RetryButton>
+          <ErrorTitle>{t('something_went_wrong_msg')}</ErrorTitle>
+          <ErrorMessage>{this.state.error?.message || t('unexpected_error_msg')}</ErrorMessage>
+          <RetryButton onClick={this.handleRetry}>{t('retry')}</RetryButton>
         </ErrorContainer>
       );
     }

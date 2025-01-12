@@ -31,7 +31,7 @@ class GraphErrorBoundary extends React.Component {
     if (this.state.hasError) {
       return (
         <ErrorContainer>
-          Failed to load graph. Please try refreshing the page.
+          {t('failed_to_load_graph_error_msg')}
         </ErrorContainer>
       );
     }

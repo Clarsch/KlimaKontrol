@@ -12,6 +12,7 @@ import { showSuccess } from '../components/SuccessMessage';
 import PropTypes from 'prop-types';
 import GraphErrorBoundary from '../components/GraphErrorBoundary';
 import axiosInstance from '../api/axiosConfig';
+import { useTranslation } from 'react-i18next';
 
 const PageContainer = styled.div`
   min-height: 100vh;
@@ -422,6 +423,7 @@ const ModalWrapper = styled.div`
 `;
 
 const LocationDetail = () => {
+  const { t } = useTranslation();
   const { locationId } = useParams();
   const navigate = useNavigate();
   const [locationData, setLocationData] = useState(null);
@@ -640,10 +642,10 @@ const LocationDetail = () => {
       );
       setThresholds(unsavedThresholds);
       setUnsavedThresholds(null);
-      showSuccess('Thresholds updated successfully');
+      showSuccess(t('thresholds_updated_successfully_msg'));
     } catch (error) {
       console.error('Failed to update thresholds:', error);
-      setError('Failed to update thresholds');
+      setError(t('thresholds_update_failed_msg'));
     }
   };
 
@@ -686,10 +688,10 @@ const LocationDetail = () => {
       
       setSettings(unsavedSettings);
       setUnsavedSettings(null);
-      showSuccess('Settings updated successfully');
+      showSuccess(t('settings_updated_successfully_msg'));
     } catch (error) {
       console.error('Failed to update settings:', error.response?.data || error);
-      setError(error.response?.data?.error || 'Failed to update settings');
+      setError(error.response?.data?.error || t('settings_update_failed_msg'));
     } finally {
       setIsSavingSettings(false);
     }
@@ -868,7 +870,7 @@ const LocationDetail = () => {
         deactivatedAt: new Date().toISOString()
       })));
 
-      showSuccess('All warnings have been deactivated');
+      showSuccess(t('all_warnings_deactivated_msg'));
     } catch (error) {
       console.error('Error deactivating all warnings:', error);
     } finally {
@@ -888,51 +890,51 @@ const LocationDetail = () => {
     });
   }, [warnings]);
 
-  if (loading || !thresholds || !settings) return <LoadingState message="Loading location data..." />;
+  if (loading || !thresholds || !settings) return <LoadingState message={t('loading_location_data')+"..."} />;
   if (error) return <ErrorMessage>{error}</ErrorMessage>;
 
   return (
     <PageContainer $visible={visible}>
-      <TopBar locationName={locationData?.name || 'Loading...'} />
+      <TopBar locationName={locationData?.name || t('loading')+'...'} />
       <Content>
         <MainSection>
           <Card>
-            <Title>Environmental Data</Title>
+            <Title>{t('environmental_data_title')}</Title>
             <TimeRangeSelector>
               <TimeButton 
                 $active={timeRange === '1day'} 
                 onClick={() => setTimeRange('1day')}
               >
-                1 Day
+                {t('1_day')}
               </TimeButton>
               <TimeButton 
                 $active={timeRange === '1month'} 
                 onClick={() => setTimeRange('1month')}
               >
-                1 Month
+                {t('1_month')}
               </TimeButton>
               <TimeButton 
                 $active={timeRange === '6months'} 
                 onClick={() => setTimeRange('6months')}
               >
-                6 Months
+                {t('6_months')}
               </TimeButton>
               <TimeButton 
                 $active={timeRange === '1year'} 
                 onClick={() => setTimeRange('1year')}
               >
-                1 Year
+                {t('1_year')}
               </TimeButton>
               <TimeButton 
                 $active={timeRange === '2year'} 
                 onClick={() => setTimeRange('2year')}
               >
-                2 Year
+                {t('2_years')}
               </TimeButton>
             </TimeRangeSelector>
 
             <GraphCard>
-              <GraphTitle>{locationData?.name} - Combined Data</GraphTitle>
+              <GraphTitle>{locationData?.name} - {t('combined_data')}</GraphTitle>
               <GraphErrorBoundary>
                 {environmentalData && renderCombinedGraph(
                   environmentalData,
@@ -943,7 +945,7 @@ const LocationDetail = () => {
             </GraphCard>
 
             <GraphCard>
-              <GraphTitle>{locationData?.name} - Temperature (°C)</GraphTitle>
+              <GraphTitle>{locationData?.name} - {t('temperature')} (°C)</GraphTitle>
               {environmentalData && renderGraph(
                 environmentalData,
                 'temperature',
@@ -955,7 +957,7 @@ const LocationDetail = () => {
             </GraphCard>
 
             <GraphCard>
-              <GraphTitle>{locationData?.name} - Relative Humidity (%)</GraphTitle>
+              <GraphTitle>{locationData?.name} - {t('relative_humidity')} (%)</GraphTitle>
               {environmentalData && renderGraph(
                 environmentalData,
                 'relative_humidity',
@@ -966,7 +968,7 @@ const LocationDetail = () => {
             </GraphCard>
 
             <GraphCard>
-              <GraphTitle>{locationData?.name} - Air Pressure (hPa)</GraphTitle>
+              <GraphTitle>{locationData?.name} - {t('air_pressure')} (hPa)</GraphTitle>
               {environmentalData && renderGraph(
                 environmentalData,
                 'air_pressure',
@@ -979,44 +981,45 @@ const LocationDetail = () => {
 
           <Card>
             <WarningsHeader>
-              <Title>Warnings for {locationData?.name}</Title>
+              <Title>{t('warnings_for', {locationName: locationData?.name})}</Title>
               {sortedWarnings.filter(w => w.active).length > 1 && (
                 <DeactivateAllButton 
                   onClick={() => setShowConfirmation(true)}
                   disabled={isDeactivatingAll}
                 >
-                  Deactivate All Warnings
+                  {t('deactivate_all_warnings')}
                 </DeactivateAllButton>
               )}
             </WarningsHeader>
             <div style={{ position: 'relative' }}>
               {isDeactivatingAll && (
                 <WarningsOverlay>
-                  <LoadingState message="Deactivating warnings..." />
+                  <LoadingState message= {t('deactivating_warnings')+"..."} />
                 </WarningsOverlay>
               )}
               {sortedWarnings.length === 0 ? (
-                <p>No warnings</p>
+                <p>{t('no_warnings')}</p>
               ) : (
                 sortedWarnings.map((warning) => (
                   <WarningCard key={warning.id} $active={warning.active}>
                     <WarningHeader>
                       <WarningType $active={warning.active}>{warning.type}</WarningType>
                       <WarningTimestamp>
-                        {format(new Date(warning.timestamp), 'MMM d, yyyy HH:mm')}
+                        {format(new Date(warning.timestamp), t('date_time_format'))}
                       </WarningTimestamp>
                     </WarningHeader>
                     <WarningMessage>{warning.message}</WarningMessage>
                     {!warning.active && warning.deactivatedBy && (
                       <DeactivationInfo>
-                        Deactivated by {warning.deactivatedBy} at {
-                          format(new Date(warning.deactivatedAt), 'MMM d, yyyy HH:mm')
-                        }
+                        { t( deactivated_by, {
+                          userName: warning.deactivatedBy, 
+                          dateTimeDeactivated: format(new Date(warning.deactivatedAt), t('date_time_format'))
+                        })}
                       </DeactivationInfo>
                     )}
                     {warning.active && (
                       <DeactivateButton onClick={() => handleDeactivateWarning(warning.id)}>
-                        Deactivate
+                        {t('deactivate')}
                       </DeactivateButton>
                     )}
                   </WarningCard>
@@ -1033,17 +1036,16 @@ const LocationDetail = () => {
                   }}
                 >
                   <ConfirmationModal>
-                    <ModalTitle>Deactivate All Warnings</ModalTitle>
+                    <ModalTitle>{t('deactivate_all_warnings')}</ModalTitle>
                     <ModalText>
-                      You are about to deactivate all active warnings for {locationData?.name}. 
-                      This action cannot be undone. Please confirm!
+                      {t('deactivate_all_warning_msg', {locationName: locationData?.name})}
                     </ModalText>
                     <ModalButtons>
                       <CancelButton onClick={() => setShowConfirmation(false)}>
-                        Cancel
+                        {t('cancel')}
                       </CancelButton>
                       <ConfirmButton onClick={handleDeactivateAllWarnings}>
-                        Deactivate All
+                        {t('deactivate_all')}
                       </ConfirmButton>
                     </ModalButtons>
                   </ConfirmationModal>
@@ -1055,9 +1057,9 @@ const LocationDetail = () => {
 
         <SideSection>
           <SettingsCard>
-            <Title>Settings for {locationData?.name}</Title>
+          <Title>{t('settings_for', {locationName: locationData?.name})}</Title>
             <SettingRow>
-              <SettingLabel>Ground Temperature:</SettingLabel>
+              <SettingLabel>{t('ground_temperature_title')}:</SettingLabel>
               <SettingInput
                 type="number"
                 value={(unsavedSettings || settings).groundTemperature}
@@ -1068,16 +1070,16 @@ const LocationDetail = () => {
               onClick={handleSaveSettings}
               disabled={isSavingSettings || !unsavedSettings}
             >
-              {isSavingSettings ? 'Saving...' : 'Save Settings'}
+              {isSavingSettings ? t('saving')+'...' : t('save_settings')}
             </SaveButton>
           </SettingsCard>
 
           <Card>
-            <Title>Thresholds</Title>
+            <Title>{t('thresholds_title')}</Title>
             <ThresholdGroup>
-              <SubTitle>Temperature (°C)</SubTitle>
+              <SubTitle>{t('temperature')} (°C)</SubTitle>
               <ThresholdRow>
-                <ThresholdLabel>Maximum:</ThresholdLabel>
+                <ThresholdLabel>{t('maximum')}:</ThresholdLabel>
                 <ThresholdInput
                   type="number"
                   value={(unsavedThresholds || thresholds).temperature.max}
@@ -1085,7 +1087,7 @@ const LocationDetail = () => {
                 />
               </ThresholdRow>
               <ThresholdRow>
-                <ThresholdLabel>Minimum:</ThresholdLabel>
+                <ThresholdLabel>{t('minimum')}:</ThresholdLabel>
                 <ThresholdInput
                   type="number"
                   value={(unsavedThresholds || thresholds).temperature.min}
@@ -1095,9 +1097,9 @@ const LocationDetail = () => {
             </ThresholdGroup>
 
             <ThresholdGroup>
-              <SubTitle>Humidity (%)</SubTitle>
+              <SubTitle>{t('humidity')} (%)</SubTitle>
               <ThresholdRow>
-                <ThresholdLabel>Maximum:</ThresholdLabel>
+                <ThresholdLabel>{t('maximum')}:</ThresholdLabel>
                 <ThresholdInput
                   type="number"
                   value={(unsavedThresholds || thresholds).humidity.max}
@@ -1105,7 +1107,7 @@ const LocationDetail = () => {
                 />
               </ThresholdRow>
               <ThresholdRow>
-                <ThresholdLabel>Minimum:</ThresholdLabel>
+                <ThresholdLabel>{t('minimum')}:</ThresholdLabel>
                 <ThresholdInput
                   type="number"
                   value={(unsavedThresholds || thresholds).humidity.min}
@@ -1115,9 +1117,9 @@ const LocationDetail = () => {
             </ThresholdGroup>
 
             <ThresholdGroup>
-              <SubTitle>Air Pressure (hPa)</SubTitle>
+              <SubTitle>{t('air_pressure')} (hPa)</SubTitle>
               <ThresholdRow>
-                <ThresholdLabel>Maximum:</ThresholdLabel>
+                <ThresholdLabel>{t('maximum')}:</ThresholdLabel>
                 <ThresholdInput
                   type="number"
                   value={(unsavedThresholds || thresholds).pressure.max}
@@ -1125,7 +1127,7 @@ const LocationDetail = () => {
                 />
               </ThresholdRow>
               <ThresholdRow>
-                <ThresholdLabel>Minimum:</ThresholdLabel>
+                <ThresholdLabel>{t('minimum')}:</ThresholdLabel>
                 <ThresholdInput
                   type="number"
                   value={(unsavedThresholds || thresholds).pressure.min}
@@ -1138,7 +1140,7 @@ const LocationDetail = () => {
               onClick={handleSaveThresholds}
               disabled={!unsavedThresholds}
             >
-              Save Thresholds
+              {t('save_thresholds')}
             </SaveButton>
           </Card>
         </SideSection>
