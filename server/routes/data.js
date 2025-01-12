@@ -196,7 +196,8 @@ router.get('/environmental/:locationId', async (req, res) => {
                 '1day': 24 * 60 * 60 * 1000,
                 '1month': 30 * 24 * 60 * 60 * 1000,
                 '6months': 180 * 24 * 60 * 60 * 1000,
-                '1year': 365 * 24 * 60 * 60 * 1000
+                '1year': 365 * 24 * 60 * 60 * 1000,
+                '2years': 2*365 * 24 * 60 * 60 * 1000
             };
             
             const filteredData = data.filter(record => {
