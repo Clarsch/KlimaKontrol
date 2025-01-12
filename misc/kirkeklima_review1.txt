@@ -1,10 +1,10 @@
 
 
 OK - Haderslev domkirke på forside 
-bruger Michael med stort M
+OK - Display name has been updated to Michael - bruger Michael med stort M
 OK - Sogn rettes til Provsti og Haderslev Domprovsti
-Alt visuelt til dansk
-2 år tilbage
+OK - Alt visuelt til dansk
+OK - 2 år tilbage
 OK - Alle kirker for Aabenraa Provsti
 OK - Maximum over minimum
 Login / logout control also edge? 

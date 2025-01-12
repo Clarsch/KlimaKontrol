@@ -268,7 +268,7 @@ const Upload = () => {
       }
 
       await axiosInstance.get(`/api/data/locations/status`);
-      setSuccess(`Upload completed successfully! ${response.data.recordCount} records were processed.`);
+      setSuccess(t('upload_sucessful_info_msg', {recordCount: response.data.recordCount}));
       setFile(null);
     } catch (error) {
       console.error('Upload error details:', {
@@ -345,7 +345,6 @@ const Upload = () => {
           <SuccessMessage>
             <h3>{t('upload_successful')}</h3>
             <p>{success}</p>
-            <p>{t('upload_successful')}</p>
           </SuccessMessage>
         )}
       </UploadContainer>

@@ -9,13 +9,14 @@
     "user_not_found":"Bruger data blev ikke fundet. Forsøg at logge ind igen!",
     "selected_file":"Valgt fil",
     "size":"Størrelse",
-    "click_or_drag":"Klik her eller træk en anden fil her",
+    "click_or_drag":"Klik her eller træk en anden fil her for at vælge en anden fil",
     "drag_and_drop_csv_file":"Træk og slip en CSV fil her",
     "click_to_select_a_file":"eller klik her for at vælge en fil",
 
     "upload_data":"Upload Data",
     "uploading":"Uploader",
     "upload_successful":"Uploadet Succesfuldt!",
+    "upload_sucessful_info_msg":"Upload succesfuldt! {{recordCount}} data punkter blev tilføjet.",
     "upload_another_msg":"Du kan nu uploade en ny fil.",
     
     "thresholds_updated_successfully_msg":"Grænseværdier opdateret succesfuldt",

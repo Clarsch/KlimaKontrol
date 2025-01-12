@@ -18,6 +18,7 @@
     "upload_data":"Upload Data",
     "uploading":"Uploading",
     "upload_successful":"Upload Successful!",
+    "upload_sucessful_info_msg":"Upload completed successfully! {{recordCount}} records were processed.",
     "upload_another_msg":"You can now upload another file if needed.",
     
 

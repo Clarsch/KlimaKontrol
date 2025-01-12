@@ -1097,7 +1097,7 @@ const LocationDetail = () => {
             </ThresholdGroup>
 
             <ThresholdGroup>
-              <SubTitle>{t('humidity')} (%)</SubTitle>
+              <SubTitle>{t('relative_humidity')} (%)</SubTitle>
               <ThresholdRow>
                 <ThresholdLabel>{t('maximum')}:</ThresholdLabel>
                 <ThresholdInput
