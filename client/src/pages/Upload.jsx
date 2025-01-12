@@ -5,6 +5,7 @@ import axios from 'axios';
 import TopBar from '../components/TopBar';
 import { Link } from 'react-router-dom';
 import axiosInstance from '../api/axiosConfig';
+import { useTranslation } from 'react-i18next';
 
 const PageContainer = styled.div`
   min-height: 100vh;
@@ -162,6 +163,7 @@ const FileContent = styled.div`
 
 
 const Upload = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [file, setFile] = useState(null);
   const [isDragActive, setIsDragActive] = useState(false);
@@ -286,7 +288,7 @@ const Upload = () => {
         <TopBar locationName="Error" />
         <UploadContainer>
           <ErrorMessage>
-            User data not found. Please try logging in again.
+           {t('user_not_found')}
           </ErrorMessage>
         </UploadContainer>
       </PageContainer>
@@ -297,7 +299,7 @@ const Upload = () => {
     <PageContainer>
       <TopBar locationName={getLocationName(user?.locations?.[0])} />
       <UploadContainer>
-        <Title>Upload Data for {getLocationName(user?.locations?.[0])}</Title>
+        <Title>{t('upload_data_for_location')}: {getLocationName(user?.locations?.[0])}</Title>
 
         <DropZone
           onDragOver={handleDragOver}
@@ -310,15 +312,15 @@ const Upload = () => {
             {file ? (
               <>
                 <div className="file-icon">📄</div>
-                <p><strong>Selected file:</strong> {file.name}</p>
-                <p><strong>Size:</strong> {(file.size / 1024).toFixed(2)} KB</p>
-                <p className="instruction">Click or drag a new file to replace</p>
+                <p><strong>{t('selected_file')}:</strong> {file.name}</p>
+                <p><strong>{t('size')}:</strong> {(file.size / 1024).toFixed(2)} KB</p>
+                <p className="instruction">{t('click_or_drag')}</p>
               </>
             ) : (
               <>
                 <div className="file-icon">📁</div>
-                <p>Drag & drop your CSV file here</p>
-                <p className="instruction">or click anywhere in this area to select a file</p>
+                <p>{t('drag_and_drop_csv_file')}</p>
+                <p className="instruction">{t('click_to_select_a_file')}</p>
               </>
             )}
           </FileContent>
@@ -335,15 +337,15 @@ const Upload = () => {
           onClick={handleUpload}
           disabled={!file || isUploading}
         >
-          {isUploading ? 'Uploading...' : 'Upload Data'}
+          {isUploading ?  t('uploading')+'...' : t('upload_data')}
         </UploadButton>
 
         {error && <ErrorMessage>{error}</ErrorMessage>}
         {success && (
           <SuccessMessage>
-            <h3>Upload Successful!</h3>
+            <h3>{t('upload_successful')}</h3>
             <p>{success}</p>
-            <p>You can now upload another file if needed.</p>
+            <p>{t('upload_successful')}</p>
           </SuccessMessage>
         )}
       </UploadContainer>

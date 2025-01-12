@@ -1,0 +1,24 @@
+{
+    "title": "Klima Kontrol",
+    "greeting": "Velkommen, {{name}}",
+    "areas": "Områder",
+    "upload_data_for_location": "Upload data for lokation",
+    "loading_locations":"Henter lokationer",
+    "locations_overview":"Lokations Overblik",
+    "access_denied":"Adgang Nægtet",
+    "user_not_found":"Bruger data blev ikke fundet. Forsøg at logge ind igen!",
+    "selected_file":"Valgt fil",
+    "size":"Størrelse",
+    "click_or_drag":"Klik her eller træk en anden fil her",
+    "drag_and_drop_csv_file":"Træk og slip en CSV fil her",
+    "click_to_select_a_file":"eller klik her for at vælge en fil",
+
+    "upload_data":"Upload Data",
+    "uploading":"Uploader",
+    "upload_successful":"Uploadet Succesfuldt!",
+    "upload_another_msg":"Du kan nu uploade en ny fil.",
+    
+    
+    "login":"Log ind"
+
+}
