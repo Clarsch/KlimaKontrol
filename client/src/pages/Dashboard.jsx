@@ -7,6 +7,7 @@ import LoadingState from '../components/LoadingState';
 import ErrorMessage from '../components/ErrorMessage';
 import { useLocation } from 'react-router-dom';
 import axiosInstance from '../api/axiosConfig';
+import { useTranslation } from 'react-i18next';
 
 const DashboardContainer = styled.div`
   min-height: 100vh;
@@ -38,6 +39,7 @@ const Title = styled.h2`
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const location = useLocation();
   const [areas, setAreas] = useState([]);
   const [expandedAreas, setExpandedAreas] = useState(() => {
@@ -164,7 +166,7 @@ const Dashboard = () => {
 
   const renderContent = () => {
     if (isLoading) {
-      return <LoadingState message="Loading locations..." />;
+      return <LoadingState message={t('loading_locations') + '...'} />;
     }
 
     if (error) {
@@ -176,7 +178,7 @@ const Dashboard = () => {
       case 'monitoring':
         return (
           <>
-            <Title>Locations Overview</Title>
+            <Title>{t("areas")}</Title>
             <LocationsOverview 
               areas={areas}
               locationStatuses={locationStatuses}
@@ -186,13 +188,13 @@ const Dashboard = () => {
           </>
         );
       default:
-        return <div>Access denied</div>;
+        return <div>{t("access_denied")}</div>;
     }
   };
 
   return (
     <DashboardContainer $visible={visible}>
-      <TopBar locationName="Dashboard" />
+      <TopBar locationName="" />
       <Content className={isEntering ? 'entering' : ''}>
         {renderContent()}
       </Content>

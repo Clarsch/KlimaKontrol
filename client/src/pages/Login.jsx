@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import TopBar from '../components/TopBar';
 import axiosInstance from '../api/axiosConfig';
+import { useTranslation } from 'react-i18next';
 const PageContainer = styled.div`
   height: 100vh;
   display: flex;
@@ -68,6 +69,8 @@ const Button = styled.button`
 `;
 
 const Login = () => {
+
+  const { t } = useTranslation();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -106,7 +109,7 @@ const Login = () => {
         <LoginForm onSubmit={handleSubmit}>
           <Input
             type="text"
-            placeholder="Username"
+            placeholder="Brugernavn"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
@@ -116,7 +119,7 @@ const Login = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <Button type="submit">Login</Button>
+          <Button type="submit">{t('login')}</Button>
         </LoginForm>
       </TopBar>
       {error && <ErrorMessage>{error}</ErrorMessage>}

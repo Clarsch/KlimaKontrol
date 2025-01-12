@@ -1,0 +1,28 @@
+
+{
+    "title": "Climate Control",
+    "greeting": "Welcome, {{name}}",
+    "areas": "Areas",
+    "upload_data_for_location": "Upload data for location",
+    "loading_locations":"Loading locations",
+    "locations_overview":"Locations Overview",
+    "access_denied":"Access denied",
+    "user_not_found":"User data not found. Please try logging in again!",
+    "selected_file":"Selected file",
+    "size":"Size",
+    "click_or_drag":"Click or drag a new file to replace",
+    "drag_and_drop_csv_file":"Drag & drop your CSV file here",
+    "click_to_select_a_file":"or click anywhere in this area to select a file",
+
+    
+    "upload_data":"Upload Data",
+    "uploading":"Uploading",
+    "upload_successful":"Upload Successful!",
+    "upload_another_msg":"You can now upload another file if needed.",
+    
+
+    "login":"Login"
+    
+
+    
+}
