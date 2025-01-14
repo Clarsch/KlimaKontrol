@@ -8,8 +8,8 @@ OK - 2 år tilbage
 OK - Alle kirker for Aabenraa Provsti
 OK - Maximum over minimum
 Login / logout control also edge? 
-ikke vise deactivated warnings
-Dots restricted to box
+OK - ikke vise deactivated warnings
+OK - Dots restricted to box
 
 
 Præsentation:

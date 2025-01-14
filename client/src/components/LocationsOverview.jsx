@@ -66,9 +66,12 @@ const Arrow = styled.span`
 
 const LocationsContainer = styled.div`
   display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
   align-items: center;
   flex-grow: 1;
+  overflow: hidden;
+  padding: 1rem;
 `;
 
 const LocationDot = styled.div`
