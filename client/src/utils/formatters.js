@@ -1,3 +1,5 @@
+import { format } from "date-fns";
+
 export const formatMeasurement = (value, type) => {
   if (typeof value !== 'number') return value;
   
@@ -15,5 +17,5 @@ export const formatMeasurement = (value, type) => {
 };
 
 export const formatTimestamp = (timestamp) => {
-  return format(new Date(timestamp), t('date_time_format'));
+  return format(new Date(timestamp), 'MMM d, yyyy HH:mm');
 }; 

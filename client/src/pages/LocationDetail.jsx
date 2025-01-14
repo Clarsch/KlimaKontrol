@@ -6,13 +6,14 @@ import TopBar from '../components/TopBar';
 import LoadingState from '../components/LoadingState';
 import ErrorMessage from '../components/ErrorMessage';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { format, subMonths, subDays, subYears, startOfDay, endOfDay } from 'date-fns';
+import { format, subMonths, subDays, subYears, startOfDay, endOfDay, formatters } from 'date-fns';
 import { withRetry, withOptimisticUpdate } from '../utils/apiHelpers';
 import { showSuccess } from '../components/SuccessMessage';
 import PropTypes from 'prop-types';
 import GraphErrorBoundary from '../components/GraphErrorBoundary';
 import axiosInstance from '../api/axiosConfig';
 import { useTranslation } from 'react-i18next';
+import { formatTimestamp } from '../utils/formatters';
 
 const PageContainer = styled.div`
   min-height: 100vh;
@@ -880,7 +881,8 @@ const LocationDetail = () => {
   };
 
   const sortedWarnings = useMemo(() => {
-    return [...warnings].sort((a, b) => {
+    //return [...warnings].sort((a, b) => {
+    return [...warnings].filter(w => w.active).sort((a, b) => {
       // Sort by active status first (active/red warnings first)
       if (a.active !== b.active) {
         return b.active ? 1 : -1;
@@ -1005,7 +1007,7 @@ const LocationDetail = () => {
                     <WarningHeader>
                       <WarningType $active={warning.active}>{warning.type}</WarningType>
                       <WarningTimestamp>
-                        {format(new Date(warning.timestamp), t('date_time_format'))}
+                        {formatTimestamp(warning.timestamp) } 
                       </WarningTimestamp>
                     </WarningHeader>
                     <WarningMessage>{warning.message}</WarningMessage>
@@ -1013,7 +1015,7 @@ const LocationDetail = () => {
                       <DeactivationInfo>
                         { t( deactivated_by, {
                           userName: warning.deactivatedBy, 
-                          dateTimeDeactivated: format(new Date(warning.deactivatedAt), t('date_time_format'))
+                          dateTimeDeactivated: formatTimestamp(warning.timestamp) 
                         })}
                       </DeactivationInfo>
                     )}
