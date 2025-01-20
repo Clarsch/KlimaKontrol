@@ -78,6 +78,7 @@ const WarningTimestamp = styled.span`
 `;
 
 const WarningMessage = styled.p`
+  color: black;
   margin: 0;
 `;
 

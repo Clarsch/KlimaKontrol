@@ -70,7 +70,6 @@ const LocationsContainer = styled.div`
   gap: 1rem;
   align-items: center;
   flex-grow: 1;
-  overflow: hidden;
   padding: 1rem;
 `;
 
