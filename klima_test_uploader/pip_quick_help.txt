@@ -1,8 +1,14 @@
 
+Install venv from requirements.txt:
+python -m venv venv
+.\venv\Scripts\activate
+pip install -r .\requirements.txt
+
 To activate venv:
 venv\Scripts\activate
 
 pip install package-name
+pip uninstall package-name
 
 pip freeze > requirements.txt
 

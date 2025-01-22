@@ -18,14 +18,27 @@ It consist of two user flows:
 From the main folder you can the following commands with npm:
 
 Mandatory, first install dependencies: 
-
-* __npm run install-all__
+```
+npm run install-all
+```
 
 Then run one of:
-- npm run server
-- npm run client
+``` 
+npm run server
+npm run client
+```
 
 Or for both client and server simultaneously
-- npm run start
+```
+npm run start
+```
+
+
+
+# The Klima Test Uploader
+## Description
+This is a small python script which is able to mock a sensor and send climate sensor readings for a location. 
+Read more info in ./klima_test_uploader/README.md
+
 
 
