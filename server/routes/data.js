@@ -244,6 +244,23 @@ router.get('/warnings/:locationId', async (req, res) => {
     }
 });
 
+router.post('/reading/dataReading', async (req, res) => {
+    try {
+        const dataReading = req.body;
+        console.log("Data Reading received of: " + JSON.stringify(dataReading, null, 2))
+        records = [dataReading]
+        const location = dataReading.location.toLowerCase();
+
+        handleFileUpload(req, res, location, records)
+
+        
+    } catch (error) {
+        console.error("Data Reading resulted in an error:", error);
+        res.status(500).json({ message: "Error processing data reading." });
+    }
+
+});
+
 // Fix the deactivate warning endpoint
 router.patch('/warnings/:warningId/deactivate', async (req, res) => {
     try {
@@ -324,6 +341,39 @@ async function handleFileUpload(req, res) {
             return res.status(400).json({ message: 'Location is required' });
         }
 
+        // Read and parse the uploaded file
+        const fileContent = await fs.readFile(req.file.path, 'utf-8');
+        
+        // Parse CSV and validate data
+        const records = await new Promise((resolve, reject) => {
+            csv.parse(fileContent, {
+                columns: true,
+                skip_empty_lines: true
+            }, (err, data) => {
+                if (err) reject(err);
+                else resolve(data);
+            });
+        });
+
+        handleFileUpload(req, res, location, records)
+    
+    } catch (error) {
+        console.error('File processing error:', error);
+        if (req.file) {
+            await fs.unlink(req.file.path).catch(console.error);
+        }
+        res.status(500).json({ 
+            message: 'Error processing file',
+            error: error.message 
+        });
+    }
+
+
+}
+    
+async function handleFileUpload(req, res, location, records) {
+    try {
+        
         // Get location config for thresholds
         const locationConfig = await configLoader.loadConfig('locations');
         
@@ -340,20 +390,6 @@ async function handleFileUpload(req, res) {
                 detail: `Location '${location}' not found in configuration`
             });
         }
-
-        // Read and parse the uploaded file
-        const fileContent = await fs.readFile(req.file.path, 'utf-8');
-        
-        // Parse CSV and validate data
-        const records = await new Promise((resolve, reject) => {
-            csv.parse(fileContent, {
-                columns: true,
-                skip_empty_lines: true
-            }, (err, data) => {
-                if (err) reject(err);
-                else resolve(data);
-            });
-        });
 
         // Validate data format
         let validationErrors = [];
@@ -497,7 +533,7 @@ router.get('/warnings/active', async (req, res) => {
   } catch (error) {
     console.error('Error fetching active warnings:', error);
     res.status(500).json({ error: 'Failed to fetch active warnings' });
-  }
+    }
 });
 
 module.exports = router; 

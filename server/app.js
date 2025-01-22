@@ -21,11 +21,20 @@ async function initializeApp() {
         
         // CORS configuration - place this BEFORE any other middleware
         const corsOptions = {
-            origin: [
-                'http://localhost:5173',
-                'https://klima-kontrol-five.vercel.app'
-            ].filter(Boolean),
-            credentials: true,
+            origin: (origin, callback) => {
+                if( !origin ) return callback(null, true);
+
+                if (origin === 'http://localhost:5173' || 
+                    origin === 'https://klima-kontrol-five.vercel.app' ||
+                    origin.startsWith('http://localhost:')
+                ) {
+                    return callback(null, true)
+                }
+
+                // Reject the request
+                return callback(new Error('Not allowed by CORS'));
+            },
+            credentials: false,
             methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS']
         };
 
