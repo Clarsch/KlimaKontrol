@@ -1,0 +1,11 @@
+
+To activate venv:
+venv\Scripts\activate
+
+pip install package-name
+
+pip freeze > requirements.txt
+
+deactivate
+
+
