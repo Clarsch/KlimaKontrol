@@ -43,3 +43,4 @@ Thumbs.db
 .vs/*
 klima_test_uploader/venv/*
 
+sensorpush_loader/config.json

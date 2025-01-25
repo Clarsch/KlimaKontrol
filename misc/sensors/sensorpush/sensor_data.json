@@ -1,0 +1,26 @@
+{
+    "16938384.41622496812705309768": {
+        "active": true,
+        "id": "16938384.41622496812705309768",
+        "calibration": {
+            "humidity": 0,
+            "temperature": 0
+        },
+        "address": "90:CE:B8:A0:78:4D",
+        "name": "Sensor 1",
+        "deviceId": "16938384",
+        "alerts": {
+            "temperature": {
+                "enabled": false,
+                "max": 0,
+                "min": 0
+            },
+            "humidity": {
+                "enabled": false
+            }
+        },
+        "rssi": -35,
+        "type": "HTP.xw",
+        "battery_voltage": 3.11
+    }
+}

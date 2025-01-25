@@ -1,0 +1,12 @@
+{
+    "New Gateway 1": {
+        "name": "New Gateway 1",
+        "last_alert": "2025-01-25T01:36:21.000Z",
+        "last_seen": "2025-01-25T20:38:43.000Z",
+        "version": "1.2.0(37)",
+        "message": null,
+        "paired": true,
+        "tags": null,
+        "id": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k="
+    }
+}
