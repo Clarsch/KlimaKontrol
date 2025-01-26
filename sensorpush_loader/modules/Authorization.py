@@ -1,17 +1,39 @@
 import requests
 import json
+from datetime import datetime, timedelta
+import modules.Formatter as fm
 
 
 class Authorization:
 
-    access_token = ""
+    _authorization_token = None
+    _authorization_token_expire = None
+    _access_token = None
+    _access_token_expire = None
+    
 
-    def isAuthorized(self):
-        return self.access_token != ""
+    def is_authorized(self):
+        return self.get_access_token() != None
 
     def __init__(self, base_url):
         self.base_url = base_url
-        self.authorize()
+        self.request_access_token()
+
+
+    def get_authorization_token(self):
+        current_time_with_safe =  datetime.now() + timedelta(minutes=5)
+        if self._authorization_token == None or current_time_with_safe > self._authorization_token_expire:
+            self.request_authorization_token()
+
+        return self._authorization_token
+        
+        
+    def get_access_token(self):
+        current_time_with_safe =  datetime.now() + timedelta(minutes=5)
+        if self._access_token == None or current_time_with_safe > self._access_token_expire:
+            self.request_access_token()
+
+        return self._access_token
 
 
     def read_json_config(self):
@@ -36,38 +58,33 @@ class Authorization:
             print(response.text)  # You'll likely want to see the error message as well
             return None
 
-    def get_authorization_token(self):
+    def request_authorization_token(self):
         auth_endpoint = self.base_url + '/api/v1/oauth/authorize'
         data = self.read_json_config()
         #print(f"Config is: {data}")
         res = self.handle_unauthorized_post_request(auth_endpoint, data)
         #print(f"Response is: {res}")
         if res.status_code == 200 and 'authorization' in res.json():
-            return res.json().get('authorization')
+            token = res.json()['authorization']
+            self._authorization_token_expire = datetime.now() + timedelta(minutes=60) 
+            self._authorization_token = token
         else:
             print(f'Error: {res.status_code}')
             print(res.text)  # You'll likely want to see the error message as well
             raise ValueError('Authorization failed')
 
 
-    def get_access_token(self, auth_token):
+    def request_access_token(self):
         access_endpoint = self.base_url + '/api/v1/oauth/accesstoken'
         data = {
-            'authorization': auth_token
+            'authorization': self.get_authorization_token()
         }
         res = self.handle_unauthorized_post_request(access_endpoint, data)
         if res.status_code == 200 and 'accesstoken' in res.json():
-            return res.json().get('accesstoken')
+            token = res.json()['accesstoken']
+            self._access_token_expire = datetime.now() + timedelta(minutes=30)
+            self._access_token = token
         else:
             print(f'Error: {res.status_code}')
             print(res.text)  # You'll likely want to see the error message as well
-            raise ValueError('Access token retrieval failed')
-
-    def authorize(self):
-        #print('Getting auth token')
-        auth_token = self.get_authorization_token()
-        #print('Getting auth token completed')
-
-        #print('Getting access token')
-        #print(f"Authorization token is {auth_token}")
-        self.access_token = self.get_access_token(auth_token)
+            raise ValueError('Access and refresh token retrieval failed')

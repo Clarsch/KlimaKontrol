@@ -1,7 +1,7 @@
 import requests
 from modules.Authorization import Authorization 
-import modules.validater as vd
-import modules.formatter as fm
+import modules.Validater as vd
+import modules.Formatter as fm
 
 class DataRequester:
 
@@ -9,10 +9,10 @@ class DataRequester:
         self.auth: Authorization = authorization
         self.base_url = base_url
         
-    def handle_authorized_post_request(self, url, data):
+    def handle_post_request(self, url, data):
         headers = {
             'Content-Type': 'application/json',
-            'Authorization': self.auth.access_token
+            'Authorization': self.auth.get_access_token()
         }
         response = requests.post(url, headers= headers, json= data)
         if response.status_code == 200:        
@@ -22,10 +22,19 @@ class DataRequester:
             print(f'Error: {response.status_code}')
             print(response.text)  # You'll likely want to see the error message as well
 
+    def call_endpoint(self, endpoint):
+        endpoint_url = self.base_url + "/" + endpoint
+
+        data = self.handle_post_request(endpoint_url)
+        
+        print(f"API status is: ")
+        fm.pritty_print_json(data)
+       
+
     def list_gateways(self):
         endpoint_url = self.base_url + "/api/v1/devices/gateways"
 
-        data = self.handle_authorized_post_request(endpoint_url, {})
+        data = self.handle_post_request(endpoint_url, {})
         
         print(f"Gateways are: ")
         fm.pritty_print_json(data)
@@ -34,7 +43,7 @@ class DataRequester:
     def list_sensors(self):
         endpoint_url = self.base_url + "/api/v1/devices/sensors"
 
-        data = self.handle_authorized_post_request(endpoint_url, {})
+        data = self.handle_post_request(endpoint_url, {})
         
         print(f"Sensors are: ")
         fm.pritty_print_json(data)
@@ -47,7 +56,7 @@ class DataRequester:
             "limit": 20
         }
         
-        data = self.handle_authorized_post_request(endpoint_url, body)
+        data = self.handle_post_request(endpoint_url, body)
         
         print("Samples are: ")
         fm.pritty_print_json(data)
@@ -81,7 +90,7 @@ class DataRequester:
             "stopTime": end_time
         }
         
-        data = self.handle_authorized_post_request(endpoint_url, body)
+        data = self.handle_post_request(endpoint_url, body)
         
         print(f"Samples are: ")
         fm.pritty_print_json(data)

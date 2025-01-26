@@ -4,14 +4,13 @@ from modules.DataRequester import DataRequester
 
 
 def main():
-    debug = False
     base_url = 'https://api.sensorpush.com'
 
     auth = Authorization(base_url)
     dataRequester = DataRequester(auth, base_url)
 
 
-    while not auth.isAuthorized():
+    while not auth.is_authorized():
         print("Authorizing....")
         time.sleep(1)
             
@@ -19,8 +18,9 @@ def main():
 
     while True:
         action = input("Choose an action: gateways, sensors, samples, exit: ")
-        if action == 'debug':
-            debug = not debug  
+        if action == 'api':
+            url = input("What endpoint do you want to reach: https://api.sensorpush.com/ + ")
+            dataRequester.call_endpoint(url)  
         elif action == 'gateways':
             dataRequester.list_gateways()  
         elif action == 'sensors':
@@ -34,7 +34,7 @@ def main():
             end_date = input("End datetime(2025-01-26T00:00:00.000Z): ").strip()
             dataRequester.list_samples(sensor_ids, max_records, start_date, end_date)      
         elif action == 'access':
-            print(f"Access Token is: {auth.access_token}")   
+            print(f"Access Token is: {auth.get_access_token()}")   
         elif action == 'exit':
             break
 
