@@ -44,3 +44,5 @@ Thumbs.db
 klima_test_uploader/venv/*
 
 sensorpush_loader/config.json
+**/__pycache__/
+
