@@ -27,8 +27,7 @@ class DataRequester:
 
         data = self.handle_post_request(endpoint_url)
         
-        print(f"API status is: ")
-        fm.pritty_print_json(data)
+        print(f"API status is: {fm.prettify_json(data)}")
        
 
     def list_gateways(self):
@@ -36,8 +35,7 @@ class DataRequester:
 
         data = self.handle_post_request(endpoint_url, {})
         
-        print(f"Gateways are: ")
-        fm.pritty_print_json(data)
+        print(f"Gateways are: {fm.prettify_json(data)}")
         
 
     def list_sensors(self):
@@ -45,8 +43,7 @@ class DataRequester:
 
         data = self.handle_post_request(endpoint_url, {})
         
-        print(f"Sensors are: ")
-        fm.pritty_print_json(data)
+        print(f"Sensors are: {fm.prettify_json(data)}")
         
 
     def list_samples_simple(self):
@@ -58,11 +55,14 @@ class DataRequester:
         
         data = self.handle_post_request(endpoint_url, body)
         
-        print("Samples are: ")
-        fm.pritty_print_json(data)
+        print(f"Samples are: {fm.prettify_json(data)}")
             
-
-    def list_samples(self, sensor_ids, max_limit, start_time, end_time):
+    def get_data_records(
+            self, sensor_ids:list[str], 
+            max_limit:int, 
+            start_time:str, 
+            end_time:str
+            ):
         endpoint_url = self.base_url + "/api/v1/samples"
         '''
         body = {
@@ -79,19 +79,21 @@ class DataRequester:
         if not vd.is_valid_datetime_format(end_time):
             print(f"End date is not in a valid format. Valid format 2025-01-25T21:43:24.000Z, received format: {end_time}")
             return 
-        if isinstance(max_limit, int):
+        if not isinstance(max_limit, int):
             print(f"Max limit is not integer. Received: {max_limit}")
             return
 
         body = { 
-            "sensors": sensor_ids.split(';'),
-            "limit": int(max_limit),
+            "sensors": sensor_ids,
+            "limit": max_limit,
             "startTime": start_time,
             "stopTime": end_time
         }
         
-        data = self.handle_post_request(endpoint_url, body)
+        return self.handle_post_request(endpoint_url, body)
+
+    def list_samples(self, sensor_ids, max_limit, start_time, end_time):
+        data = self.get_data_records(sensor_ids.split(';'), max_limit, start_time, end_time)
         
-        print(f"Samples are: ")
-        fm.pritty_print_json(data)
+        print(f"Samples are: {fm.prettify_json(data)}")
         
