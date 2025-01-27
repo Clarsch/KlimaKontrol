@@ -1,7 +1,7 @@
 import requests
-from modules.Authorization import Authorization 
-import modules.Validater as vd
-import modules.Formatter as fm
+from sensorpush_loader.modules.Authorization import Authorization 
+import sensorpush_loader.modules.Validater as vd
+import sensorpush_loader.modules.Formatter as fm
 
 class DataRequester:
 

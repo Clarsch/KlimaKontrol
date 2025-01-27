@@ -2,15 +2,17 @@ import time
 from modules.Authorization import Authorization 
 from modules.DataRequester import DataRequester
 from modules.DataPullRunner import DataPullRunner, DataPullRunnerThread
-
+import asyncio
 
 
 def main():
     base_url = 'https://api.sensorpush.com'
 
+    queue = asyncio.Queue()
+
     auth = Authorization(base_url)
     data_requester = DataRequester(auth, base_url)
-    data_pull_runner = DataPullRunner(auth)
+    data_pull_runner = DataPullRunner(queue, auth)
 
     runner_thread = None
     

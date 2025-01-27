@@ -3,14 +3,30 @@ import time
 import random
 from datetime import datetime, timedelta
 import os
-
+import json
 
 backend_url = "http://localhost:5001"
 data_url = backend_url + "/api/data"
 data_location_status = data_url + "/locations/status"
-data_readings_url = data_url + "/reading/dataReading"
 
-def postLocationDataReading(location, intervalInSeconds, dateIntervalsInHours):
+def post_data_observation(observation):
+    data_readings_url = data_url + "/reading/dataReading"
+
+    try:
+        response = requests.post(data_readings_url, json=observation)
+        response.raise_for_status()
+        print("Posting data reading is completed!")
+
+    except requests.exceptions.RequestException as e:
+        # Handle any errors that occur during the request
+        print("An error occurred:", e)
+
+
+def prettify_json(input_data: str):
+    pretty_json = json.dumps(input_data, indent=4)
+    return(pretty_json)
+        
+def post_random_location_data_readings(location, intervalInSeconds, dateIntervalsInHours):
     temperature = 15.0
     humidity = 60.0
     testDateTime = datetime(2025, 1, 1, 0, 0, 0)
@@ -33,7 +49,7 @@ def postLocationDataReading(location, intervalInSeconds, dateIntervalsInHours):
 
         testDateTime = testDateTime + timedelta(hours=dateIntervalsInHours)
 
-        measurement_json = {
+        observation_json = {
             "location": location,
             "record_time": testDateTime.strftime("%Y-%m-%dT%H:%M:%S"),
             "temperature": round(temperature, 2),
@@ -41,15 +57,9 @@ def postLocationDataReading(location, intervalInSeconds, dateIntervalsInHours):
             "air_pressure": "1013",
             "pause": "0"
         }
+        print(prettify_json(observation_json))
 
-        try:
-            response = requests.post(data_readings_url, json=measurement_json)
-            response.raise_for_status()
-            print("Posting data reading is completed!")
-
-        except requests.exceptions.RequestException as e:
-            # Handle any errors that occur during the request
-            print("An error occurred:", e)
+        post_data_observation(observation_json)
 
 
         time.sleep(intervalInSeconds)
@@ -80,8 +90,8 @@ def main():
         if action == "sensor":
             location = input("Enter location Id:").strip()
             triggerInterval = input("Enter trigger inteval in seconds:").strip()
-            dateInterval = input("Enter date inteval in hours:").strip()
-            postLocationDataReading(location, int(triggerInterval), int(dateInterval))
+            dateInterval = input("Enter date interval in hours:").strip()
+            post_random_location_data_readings(location, int(triggerInterval), int(dateInterval))
 
         if action == "resetData":
             resetLocationsData()

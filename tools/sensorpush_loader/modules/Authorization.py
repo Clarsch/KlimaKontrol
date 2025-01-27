@@ -1,7 +1,6 @@
 import requests
 import json
 from datetime import datetime, timedelta
-import modules.Formatter as fm
 
 
 class Authorization:
