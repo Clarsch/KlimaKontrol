@@ -12,7 +12,7 @@ def datetime_to_utc_format(datetime: datetime):
 
 
 def string_to_utc_datetime(date_string:str):
-    input_string_corrected = date_string.replace('Z', '+00:00')
+    input_string_corrected = date_string.replace('000Z', '+00:00')
     return datetime.fromisoformat(input_string_corrected)
 
 def string_to_naive_datetime(date_string:str):

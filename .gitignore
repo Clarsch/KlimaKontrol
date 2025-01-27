@@ -46,3 +46,4 @@ Thumbs.db
 **/config.json
 **/__pycache__/
 **/venv/
+logs/*
