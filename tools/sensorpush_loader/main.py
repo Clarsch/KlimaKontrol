@@ -1,9 +1,7 @@
 import time
-import asyncio
 from modules.Authorization import Authorization 
 from modules.DataRequester import DataRequester
-from DataPullRunner import DataPullRunner, DataPullRunnerThread
-import modules.Formatter as fm
+from modules.DataPullRunner import DataPullRunner, DataPullRunnerThread
 
 
 

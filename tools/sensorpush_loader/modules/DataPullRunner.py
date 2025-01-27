@@ -10,8 +10,7 @@ class DataPullRunner():
 
     observations = {}
 
-    def __init__(self, auth = None):
-        base_url = 'https://api.sensorpush.com'
+    def __init__(self, auth = None, base_url = 'https://api.sensorpush.com'):
         self.auth = Authorization(base_url) if auth == None else auth
         self.dataRequester = DataRequester(auth, base_url)
         self.last_datapoint_reading = datetime.now() - timedelta(days=365)        
