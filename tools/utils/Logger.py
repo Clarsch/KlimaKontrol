@@ -1,6 +1,6 @@
 import logging
 import os
-from datetime import datetime
+
 
 class Logger:
     def __init__(self, name='app_logger', log_file='app.log', level=logging.DEBUG):
@@ -24,7 +24,7 @@ class Logger:
 
         # Create a console handler
         self.console_handler = logging.StreamHandler()
-        self.console_handler.setLevel(level)
+        self.console_handler.setLevel(logging.INFO) # Concole logging for debug is not enabled by default
 
         # Create a formatter
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -33,7 +33,7 @@ class Logger:
 
         # Add the handlers to the logger
         self.logger.addHandler(file_handler)
-        # console handler not enabled by default
+        self.logger.addHandler(self.console_handler)
 
     def debug(self, caller_name, message):
         """Log a message with DEBUG level."""
@@ -55,17 +55,11 @@ class Logger:
         """Log a message with CRITICAL level."""
         self.logger.critical(f"{caller_name}: {message}")
 
-    def disable_console_output(self):
-        self.set_console_handler(False)
+    def disable_console_debug_output(self):
+        self.console_handler.setLevel(logging.INFO)
     
-    def enable_console_output(self):
-        self.set_console_handler(True)
-
-    def set_console_handler(self, enable_handler):
-        if not enable_handler and self.console_handler in self.logger.handlers:
-            self.logger.removeHandler(self.console_handler)
-        elif enable_handler and not self.console_handler in self.logger.handlers:
-            self.logger.addHandler(self.console_handler)
+    def enable_console_debug_output(self):
+        self.console_handler.setLevel(logging.DEBUG)
 
 
 
@@ -89,9 +83,9 @@ class Logger:
             elif action == 'test':
                 self.debug(TAG, "This is a TEST DEBUG Log statement...")
             elif action == 'enable':
-                self.enable_console_output()
+                self.enable_console_debug_output()
                 self.debug(TAG, "DEBUG Console logging ENABLED")
             elif action == 'disable':
-                self.disable_console_output()
-                self.debug(TAG, "DEBUG Console logging DISABLED")
+                self.disable_console_debug_output()
+                self.info(TAG, "DEBUG Console logging DISABLED")
 

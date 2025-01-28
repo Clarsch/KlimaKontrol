@@ -42,7 +42,7 @@ def main():
         elif action == 'access':
             print(f"Access Token is: {auth.get_access_token()}")   
         elif action == 'print':
-            observations = data_pull_runner.observations
+            observations = data_pull_runner._observations
             print(observations)
             print(f"Observations does now contain {len(observations)} readings")
 
