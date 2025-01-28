@@ -61,9 +61,9 @@ class DataPullRunner:
         sensor_ids = self._get_all_sensor_ids()
         max_records = self._get_config()['maxRecords'] # * number_of_sensors
 
-        enddate_formatted = fm.datetime_to_utc_format(datetime.now(timezone.utc) + timedelta(minutes=10))        
+        enddate_formatted = fm.datetime_to_utc_string(datetime.now(timezone.utc) + timedelta(minutes=10))        
         startdate = self.last_datapoint_reading 
-        startdate_formatted = fm.datetime_to_utc_format(startdate)
+        startdate_formatted = fm.datetime_to_utc_string(startdate)
         self.logger.debug(self.TAG, f"New readings from {startdate_formatted} to {enddate_formatted}")
 
         data = self.dataRequester.get_data_observations(sensor_ids, max_records, startdate_formatted, enddate_formatted)

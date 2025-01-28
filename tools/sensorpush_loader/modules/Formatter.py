@@ -7,8 +7,11 @@ def prettify_json(input_data: str):
     return(pretty_json)
 
 
-def datetime_to_utc_format(datetime: datetime):
+def datetime_to_utc_string(datetime: datetime):
     return datetime.strftime('%Y-%m-%dT%H:%M:%S.000Z')
+
+def datetime_to_simple_datetime_string(datetime: datetime):
+    return datetime.strftime('%Y-%m-%d_%H%M')
 
 
 def string_to_utc_datetime(date_string:str):

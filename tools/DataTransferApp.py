@@ -1,12 +1,15 @@
 from sensorpush_loader.modules.DataPullRunner import DataPullRunner, DataPullRunnerThread
 from sensorpush_loader.modules.Authorization import Authorization
 from utils.Logger import Logger
+from datetime import datetime
+import sensorpush_loader.modules.Formatter as fm
 
 
 
 def main():
     app_name = 'DataTransferRunner'
-    logger = Logger(app_name, f'../logs/{app_name}-app.log')
+    log_filename = f"{fm.datetime_to_simple_datetime_string(datetime.now())}_{app_name}.log"
+    logger = Logger(app_name, f'../logs/{log_filename}')
     TAG = main.__name__    
 
     auth = Authorization(logger, 'https://api.sensorpush.com')

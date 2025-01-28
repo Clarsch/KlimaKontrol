@@ -20,7 +20,7 @@ class Authorization:
         self.logger = logger
         self.base_url = base_url
         self.request_access_token()
-        logger.info(self.TAG, f"INITIALIZED.")
+        logger.info(self.TAG, f"{'SUCCESSFUL' if self.is_authorized() else 'FAILED...'}")
         logger.debug(self.TAG, f"INITIALIZED for URL: {base_url}. Is successfully authorized: {self.is_authorized()}.")
 
     def get_authorization_token(self):
