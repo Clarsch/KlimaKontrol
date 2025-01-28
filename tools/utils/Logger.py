@@ -67,7 +67,7 @@ class Logger:
         TAG = "LOGGER"
         print("\nWelcome to the LOGGER settings:")
         help_desc = "  help     -> Show the options again\n"
-        exit_desc = "  exit     -> Exit the logger settings\n"
+        exit_desc = "  leave     -> Exit the logger settings\n"
         test_desc = "  test     -> Writes a DEBUG log in console if enabled\n"
         enab_desc = "  enable   -> Enables the logger Console output\n"
         disa_desc = "  disable  -> Disables the logger Console output\n"
@@ -76,7 +76,7 @@ class Logger:
 
         while True:
             action = input("Select option: ").strip()
-            if action == "exit":
+            if action == "leave":
                 return
             elif action == 'help' or action == '-h':
                 print(options)
