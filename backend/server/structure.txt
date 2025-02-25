@@ -1,0 +1,31 @@
+my-go-app/
+│
+├── go.mod                # Module file defining the module's path and dependencies
+├── go.sum                # File containing checksums for module dependencies
+│
+├── cmd/
+│   └── main.go           # Entry point of the application
+│
+├── config/
+│   └── config.go         # Configuration management (e.g., database connection)
+│
+├── models/
+│   └── user.go           # GORM models representing database tables
+│
+├── repositories/
+│   ├── user_repository.go # Repository interface and implementation
+│   ├── role_repository.go # Example of another repository
+│   └── init.go           # Initializes all repositories
+│
+├── services/
+│   ├── user_service.go    # Business logic layer for users
+│   ├── role_service.go     # Example of another service
+│   └── init.go            # Initializes all services
+│
+├── routes/
+│   ├── user_routes.go     # API route definitions for users
+│   ├── role_routes.go     # Example of another route
+│   └── init.go            # Initializes all routes
+│
+└── utils/
+    └── helpers.go         # Helper functions (if needed)

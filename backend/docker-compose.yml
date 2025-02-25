@@ -1,0 +1,40 @@
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    restart: always
+    environment:
+      ACCEPT_EULA: "Y"  # Accept the end user license agreement
+      SA_PASSWORD: sTngPw34diAmIt             # Set a password 
+    ports:
+      - "1433:1433"                              # Expose port
+    volumes:
+      - sql_server_data:/var/opt/mssql              # Persist data
+
+    labels:
+      service: "database"
+      environment: "development"
+
+  app:
+    build:
+      context: .\server\                                 # Set the context for the build
+      dockerfile: Dockerfile                     # Use the specified Dockerfile
+    #restart: always
+    ports:
+      - "8080:8080"                              # Expose port 8080
+    depends_on:
+      - db                                       # Ensure the db service starts before the app
+    environment:
+      DATABASE_URL: "Server=db,1433;Database=master;User Id=SA;Password=sTngPw34diAmIt;"  # Use correct connection string
+    labels:
+      service: "go_application"
+      environment: "development"
+
+
+networks:
+  klimakontrol_network:
+    driver: bridge
+    labels:
+      purpose: "klimakontrol_network"
+
+volumes:
+  sql_server_data:
