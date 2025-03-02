@@ -1,19 +1,18 @@
 package services
 
 import (
-	//"klimakontrol/models"
+	"klimakontrol/models"
 	"klimakontrol/repositories"
 )
 
-type UserService struct {
-	repo repositories.UserRepository
+type ObservationService struct {
+	repo repositories.ObservationRepository
 }
 
-func NewUserService(repo repositories.UserRepository) *UserService {
-	return &UserService{repo: repo}
+func NewObservationService(repo repositories.ObservationRepository) *ObservationService {
+	return &ObservationService{repo: repo}
 }
 
-/*
 func (s *UserService) RegisterUser(username, email string) error {
 	user := &models.User{Username: username, Email: email}
 	return s.repo.Create(user)
@@ -22,5 +21,5 @@ func (s *UserService) RegisterUser(username, email string) error {
 func (s *UserService) GetUserByID(id uint) (*models.User, error) {
 	return s.repo.FindByID(id)
 }
-*/
+
 // Other service methods...

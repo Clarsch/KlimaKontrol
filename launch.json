@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Go Application",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "backend/server/cmd/main.go", // Update this path if necessary
+            "args": [],
+            "env": {
+                "DATABASE_SERVER_URL": "sqlserver://SA:sTngPw34diAmIt@localhost:1433",
+            },
+            "cwd": "${workspaceFolder}",
+            "trace": "log" // Optional: enable verbose logging; useful for debugging the debugger
+        }
+    ]
+}

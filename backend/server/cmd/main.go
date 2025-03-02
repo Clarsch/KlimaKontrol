@@ -15,7 +15,7 @@ func main() {
 	// Init Database Connection
 	db, err := config.ConnectDB()
 	if err != nil {
-		panic(fmt.Errorf("Failed to Connect with database: %v", err))
+		panic(fmt.Errorf("Failed to database setup: %v", err))
 	}
 
 	// Init all Repositories
@@ -31,6 +31,11 @@ func main() {
 	routes.InitRoutes(app, services) // Setting up routes
 
 	// Start the server
-	app.Listen(":8080")
+	if err := app.Listen(":8080"); err != nil {
+		fmt.Printf("Error starting server: %v", err)
+	}
+
+	// Log the shutdown
+	fmt.Println("Server stopped.")
 
 }

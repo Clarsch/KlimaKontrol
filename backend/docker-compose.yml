@@ -24,7 +24,8 @@ services:
     depends_on:
       - db                                       # Ensure the db service starts before the app
     environment:
-      DATABASE_URL: "Server=db,1433;Database=master;User Id=SA;Password=sTngPw34diAmIt;"  # Use correct connection string
+      DATABASE_SERVER_URL: "sqlserver://SA:sTngPw34diAmIt@db:1433"
+      DATABASE_SCRIPTS_FOLDER_PATH: "/app/config/db_scripts/"
     labels:
       service: "go_application"
       environment: "development"

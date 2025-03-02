@@ -2,6 +2,8 @@
 USE KlimaKontrolDB;
 GO
 
+Begin Transaction
+
 -- Inserting into Roles table
 INSERT INTO Roles (RoleName, Description) VALUES
 ('Admin', 'Administrator with full access.'),
@@ -37,9 +39,9 @@ INSERT INTO Gateways (GatewayID, GatewayName, LastSeenUTC, SoftwareVersion, Pair
 
 -- Inserting into Observations table (Assuming SensorID from Sensors table exists)
 INSERT INTO Observations (ObservedTimeUTC, SensorID, TemperatureFahrenheit, Humidity, BarometricPressureInches, DewpointFahrenheit) VALUES
-("2025-01-25T22:05:59.000Z", '16938384.41622496812705309768', 72.39, 44.95, 29.69, 49.78),
-("2025-01-25T22:05:00.000Z", '16938384.41622496812705309768', 72.34, 44.91, 29.69, 49.72),
-("2025-01-25T22:04:01.000Z", '16938384.41622496812705309768', 72.36, 44.87, 29.69, 49.72);
+('2025-01-25T22:05:59.000Z', '16938384.41622496812705309768', 72.39, 44.95, 29.69, 49.78),
+('2025-01-25T22:05:00.000Z', '16938384.41622496812705309768', 72.34, 44.91, 29.69, 49.72),
+('2025-01-25T22:04:01.000Z', '16938384.41622496812705309768', 72.36, 44.87, 29.69, 49.72);
 
 
 INSERT INTO UserRoleMapping (UserID, RoleID) VALUES
@@ -55,18 +57,18 @@ INSERT INTO UserAreaMapping (UserID, AreaID) VALUES
 (2, 1),  -- christian with Sankt Nicolai
 (2, 2);  -- christian with Rise
 
-INSERT INTO AreaLocationMapping (LocationID, AreaID) VALUES
+INSERT INTO LocationAreaMapping (LocationID, AreaID) VALUES
 (1, 1),  -- Sankt Nicolai Kirke with Aabenraa Provsti
 (2, 1),  -- Rise Kirke with Aabenraa Provsti
 (3, 2);  -- Haderslev Domkirke with Haderslev Domprovsti
 
 
 INSERT INTO GatewayLocationMapping (GatewayID, LocationID) VALUES
-(1, 2); --GateWay to Rise Kirke
+('jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=', 2); --GateWay to Rise Kirke
 
 INSERT INTO SensorLocationMapping (SensorID, LocationID) VALUES
-(1, 2); --Sensor1 to Rise Kirke
-(2, 2); --Sensor2 to Rise Kirke
+('16938384.41622496812705309768', 2), --Sensor1 to Rise Kirke
+('16938386.41622496812705309228', 2); --Sensor2 to Rise Kirke
 
 
-
+Rollback Transaction

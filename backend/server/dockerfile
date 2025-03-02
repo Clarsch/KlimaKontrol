@@ -16,10 +16,13 @@ RUN go build -o main ./cmd/main.go
 # Use a minimal base image to run the binary
 FROM debian:stable-slim
 
-WORKDIR /root/
+#AFTER BUILD
+#WORKDIR /root/
+WORKDIR /app
 
 # Copy the binary from the previous stage
 COPY --from=builder /app/main ./
+COPY ./config ./config
 
 # Grant execute permissions to the binary
 RUN chmod +x main

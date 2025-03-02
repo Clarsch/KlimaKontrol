@@ -5,7 +5,6 @@ DELETE FROM UserAreaMapping
 DELETE FROM SensorLocationMapping
 DELETE FROM LocationAreaMapping
 DELETE FROM UserRoleMapping
-DELETE FROM ObservationSensorMapping
 DELETE FROM GatewayLocationMapping
 
 DELETE FROM Users
