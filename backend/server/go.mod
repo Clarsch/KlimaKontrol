@@ -2,6 +2,10 @@ module klimakontrol
 
 go 1.24
 
+godebug (
+	x509negativeserial=1
+)
+
 require (
 	github.com/gofiber/fiber/v2 v2.52.6
 	gorm.io/driver/sqlserver v1.5.4
