@@ -2,7 +2,7 @@ package models
 
 import "time"
 
-type LocationAreaMapping struct {
+type LocationAreaMappingDB struct {
 	MappingID             int        `gorm:"primaryKey;autoIncrement"`
 	LocationID            int        `gorm:"index"`
 	AreaID                int        `gorm:"index"`

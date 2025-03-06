@@ -2,7 +2,7 @@ package models
 
 import "time"
 
-type UserRoleMapping struct {
+type UserRoleMappingDB struct {
 	MappingID             int        `gorm:"primaryKey;autoIncrement"`
 	UserID                int        `gorm:"index"`
 	RoleID                int        `gorm:"index"`

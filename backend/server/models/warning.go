@@ -2,7 +2,7 @@ package models
 
 import "time"
 
-type Warning struct {
+type WarningDB struct {
 	WarningID      int       `gorm:"primaryKey;autoIncrement"`
 	Type           string    `gorm:"size:50;not null"`
 	WarningTimeUTC time.Time `gorm:"not null"`

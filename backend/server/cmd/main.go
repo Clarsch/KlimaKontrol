@@ -30,6 +30,12 @@ func main() {
 	// Init all Routes
 	routes.InitRoutes(app, services) // Setting up routes
 
+	loadedLocs, _ := repos.LocationRepository.FindAll()
+	for _, loc := range loadedLocs {
+		loc.PrettyPrint()
+
+	}
+
 	// Start the server
 	if err := app.Listen(":8080"); err != nil {
 		fmt.Printf("Error starting server: %v", err)

@@ -2,7 +2,7 @@ package models
 
 import "time"
 
-type Observation struct {
+type ObservationDB struct {
 	ObservationID            int       `gorm:"primaryKey;autoIncrement"`
 	ObservedTimeUTC          time.Time `gorm:"not null"`
 	SensorID                 string    `gorm:"size:50;index"`

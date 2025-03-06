@@ -13,7 +13,7 @@ func NewSensorService(repo repositories.SensorRepository) *SensorService {
 	return &SensorService{repo: repo}
 }
 
-func (s *SensorService) GetAllSensors() ([]models.Sensor, error) {
+func (s *SensorService) GetAllSensors() ([]models.SensorDB, error) {
 	sensors, err := s.repo.FindAll()
 	return sensors, err
 }

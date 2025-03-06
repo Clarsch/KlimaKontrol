@@ -7,9 +7,9 @@ import (
 )
 
 type ObservationRepository interface {
-	Create(observation *models.Observation) error
-	FindByID(id uint) (*models.Observation, error)
-	FindAll() ([]models.Observation, error)
+	Create(observation *models.ObservationDB) error
+	FindByID(id uint) (*models.ObservationDB, error)
+	FindAll() ([]models.ObservationDB, error)
 	//Update(observation *models.Observation) error
 }
 
@@ -21,18 +21,18 @@ func NewObservationRepository(db *gorm.DB) ObservationRepository {
 	return &observationRepository{db: db}
 }
 
-func (r *observationRepository) Create(user *models.Observation) error {
+func (r *observationRepository) Create(user *models.ObservationDB) error {
 	return r.db.Create(user).Error
 }
 
-func (r *observationRepository) FindByID(id uint) (*models.Observation, error) {
-	var observation models.Observation
+func (r *observationRepository) FindByID(id uint) (*models.ObservationDB, error) {
+	var observation models.ObservationDB
 	err := r.db.First(&observation, id).Error
 	return &observation, err
 }
 
-func (r *observationRepository) FindAll() ([]models.Observation, error) {
-	var observations []models.Observation
+func (r *observationRepository) FindAll() ([]models.ObservationDB, error) {
+	var observations []models.ObservationDB
 	err := r.db.Find(&observations).Error
 	return observations, err
 }

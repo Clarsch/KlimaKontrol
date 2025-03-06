@@ -37,25 +37,25 @@ func ConnectDB() (*gorm.DB, error) {
 	// If the database did not exist and is newly created, create also the tables and seed the database
 	if dbExists == 0 { //TODO Should be changed to check if tables exists
 		db.AutoMigrate(
-			&models.Role{},
-			&models.Area{},
-			&models.User{},
-			&models.Location{},
-			&models.Sensor{},
-			&models.Gateway{},
-			&models.Observation{},
-			&models.Warning{},
-			&models.UserRoleMapping{},
-			&models.UserAreaMapping{},
-			&models.LocationAreaMapping{},
-			&models.GatewayLocationMapping{},
-			&models.SensorLocationMapping{},
+			&models.RoleDB{},
+			&models.AreaDB{},
+			&models.UserDB{},
+			&models.LocationDB{},
+			&models.SensorDB{},
+			&models.GatewayDB{},
+			&models.ObservationDB{},
+			&models.WarningDB{},
+			&models.UserRoleMappingDB{},
+			&models.UserAreaMappingDB{},
+			&models.LocationAreaMappingDB{},
+			&models.GatewayLocationMappingDB{},
+			&models.SensorLocationMappingDB{},
 		)
 
 		fmt.Println("Database KlimaKontrolDB tables created.")
 
 		// Seed data
-		SeedData(db)
+		//SeedData(db)
 		fmt.Println("Database KlimaKontrolDB seeded with startup data.")
 
 	} else {

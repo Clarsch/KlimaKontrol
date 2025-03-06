@@ -7,7 +7,7 @@ import (
 )
 
 type WarningRepository interface {
-	FindAll() ([]models.Warning, error)
+	FindAll() ([]models.WarningDB, error)
 }
 
 type warningRepository struct {
@@ -18,8 +18,8 @@ func NewWarningRepository(db *gorm.DB) WarningRepository {
 	return &warningRepository{db: db}
 }
 
-func (r *warningRepository) FindAll() ([]models.Warning, error) {
-	var warnings []models.Warning
-	err := r.db.Model(&models.Warning{}).Find(&warnings).Error
+func (r *warningRepository) FindAll() ([]models.WarningDB, error) {
+	var warnings []models.WarningDB
+	err := r.db.Model(&models.WarningDB{}).Find(&warnings).Error
 	return warnings, err
 }

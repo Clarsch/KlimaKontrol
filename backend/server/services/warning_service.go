@@ -13,7 +13,7 @@ func NewWarningService(repo repositories.WarningRepository) *WarningService {
 	return &WarningService{repo: repo}
 }
 
-func (s *WarningService) GetAllWarnings() ([]models.Warning, error) {
+func (s *WarningService) GetAllWarnings() ([]models.WarningDB, error) {
 	warnings, err := s.repo.FindAll()
 	return warnings, err
 }

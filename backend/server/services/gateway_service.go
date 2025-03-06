@@ -13,7 +13,7 @@ func NewGatewayService(repo repositories.GatewayRepository) *GatewayService {
 	return &GatewayService{repo: repo}
 }
 
-func (s *GatewayService) GetAllGateways() ([]models.Gateway, error) {
+func (s *GatewayService) GetAllGateways() ([]models.GatewayDB, error) {
 	gateways, err := s.repo.FindAll()
 	return gateways, err
 }

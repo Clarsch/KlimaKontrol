@@ -7,7 +7,7 @@ import (
 )
 
 type GatewayRepository interface {
-	FindAll() ([]models.Gateway, error)
+	FindAll() ([]models.GatewayDB, error)
 }
 
 type gatewayRepository struct {
@@ -18,8 +18,8 @@ func NewGatewayRepository(db *gorm.DB) GatewayRepository {
 	return &gatewayRepository{db: db}
 }
 
-func (r *gatewayRepository) FindAll() ([]models.Gateway, error) {
-	var gateways []models.Gateway
-	err := r.db.Model(&models.Gateway{}).Find(&gateways).Error
+func (r *gatewayRepository) FindAll() ([]models.GatewayDB, error) {
+	var gateways []models.GatewayDB
+	err := r.db.Model(&models.GatewayDB{}).Find(&gateways).Error
 	return gateways, err
 }

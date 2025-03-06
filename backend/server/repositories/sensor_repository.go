@@ -7,7 +7,7 @@ import (
 )
 
 type SensorRepository interface {
-	FindAll() ([]models.Sensor, error)
+	FindAll() ([]models.SensorDB, error)
 }
 
 type sensorRepository struct {
@@ -18,8 +18,8 @@ func NewSensorRepository(db *gorm.DB) SensorRepository {
 	return &sensorRepository{db: db}
 }
 
-func (r *sensorRepository) FindAll() ([]models.Sensor, error) {
-	var sensors []models.Sensor
-	err := r.db.Model(&models.Sensor{}).Find(&sensors).Error
+func (r *sensorRepository) FindAll() ([]models.SensorDB, error) {
+	var sensors []models.SensorDB
+	err := r.db.Model(&models.SensorDB{}).Find(&sensors).Error
 	return sensors, err
 }

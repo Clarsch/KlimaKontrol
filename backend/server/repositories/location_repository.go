@@ -8,6 +8,7 @@ import (
 
 type LocationRepository interface {
 	FindAll() ([]models.Location, error)
+	Create([]models.Location) error
 }
 
 type locationRepository struct {
@@ -19,10 +20,14 @@ func NewLocationRepository(db *gorm.DB) LocationRepository {
 }
 
 func (r *locationRepository) FindAll() ([]models.Location, error) {
-	var locations []models.Location
-	err := r.db.Model(&models.Location{}).Find(&locations).Error
+	var locationDBs []models.LocationDB
+	err := r.db.Model(&models.LocationDB{}).Find(&locationDBs).Error
+	locations := models.ConvertToLocationsFromDB(locationDBs)
 	return locations, err
 }
 
-
-func 
+func (r *locationRepository) Create(locations []models.Location) error {
+	locationDBs := models.ConvertLocationsToDB(locations)
+	err := r.db.Model(&models.LocationDB{}).Create(&locationDBs).Error
+	return err
+}
