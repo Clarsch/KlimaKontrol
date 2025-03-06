@@ -1,21 +1,36 @@
 package services
 
-import "klimakontrol/repositories"
+import (
+	"klimakontrol/repositories"
+)
 
 type Services struct {
-	UserService        *UserService
-	ObservationService *ObservationService
 	AreaService        *AreaService
+	GatewayService     *GatewayService
+	LocationService    *LocationService
+	ObservationService *ObservationService
+	SensorService      *SensorService
+	UserService        *UserService
+	WarningService     *WarningService
 }
 
-func InitServices(repos repositories.Repositories) Services {
-	userService := NewUserService(repos.UserRepository)
-	observationService := NewObservationService(repos.ObservationRepository)
-	areaService := NewAreaService(repos.AreaRepository)
-	//roleService := NewRoleService(roleRepo) // Assume you have a similar service
+func InitServices(repositories repositories.Repositories) Services {
+	areaService := NewAreaService(repositories.AreaRepository)
+	gatewayService := NewGatewayService(repositories.GatewayRepository)
+	locationService := NewLocationService(repositories.LocationRepository)
+	observationService := NewObservationService(repositories.ObservationRepository)
+	sensorService := NewSensorService(repositories.SensorRepository)
+	userService := NewUserService(repositories.UserRepository)
+	warningService := NewWarningService(repositories.WarningRepository)
+
 	return Services{
-		UserService:        userService,
-		ObservationService: observationService,
 		AreaService:        areaService,
+		GatewayService:     gatewayService,
+		LocationService:    locationService,
+		ObservationService: observationService,
+		SensorService:      sensorService,
+		UserService:        userService,
+		WarningService:     warningService,
 	}
+
 }

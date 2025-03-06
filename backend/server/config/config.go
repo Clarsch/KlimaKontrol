@@ -37,13 +37,14 @@ func ConnectDB() (*gorm.DB, error) {
 	// If the database did not exist and is newly created, create also the tables and seed the database
 	if dbExists == 0 { //TODO Should be changed to check if tables exists
 		db.AutoMigrate(
-			&models.Roles{},
+			&models.Role{},
 			&models.Area{},
 			&models.User{},
 			&models.Location{},
 			&models.Sensor{},
 			&models.Gateway{},
 			&models.Observation{},
+			&models.Warning{},
 			&models.UserRoleMapping{},
 			&models.UserAreaMapping{},
 			&models.LocationAreaMapping{},

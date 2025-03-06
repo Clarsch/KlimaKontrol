@@ -9,7 +9,7 @@ import (
 
 func SeedData(db *gorm.DB) {
 	// Seed Roles
-	roles := []models.Roles{
+	roles := []models.Role{
 		{RoleName: "Admin", Description: "Administrator with full access."},
 		{RoleName: "Manager", Description: "Manager with access to overviewv of multiple locations."},
 		{RoleName: "User", Description: "Regular user with restricted access."},

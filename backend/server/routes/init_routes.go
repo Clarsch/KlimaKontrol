@@ -9,6 +9,7 @@ import (
 func InitRoutes(app *fiber.App, services services.Services) {
 
 	AreaRoutes(app, services)
+	LocationRoutes(app, services)
 	UserRoutes(app, services)
 	ObservationRoutes(app, services)
 
