@@ -55,7 +55,7 @@ func ConnectDB() (*gorm.DB, error) {
 		fmt.Println("Database KlimaKontrolDB tables created.")
 
 		// Seed data
-		//SeedData(db)
+		SeedData(db)
 		fmt.Println("Database KlimaKontrolDB seeded with startup data.")
 
 	} else {
