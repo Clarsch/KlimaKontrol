@@ -29,13 +29,38 @@ npm run release:major
 git push origin v<new-version>
 ```
 
-## 📋 Release Checklist
+## 📋 Pre-Release Checklist
 
-### Before Release
+### Before Running Release Script
+- [ ] Update `CHANGELOG.md` with all changes in "Unreleased" section
+- [ ] Test your application thoroughly
+- [ ] Commit all current changes
+- [ ] Ensure no uncommitted changes exist
+- [ ] Review breaking changes (especially for major releases)
+- [ ] Check that all package versions are consistent
 - [ ] All tests pass
 - [ ] Code review completed
 - [ ] Documentation updated
-- [ ] No breaking changes (unless major release)
+
+### CHANGELOG.md Update Example
+```markdown
+## [Unreleased]
+
+### Added
+- New feature 1
+- New feature 2
+
+### Changed
+- Updated functionality
+
+### Fixed
+- Bug fix description
+
+### Breaking Changes
+- Describe any breaking changes (for major releases)
+```
+
+## 📋 Release Checklist
 
 ### During Release
 - [ ] Run `npm run version-check`
