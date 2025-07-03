@@ -1,19 +1,23 @@
 # KlimaKontrol Version Information
 
 ## Current Version
-**1.0.0** - Initial Release
+**2.0.0** - Initial Release
 
 ## Version Components
-- **Client (Frontend)**: 1.0.0
-- **Server (Backend)**: 1.0.0
-- **Root Package**: 1.0.0
+- **Client (Frontend)**: 2.0.0
+- **Server (Backend)**: 2.0.0
+- **Root Package**: 2.0.0
 
 ## Release Date
 2024-01-XX
 
 ## Version History
 
-### 1.0.0 (2024-01-XX) - Initial Release
+### 1.0.0
+### 2.0.0 (2025-07-03) - Major Release
+- major release
+
+ (2025-07-03) - Initial Release
 - First public release of KlimaKontrol
 - Complete climate monitoring system
 - Full feature set including authentication, data management, and warnings

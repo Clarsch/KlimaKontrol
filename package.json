@@ -1,6 +1,6 @@
 {
   "name": "klima-kontrol",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Climate monitoring system for churches",
   "type": "commonjs",
   "scripts": {
@@ -23,4 +23,4 @@
     "node": ">=14.0.0"
   },
   "private": true
-} 
+}
