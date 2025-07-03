@@ -56,8 +56,8 @@ function updateVersionFile(newVersion, releaseType) {
     const today = new Date().toISOString().split('T')[0];
     const versionHistoryEntry = `\n### ${newVersion} (${today}) - ${releaseType.charAt(0).toUpperCase() + releaseType.slice(1)} Release\n- ${releaseType} release\n\n`;
     
-    // Insert after the first version entry
-    const historyMatch = content.match(/(## Version History\s*\n\s*### [\d.]+)/);
+    // Insert after the Version History header, before the first version entry
+    const historyMatch = content.match(/(## Version History\s*\n)/);
     if (historyMatch) {
         content = content.replace(
             historyMatch[1],
