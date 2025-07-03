@@ -3,7 +3,7 @@ const path = require('path');
 
 class ConfigLoader {
     constructor() {
-        this.externalConfigPath = path.resolve(__dirname, '../../../KlimaKontrol-config/server/data');
+        this.externalConfigPath = path.resolve(__dirname, '../../klima_kontrol_config/server/data');
         this.cache = new Map();
     }
 

@@ -1,0 +1,3 @@
+[submodule "klima_kontrol_config"]
+	path = klima_kontrol_config
+	url = https://github.com/Clarsch/KlimaKontrol-config.git
