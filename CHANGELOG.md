@@ -10,6 +10,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+---
+
+
+## [2.0.0] - 2025-07-04
+
+### Added
+
+### Changed
     - submodule for klimaKontrol config and updated config loader ref
 
 ### Deprecated
