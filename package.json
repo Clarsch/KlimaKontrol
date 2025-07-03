@@ -10,7 +10,11 @@
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "prod": "concurrently \"npm run server\" \"npm run client --mode production\"",
     "install-all": "npm install && cd client && npm install && cd ../server && npm install",
-    "start": "npm run dev"
+    "start": "npm run dev",
+    "version-check": "node scripts/version-check.js",
+    "release:patch": "node scripts/release.js patch",
+    "release:minor": "node scripts/release.js minor",
+    "release:major": "node scripts/release.js major"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
