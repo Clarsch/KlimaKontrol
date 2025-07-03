@@ -83,6 +83,21 @@ function createRelease() {
     console.log(`🚀 Creating ${releaseType} release...\n`);
     
     try {
+        // Check git status BEFORE making any changes
+        console.log('🔍 Checking git status...');
+        try {
+            const gitStatus = execSync('git status --porcelain', { encoding: 'utf8' });
+            if (gitStatus.trim()) {
+                console.log('\n⚠️  Uncommitted changes detected:');
+                console.log(gitStatus);
+                console.log('\nPlease commit your changes before creating a release.');
+                process.exit(1);
+            }
+            console.log('✅ No uncommitted changes found\n');
+        } catch (error) {
+            console.log('⚠️  Could not check git status. Make sure you have git installed and are in a git repository.');
+        }
+        
         // Read current versions
         const rootPackage = readPackageJson('./package.json');
         const clientPackage = readPackageJson('./client/package.json');
@@ -107,19 +122,6 @@ function createRelease() {
         // Update VERSION.md
         console.log('📝 Updating VERSION.md...');
         updateVersionFile(newVersion, releaseType);
-        
-        // Check git status
-        try {
-            const gitStatus = execSync('git status --porcelain', { encoding: 'utf8' });
-            if (gitStatus.trim()) {
-                console.log('\n⚠️  Uncommitted changes detected:');
-                console.log(gitStatus);
-                console.log('\nPlease commit your changes before creating a release.');
-                process.exit(1);
-            }
-        } catch (error) {
-            console.log('⚠️  Could not check git status. Make sure you have git installed and are in a git repository.');
-        }
         
         // Create git tag
         try {
