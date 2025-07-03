@@ -28,7 +28,7 @@ function bumpVersion(version, type) {
     }
 }
 
-function updateVersionFile(newVersion) {
+function updateVersionFile(newVersion, releaseType) {
     const versionPath = './VERSION.md';
     let content = fs.readFileSync(versionPath, 'utf8');
     
@@ -54,7 +54,7 @@ function updateVersionFile(newVersion) {
     
     // Add new version to history
     const today = new Date().toISOString().split('T')[0];
-    const versionHistoryEntry = `\n### ${newVersion} (${today}) - ${type.charAt(0).toUpperCase() + type.slice(1)} Release\n- ${type} release\n\n`;
+    const versionHistoryEntry = `\n### ${newVersion} (${today}) - ${releaseType.charAt(0).toUpperCase() + releaseType.slice(1)} Release\n- ${releaseType} release\n\n`;
     
     // Insert after the first version entry
     const historyMatch = content.match(/(## Version History\s*\n\s*### [\d.]+)/);
@@ -106,7 +106,7 @@ function createRelease() {
         
         // Update VERSION.md
         console.log('📝 Updating VERSION.md...');
-        updateVersionFile(newVersion);
+        updateVersionFile(newVersion, releaseType);
         
         // Check git status
         try {
