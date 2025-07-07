@@ -7,8 +7,8 @@ The purpose is to monitor the indoor climate on different locations and create a
 ## How does it work?
 The KlimaKontrol is a web solution which is currently a minimum viable product for demo purposes. 
 It consist of two user flows:
-1. DataCollecting Users: A number of users who will upload data points from data collector devices on a given location. Future: IOT devices uploading live data from locations.
-2. Monitoring/Managing Users: A few selected users whose purpose is to have the overview of all locations and act upon monitoring alarms, to correct the indoor climate at a given location. 
+1. DataCollecting Users: A number of users who will upload data points from data collector devices on a given location. Each sensor has a unique sensor_id and can be moved between locations. Future: IOT devices uploading live data from locations.
+2. Monitoring/Managing Users: A few selected users whose purpose is to have the overview of all locations and act upon monitoring alarms, to correct the indoor climate at a given location. Multiple sensors per location are supported with individual visualization. 
 
 ![overview_demo](https://github.com/user-attachments/assets/1d24fd69-07c7-455c-8172-d07486b7fa17)
 

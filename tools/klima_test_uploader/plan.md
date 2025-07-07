@@ -28,20 +28,13 @@ The KlimaKontol app API should accept data in the following format from the sens
 
 ```json
 {
-  "location": { //Maybe not needed? Just lookup where the sensor is paired to?
-    "name": "Location Name", //Human readable
-    "id": "Location ID" //UUID
-  },
-  "sensor": {
-    "name": "Sensor Name", //Human readable
-    "id": "Sensor ID", //UUID
-    "battery_level": "battery percentage" 
-  },
-  "dateTime": "YYYY-MM-DDTHH:MM:SSZ", //Date and time for the reading
-  "data": {
-    "temperature": "Value in Celsius", //Float
-    "humidity": "Value in percentage", //Float
-    "pressure": "Value in hPa" //Float
-  }
+  "sensor_id": "sensor_001", //Required: Unique sensor identifier
+  "location_id": "location_id", //Required: Location where sensor is deployed
+  "record_time": "YYYY-MM-DDTHH:MM:SSZ", //Date and time for the reading
+  "temperature": 20.5, //Value in Celsius (Float)
+  "relative_humidity": 55.2, //Value in percentage (Float)
+  "air_pressure": 1013.25 //Value in hPa (Float)
 }
 ```
+
+**Note:** The server will automatically add a UUID (`id`) to each record. The `sensor_id` and `location_id` are required fields for all data submissions.

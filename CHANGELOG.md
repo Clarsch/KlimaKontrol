@@ -8,8 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Multi-sensor support with unique sensor identification
+- UUID generation for all environmental data records
+- Sensor mobility support (sensors can be moved between locations)
+- Enhanced data visualization with multiple sensor lines per location
+- Data migration utility for existing environmental data
+- New data structure with sensor_id and location_id fields
+- Updated CSV format requiring sensor_id column
 
 ### Changed
+- Environmental data structure now includes id, sensor_id, and location_id
+- Data grouping logic updated to handle sensor mobility
+- CSV upload format updated to require sensor_id
+- Single data reading endpoint updated to require sensor_id and location_id
+- All existing data migrated to include sensor_id: "sensor_01" and new UUIDs
 
 ### Deprecated
 

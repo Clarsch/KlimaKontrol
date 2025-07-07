@@ -14,6 +14,7 @@ import GraphErrorBoundary from '../components/GraphErrorBoundary';
 import axiosInstance from '../api/axiosConfig';
 import { useTranslation } from 'react-i18next';
 import { formatTimestamp } from '../utils/formatters';
+import { groupReadingsBySensorAndLocation } from '../utils/dataProcessor';
 
 const PageContainer = styled.div`
   min-height: 100vh;
@@ -505,6 +506,17 @@ const LocationDetail = () => {
   };
 
   const renderGraph = (data, dataKey, unit, color, thresholds, groundTemp = null) => {
+    // Handle null, undefined, or empty data
+    if (!data || !Array.isArray(data) || data.length === 0) {
+      return (
+        <ResponsiveContainer width="100%" height="100%">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+            <p>No data available</p>
+          </div>
+        </ResponsiveContainer>
+      );
+    }
+
     const timeRangeConfig = getTimeRange(timeRange);
     
     const formattedData = data.map(point => ({
@@ -700,48 +712,27 @@ const LocationDetail = () => {
   };
 
   const renderCombinedGraph = (data, thresholds, groundTemp) => {
-    const timeRangeConfig = getTimeRange(timeRange);
-    
-    const formattedData = data.map(point => ({
-      ...point,
-      record_time: new Date(point.record_time).getTime()
-    }));
-
-    const tempMin = Math.min(...formattedData.map(d => parseFloat(d.temperature)));
-    const tempMax = Math.max(...formattedData.map(d => parseFloat(d.temperature)));
-    const humidityMin = Math.min(...formattedData.map(d => parseFloat(d.relative_humidity)));
-    const humidityMax = Math.max(...formattedData.map(d => parseFloat(d.relative_humidity)));
-    
-    const tempPadding = (Math.max(tempMax, thresholds.temperature.max) - 
-                        Math.min(tempMin, thresholds.temperature.min)) * 0.05;
-    const humidityPadding = (Math.max(humidityMax, thresholds.humidity.max) - 
-                            Math.min(humidityMin, thresholds.humidity.min)) * 0.05;
-
-    // Calculate ticks for both axes
-    const tempTicks = [];
-    const humidityTicks = [];
-    const tickCount = 5;
-
-    const tempInterval = (tempMax - tempMin) / (tickCount - 1);
-    const humidityInterval = (humidityMax - humidityMin) / (tickCount - 1);
-
-    for (let i = 0; i < tickCount; i++) {
-      tempTicks.push(Math.round((tempMin + (i * tempInterval)) * 10) / 10);
-      humidityTicks.push(Math.round((humidityMin + (i * humidityInterval)) * 10) / 10);
+    // Handle null, undefined, or empty data
+    if (!data || !Array.isArray(data) || data.length === 0) {
+      return (
+        <ResponsiveContainer width="100%" height="100%">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+            <p>No data available</p>
+          </div>
+        </ResponsiveContainer>
+      );
     }
+
+    const timeRangeConfig = getTimeRange(timeRange);
+    const grouped = groupReadingsBySensorAndLocation(data);
+    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA500', '#005670'];
+    let colorIdx = 0;
 
     return (
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart 
-          data={formattedData} 
-          margin={{ top: 5, right: 60, bottom: 25, left: 0 }}
-        >
-          <CartesianGrid 
-            strokeDasharray="3 3"
-            horizontal={true}
-            vertical={true}
-          />
-          <XAxis 
+        <LineChart margin={{ top: 5, right: 60, bottom: 25, left: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" horizontal vertical />
+          <XAxis
             dataKey="record_time"
             type="number"
             domain={[timeRangeConfig.start, timeRangeConfig.end]}
@@ -749,82 +740,32 @@ const LocationDetail = () => {
             scale="time"
             interval="preserveStartEnd"
           />
-          <YAxis 
-            yAxisId="temp" 
-            domain={[
-              Math.floor(Math.min(tempMin, thresholds.temperature.min) - tempPadding),
-              Math.ceil(Math.max(tempMax, thresholds.temperature.max) + tempPadding)
-            ]}
-            ticks={tempTicks}
-            orientation="left"
-            interval="preserveStartEnd"
-          />
-          <YAxis 
-            yAxisId="humidity" 
-            domain={[
-              Math.floor(Math.min(humidityMin, thresholds.humidity.min) - humidityPadding),
-              Math.ceil(Math.max(humidityMax, thresholds.humidity.max) + humidityPadding)
-            ]}
-            ticks={humidityTicks}
-            orientation="right"
-            interval="preserveStartEnd"
-          />
-          <YAxis 
-            yAxisId="pressure" 
-            orientation="right" 
-            domain={[970, 1050]}
-            hide // Hide the axis but keep it for the line
-          />
-          
-          <Tooltip 
+          <YAxis yAxisId="temp" orientation="left" />
+          <YAxis yAxisId="humidity" orientation="right" />
+          <YAxis yAxisId="pressure" orientation="right" domain={[970, 1050]} hide />
+          <Tooltip
             content={(props) => (
-              <CustomTooltipContent 
-                {...props} 
-                locationName={locationData?.name}
-              />
+              <CustomTooltipContent {...props} locationName={locationData?.name} />
             )}
           />
-
-          {/* Ground temperature reference line */}
-          <ReferenceLine 
-            yAxisId="temp"
-            y={groundTemp} 
-            stroke="#005670" 
-            strokeDasharray="3 3"
-            label={{ 
-              value: `${groundTemp}°C`,
-              position: 'right',
-              fill: '#005670'
-            }}
-          />
-
-          <Line 
-            yAxisId="temp"
-            type="monotone" 
-            dataKey="temperature" 
-            stroke="#FF6B6B" 
-            dot={false}
-            strokeWidth={2}
-            name="temperature"
-          />
-          <Line 
-            yAxisId="humidity"
-            type="monotone" 
-            dataKey="relative_humidity" 
-            stroke="#4ECDC4" 
-            dot={false}
-            strokeWidth={2}
-            name="relative_humidity"
-          />
-          <Line 
-            yAxisId="pressure"
-            type="monotone" 
-            dataKey="air_pressure" 
-            stroke="#45B7D1" 
-            dot={false}
-            strokeWidth={2}
-            name="air_pressure"
-          />
+          {/* Render a Line for each sensor_id|location_id group */}
+          {Object.entries(grouped).map(([key, records]) => {
+            const [sensorId, locId] = key.split('|');
+            const color = colors[colorIdx++ % colors.length];
+            return (
+              <Line
+                key={key}
+                yAxisId="temp"
+                type="monotone"
+                dataKey="temperature"
+                data={records.map(point => ({ ...point, record_time: new Date(point.record_time).getTime() }))}
+                stroke={color}
+                dot={false}
+                strokeWidth={2}
+                name={`Sensor ${sensorId}`}
+              />
+            );
+          })}
         </LineChart>
       </ResponsiveContainer>
     );

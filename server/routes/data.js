@@ -248,8 +248,22 @@ router.post('/reading/dataReading', async (req, res) => {
     try {
         const dataReading = req.body;
         console.log("Data Reading received of: " + JSON.stringify(dataReading, null, 2))
+        
+        // Validate required fields
+        if (!dataReading.sensor_id) {
+            return res.status(400).json({ 
+                message: 'sensor_id is required for data readings' 
+            });
+        }
+        
+        if (!dataReading.location_id) {
+            return res.status(400).json({ 
+                message: 'location_id is required for data readings' 
+            });
+        }
+        
         records = [dataReading]
-        const location = dataReading.location.toLowerCase();
+        const location = dataReading.location_id.toLowerCase();
 
         handleFileUpload(req, res, location, records)
 
@@ -355,7 +369,13 @@ async function handleFileUpload(req, res) {
             });
         });
 
-        handleFileUpload(req, res, location, records)
+        // Add location_id to each record from the upload location
+        const recordsWithLocation = records.map(record => ({
+            ...record,
+            location_id: location
+        }));
+
+        handleFileUpload(req, res, location, recordsWithLocation)
     
     } catch (error) {
         console.error('File processing error:', error);
@@ -394,6 +414,16 @@ async function handleFileUpload(req, res, location, records) {
         // Validate data format
         let validationErrors = [];
         records.forEach((record, index) => {
+            // Validate sensor_id
+            if (!record.sensor_id || typeof record.sensor_id !== 'string') {
+                validationErrors.push(`Row ${index + 1}: Missing or invalid sensor_id`);
+            }
+            
+            // Validate location_id
+            if (!record.location_id || typeof record.location_id !== 'string') {
+                validationErrors.push(`Row ${index + 1}: Missing or invalid location_id`);
+            }
+            
             const temp = parseFloat(record.temperature);
             const humidity = parseFloat(record.relative_humidity);
             const pressure = parseFloat(record.air_pressure);
@@ -421,8 +451,19 @@ async function handleFileUpload(req, res, location, records) {
             });
         }
 
+        // Add UUIDs to records and ensure location_id is set
+        const { addUUIDToRecord } = require('../utils/uuidGenerator');
+        const processedRecords = records.map(record => {
+            // If record doesn't have location_id, add it from the location parameter
+            const recordWithLocation = record.location_id ? record : {
+                ...record,
+                location_id: location
+            };
+            return addUUIDToRecord(recordWithLocation);
+        });
+
         // Process data for warnings using location thresholds
-        const warnings = processData(records, location, locationData.thresholds);
+        const warnings = processData(processedRecords, location, locationData.thresholds);
 
         // Add this code to save warnings
         const warningsPath = path.join(__dirname, '..', 'data', 'warnings', 'warnings.json');
@@ -454,7 +495,7 @@ async function handleFileUpload(req, res, location, records) {
         }
 
         // Merge and sort data
-        const mergedData = [...existingData, ...records].sort((a, b) => 
+        const mergedData = [...existingData, ...processedRecords].sort((a, b) => 
             new Date(a.record_time) - new Date(b.record_time)
         );
 
@@ -466,7 +507,7 @@ async function handleFileUpload(req, res, location, records) {
 
         res.json({ 
             message: 'File uploaded and processed successfully',
-            recordCount: records.length,
+            recordCount: processedRecords.length,
             newWarnings: warnings.length
         });
 

@@ -10,6 +10,8 @@ It has three starting values:
 Both temperature and humidity will be a random factor added or subtracted the latests value, to simulate changes in the values.
 For simulating multiple sensors, run sensor simulation in multiple scripts.
 
+**Note:** The current implementation requires sensor_id and location_id in data readings. Ensure your test data includes these fields.
+
 ## Running the script
 
 Install Python virtual env if not already installed:
