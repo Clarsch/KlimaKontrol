@@ -1,20 +1,16 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import axios from 'axios';
 import TopBar from '../components/TopBar';
 import LoadingState from '../components/LoadingState';
 import ErrorMessage from '../components/ErrorMessage';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { format, subMonths, subDays, subYears, startOfDay, endOfDay, formatters } from 'date-fns';
-import { withRetry, withOptimisticUpdate } from '../utils/apiHelpers';
+import { withRetry } from '../utils/apiHelpers';
 import { showSuccess } from '../components/SuccessMessage';
 import PropTypes from 'prop-types';
-import GraphErrorBoundary from '../components/GraphErrorBoundary';
 import axiosInstance from '../api/axiosConfig';
 import { useTranslation } from 'react-i18next';
 import { formatTimestamp } from '../utils/formatters';
-import { groupReadingsBySensorAndLocation } from '../utils/dataProcessor';
+import GraphComponent from '../components/GraphComponent';
 
 const PageContainer = styled.div`
   min-height: 100vh;
@@ -166,10 +162,10 @@ const TimeButton = styled.button`
 `;
 
 const GraphCard = styled(Card)`
-  height: 330px;
+  height: 400px;
   margin-bottom: 1rem;
   padding: 1rem 0.5rem 2.5rem 0.5rem;
-  overflow: visible;
+  overflow: hidden;
 `;
 
 const GraphTitle = styled.h4`
@@ -208,118 +204,15 @@ const DeactivationInfo = styled.div`
   margin-top: 0.5rem;
 `;
 
-const CustomTooltip = styled.div`
-  background-color: white;
-  border: 1px solid #ccc;
-  padding: 10px;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
-  .date-time {
-    border-bottom: 1px solid #eee;
-    padding-bottom: 5px;
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: #666;
-  }
 
-  .measurement {
-    color: #333;
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-  }
-`;
 
-const CustomTooltipContent = ({ active, payload, label, locationName, unit }) => {
-  if (!active || !payload || !payload.length) return null;
 
-  return (
-    <CustomTooltip>
-      <div className="date-time">
-        {locationName} - {format(new Date(label), 'MMM d, yyyy HH:mm')}
-      </div>
-      {payload.map((entry, index) => {
-        const value = parseFloat(entry.value);
-        if (isNaN(value)) return null;
 
-        const valueUnit = entry.name === 'temperature' ? '°C' : 
-                         entry.name === 'relative_humidity' ? '%' : 
-                         entry.name === 'air_pressure' ? 'hPa' : '';
 
-        const displayName = entry.name.split('_')
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(' ');
 
-        return (
-          <div key={index} className="measurement">
-            <span>{displayName}:</span>
-            <span>{value.toFixed(1)} {valueUnit}</span>
-          </div>
-        );
-      })}
-    </CustomTooltip>
-  );
-};
 
-CustomTooltipContent.propTypes = {
-  active: PropTypes.bool,
-  payload: PropTypes.arrayOf(PropTypes.shape({
-    name: PropTypes.string,
-    value: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
-  })),
-  label: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  locationName: PropTypes.string,
-  unit: PropTypes.string
-};
 
-const getTimeRange = (range) => {
-  const now = new Date();
-  switch (range) {
-    case '1day':
-      return {
-        start: startOfDay(now).getTime(),
-        end: endOfDay(now).getTime(),
-        tickFormat: 'HH:mm',
-        ticks: 24 // Show hourly ticks
-      };
-    case '1month':
-      return {
-        start: subMonths(now, 1).getTime(),
-        end: now.getTime(),
-        tickFormat: 'MMM dd',
-        ticks: 30 // Show daily ticks
-      };
-    case '6months':
-      return {
-        start: subMonths(now, 6).getTime(),
-        end: now.getTime(),
-        tickFormat: 'MMM dd',
-        ticks: 12 // Show bi-weekly ticks
-      };
-    case '1year':
-      return {
-        start: subYears(now, 1).getTime(),
-        end: now.getTime(),
-        tickFormat: 'MMM yyyy',
-        ticks: 12 // Show monthly ticks
-      };
-    case '2year':
-      return {
-        start: subYears(now, 2).getTime(),
-        end: now.getTime(),
-        tickFormat: 'MMM yyyy',
-        ticks: 12 // Show monthly ticks
-      };
-    default:
-      return null;
-  }
-};
-
-const DetailContainer = styled.div`
-  opacity: ${props => props.fadeIn ? '1' : '0'};
-  transition: opacity 0.3s ease;
-`;
 
 const WarningsHeader = styled.div`
   display: flex;
@@ -428,7 +321,6 @@ const ModalWrapper = styled.div`
 const LocationDetail = () => {
   const { t } = useTranslation();
   const { locationId } = useParams();
-  const navigate = useNavigate();
   const [locationData, setLocationData] = useState(null);
   const [environmentalData, setEnvironmentalData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -500,131 +392,8 @@ const LocationDetail = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const formatDate = (timestamp) => {
-    const date = new Date(timestamp);
-    return `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
-  };
 
-  const renderGraph = (data, dataKey, unit, color, thresholds, groundTemp = null) => {
-    // Handle null, undefined, or empty data
-    if (!data || !Array.isArray(data) || data.length === 0) {
-      return (
-        <ResponsiveContainer width="100%" height="100%">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-            <p>No data available</p>
-          </div>
-        </ResponsiveContainer>
-      );
-    }
 
-    const timeRangeConfig = getTimeRange(timeRange);
-    
-    const formattedData = data.map(point => ({
-      ...point,
-      record_time: new Date(point.record_time).getTime()
-    }));
-
-    const dataMin = Math.min(...formattedData.map(d => parseFloat(d[dataKey])));
-    const dataMax = Math.max(...formattedData.map(d => parseFloat(d[dataKey])));
-    
-    const yMin = Math.min(thresholds.min, dataMin);
-    const yMax = Math.max(thresholds.max, dataMax);
-    
-    const domainPadding = (yMax - yMin) * 0.05;
-
-    // Calculate Y-axis ticks
-    const yAxisTicks = [];
-    const tickCount = 5;
-    const tickInterval = (yMax - yMin) / (tickCount - 1);
-    for (let i = 0; i < tickCount; i++) {
-      yAxisTicks.push(Math.round((yMin + (i * tickInterval)) * 10) / 10);
-    }
-
-    return (
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart 
-          data={formattedData} 
-          margin={{ top: 5, right: 60, bottom: 25, left: 0 }}
-        >
-          <CartesianGrid 
-            strokeDasharray="3 3"
-            horizontal={true}
-            vertical={true}
-          />
-          <XAxis 
-            dataKey="record_time"
-            type="number"
-            domain={[timeRangeConfig.start, timeRangeConfig.end]}
-            tickFormatter={(timestamp) => format(timestamp, timeRangeConfig.tickFormat)}
-            scale="time"
-            interval="preserveStartEnd"
-          />
-          <YAxis 
-            domain={[
-              Math.floor(yMin - domainPadding), 
-              Math.ceil(yMax + domainPadding)
-            ]}
-            ticks={yAxisTicks}
-            allowDecimals={true}
-            interval="preserveStartEnd"
-          />
-          <Tooltip 
-            content={(props) => (
-              <CustomTooltipContent 
-                {...props} 
-                locationName={locationData?.name}
-                unit={unit}
-              />
-            )}
-          />
-          
-          {/* Threshold lines */}
-          <ReferenceLine 
-            y={thresholds.max} 
-            stroke="#FFA500" 
-            strokeDasharray="3 3"
-            label={{ 
-              value: `${thresholds.max}${unit}`,
-              position: 'right',
-              fill: '#FFA500'
-            }}
-          />
-          <ReferenceLine 
-            y={thresholds.min} 
-            stroke="#FFA500" 
-            strokeDasharray="3 3"
-            label={{ 
-              value: `${thresholds.min}${unit}`,
-              position: 'right',
-              fill: '#FFA500'
-            }}
-          />
-
-          {/* Ground temperature reference line (only for temperature graph) */}
-          {groundTemp !== null && (
-            <ReferenceLine 
-              y={groundTemp} 
-              stroke="#005670" 
-              strokeDasharray="3 3"
-              label={{ 
-                value: `${groundTemp}°C`,
-                position: 'right',
-                fill: '#005670'
-              }}
-            />
-          )}
-
-          <Line 
-            type="monotone" 
-            dataKey={dataKey} 
-            stroke={color} 
-            dot={false}
-            strokeWidth={2}
-          />
-        </LineChart>
-      </ResponsiveContainer>
-    );
-  };
 
   const handleThresholdChange = (sensor, bound, value) => {
     const newValue = parseFloat(value);
@@ -711,65 +480,7 @@ const LocationDetail = () => {
     }
   };
 
-  const renderCombinedGraph = (data, thresholds, groundTemp) => {
-    // Handle null, undefined, or empty data
-    if (!data || !Array.isArray(data) || data.length === 0) {
-      return (
-        <ResponsiveContainer width="100%" height="100%">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-            <p>No data available</p>
-          </div>
-        </ResponsiveContainer>
-      );
-    }
 
-    const timeRangeConfig = getTimeRange(timeRange);
-    const grouped = groupReadingsBySensorAndLocation(data);
-    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA500', '#005670'];
-    let colorIdx = 0;
-
-    return (
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart margin={{ top: 5, right: 60, bottom: 25, left: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" horizontal vertical />
-          <XAxis
-            dataKey="record_time"
-            type="number"
-            domain={[timeRangeConfig.start, timeRangeConfig.end]}
-            tickFormatter={(timestamp) => format(timestamp, timeRangeConfig.tickFormat)}
-            scale="time"
-            interval="preserveStartEnd"
-          />
-          <YAxis yAxisId="temp" orientation="left" />
-          <YAxis yAxisId="humidity" orientation="right" />
-          <YAxis yAxisId="pressure" orientation="right" domain={[970, 1050]} hide />
-          <Tooltip
-            content={(props) => (
-              <CustomTooltipContent {...props} locationName={locationData?.name} />
-            )}
-          />
-          {/* Render a Line for each sensor_id|location_id group */}
-          {Object.entries(grouped).map(([key, records]) => {
-            const [sensorId, locId] = key.split('|');
-            const color = colors[colorIdx++ % colors.length];
-            return (
-              <Line
-                key={key}
-                yAxisId="temp"
-                type="monotone"
-                dataKey="temperature"
-                data={records.map(point => ({ ...point, record_time: new Date(point.record_time).getTime() }))}
-                stroke={color}
-                dot={false}
-                strokeWidth={2}
-                name={`Sensor ${sensorId}`}
-              />
-            );
-          })}
-        </LineChart>
-      </ResponsiveContainer>
-    );
-  };
 
   const handleDeactivateWarning = async (warningId) => {
     try {
@@ -879,46 +590,71 @@ const LocationDetail = () => {
 
             <GraphCard>
               <GraphTitle>{locationData?.name} - {t('combined_data')}</GraphTitle>
-              <GraphErrorBoundary>
-                {environmentalData && renderCombinedGraph(
-                  environmentalData,
-                  thresholds,
-                  settings.groundTemperature
-                )}
-              </GraphErrorBoundary>
+              {environmentalData && (
+                <GraphComponent
+                  data={environmentalData}
+                  dataKey="temperature"
+                  unit="°C"
+                  thresholds={thresholds.temperature}
+                  groundTemp={settings.groundTemperature}
+                  timeRange={timeRange}
+                  locationName={locationData?.name}
+                  graphType="combined"
+                  height="100%"
+                  showSensorLabels={true}
+                />
+              )}
             </GraphCard>
 
             <GraphCard>
               <GraphTitle>{locationData?.name} - {t('temperature')} (°C)</GraphTitle>
-              {environmentalData && renderGraph(
-                environmentalData,
-                'temperature',
-                '°C',
-                '#FF6B6B',
-                thresholds.temperature,
-                settings.groundTemperature
+              {environmentalData && (
+                <GraphComponent
+                  data={environmentalData}
+                  dataKey="temperature"
+                  unit="°C"
+                  thresholds={thresholds.temperature}
+                  groundTemp={settings.groundTemperature}
+                  timeRange={timeRange}
+                  locationName={locationData?.name}
+                  graphType="single"
+                  height="100%"
+                  showSensorLabels={true}
+                />
               )}
             </GraphCard>
 
             <GraphCard>
               <GraphTitle>{locationData?.name} - {t('relative_humidity')} (%)</GraphTitle>
-              {environmentalData && renderGraph(
-                environmentalData,
-                'relative_humidity',
-                '%',
-                '#4ECDC4',
-                thresholds.humidity
+              {environmentalData && (
+                <GraphComponent
+                  data={environmentalData}
+                  dataKey="relative_humidity"
+                  unit="%"
+                  thresholds={thresholds.humidity}
+                  timeRange={timeRange}
+                  locationName={locationData?.name}
+                  graphType="single"
+                  height="100%"
+                  showSensorLabels={true}
+                />
               )}
             </GraphCard>
 
             <GraphCard>
               <GraphTitle>{locationData?.name} - {t('air_pressure')} (hPa)</GraphTitle>
-              {environmentalData && renderGraph(
-                environmentalData,
-                'air_pressure',
-                'hPa',
-                '#45B7D1',
-                thresholds.pressure
+              {environmentalData && (
+                <GraphComponent
+                  data={environmentalData}
+                  dataKey="air_pressure"
+                  unit="hPa"
+                  thresholds={thresholds.pressure}
+                  timeRange={timeRange}
+                  locationName={locationData?.name}
+                  graphType="single"
+                  height="100%"
+                  showSensorLabels={true}
+                />
               )}
             </GraphCard>
           </Card>

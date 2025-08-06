@@ -1,0 +1,353 @@
+[
+  {
+    "record_time": "2025-08-02T19:29:55.591Z",
+    "temperature": 19.05,
+    "relative_humidity": 52.08,
+    "air_pressure": 1012.35,
+    "sensor_id": "bov_sensor_001",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-02T19:29:55.591Z",
+    "temperature": 23.3,
+    "relative_humidity": 40.14,
+    "air_pressure": 1014.37,
+    "sensor_id": "bov_sensor_002",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-02T19:29:55.591Z",
+    "temperature": 18.81,
+    "relative_humidity": 56.03,
+    "air_pressure": 1002.8,
+    "sensor_id": "bov_sensor_003",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-02T19:59:55.591Z",
+    "temperature": 19.08,
+    "relative_humidity": 53.47,
+    "air_pressure": 1012.13,
+    "sensor_id": "bov_sensor_001",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-02T19:59:55.591Z",
+    "temperature": 23.21,
+    "relative_humidity": 37.88,
+    "air_pressure": 1014.59,
+    "sensor_id": "bov_sensor_002",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-02T19:59:55.591Z",
+    "temperature": 18.91,
+    "relative_humidity": 56.09,
+    "air_pressure": 1002.82,
+    "sensor_id": "bov_sensor_003",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-02T20:29:55.591Z",
+    "temperature": 18.8,
+    "relative_humidity": 53.24,
+    "air_pressure": 1013.82,
+    "sensor_id": "bov_sensor_001",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-02T20:29:55.591Z",
+    "temperature": 23.06,
+    "relative_humidity": 38.93,
+    "air_pressure": 1013,
+    "sensor_id": "bov_sensor_002",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-02T20:29:55.591Z",
+    "temperature": 18.54,
+    "relative_humidity": 55.41,
+    "air_pressure": 1002.59,
+    "sensor_id": "bov_sensor_003",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-02T20:59:55.591Z",
+    "temperature": 19.2,
+    "relative_humidity": 52.3,
+    "air_pressure": 1012.84,
+    "sensor_id": "bov_sensor_001",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-02T20:59:55.591Z",
+    "temperature": 23.33,
+    "relative_humidity": 40.02,
+    "air_pressure": 1013.18,
+    "sensor_id": "bov_sensor_002",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-02T20:59:55.591Z",
+    "temperature": 17.97,
+    "relative_humidity": 55.91,
+    "air_pressure": 1001.28,
+    "sensor_id": "bov_sensor_003",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-02T21:29:55.591Z",
+    "temperature": 19.49,
+    "relative_humidity": 51.51,
+    "air_pressure": 1013.21,
+    "sensor_id": "bov_sensor_001",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-02T21:29:55.591Z",
+    "temperature": 23.37,
+    "relative_humidity": 42.33,
+    "air_pressure": 1013.97,
+    "sensor_id": "bov_sensor_002",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-02T21:29:55.591Z",
+    "temperature": 18.25,
+    "relative_humidity": 56.08,
+    "air_pressure": 1002.39,
+    "sensor_id": "bov_sensor_003",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-02T21:59:55.591Z",
+    "temperature": 19.48,
+    "relative_humidity": 53.62,
+    "air_pressure": 1014.87,
+    "sensor_id": "bov_sensor_001",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-02T21:59:55.591Z",
+    "temperature": 22.51,
+    "relative_humidity": 40.51,
+    "air_pressure": 1012.99,
+    "sensor_id": "bov_sensor_002",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-02T21:59:55.591Z",
+    "temperature": 18.36,
+    "relative_humidity": 55.93,
+    "air_pressure": 1001.73,
+    "sensor_id": "bov_sensor_003",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-02T22:29:55.591Z",
+    "temperature": 19.6,
+    "relative_humidity": 50.4,
+    "air_pressure": 1014.77,
+    "sensor_id": "bov_sensor_001",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-02T22:29:55.591Z",
+    "temperature": 22.84,
+    "relative_humidity": 42.5,
+    "air_pressure": 1012.9,
+    "sensor_id": "bov_sensor_002",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-02T22:29:55.591Z",
+    "temperature": 18.22,
+    "relative_humidity": 53.82,
+    "air_pressure": 1001.46,
+    "sensor_id": "bov_sensor_003",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-02T22:59:55.591Z",
+    "temperature": 19.08,
+    "relative_humidity": 50.46,
+    "air_pressure": 1012.11,
+    "sensor_id": "bov_sensor_001",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-02T22:59:55.591Z",
+    "temperature": 22.54,
+    "relative_humidity": 41.48,
+    "air_pressure": 1013.04,
+    "sensor_id": "bov_sensor_002",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-02T22:59:55.591Z",
+    "temperature": 18.56,
+    "relative_humidity": 53.56,
+    "air_pressure": 1003.17,
+    "sensor_id": "bov_sensor_003",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-02T23:29:55.591Z",
+    "temperature": 19.3,
+    "relative_humidity": 51.08,
+    "air_pressure": 1014.48,
+    "sensor_id": "bov_sensor_001",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-02T23:29:55.591Z",
+    "temperature": 22.29,
+    "relative_humidity": 40.36,
+    "air_pressure": 1014.32,
+    "sensor_id": "bov_sensor_002",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-02T23:29:55.591Z",
+    "temperature": 18.28,
+    "relative_humidity": 53.65,
+    "air_pressure": 1000.99,
+    "sensor_id": "bov_sensor_003",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-02T23:59:55.591Z",
+    "temperature": 18.93,
+    "relative_humidity": 52.61,
+    "air_pressure": 1014.55,
+    "sensor_id": "bov_sensor_001",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-02T23:59:55.591Z",
+    "temperature": 22.76,
+    "relative_humidity": 40.42,
+    "air_pressure": 1013.21,
+    "sensor_id": "bov_sensor_002",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-02T23:59:55.591Z",
+    "temperature": 18.12,
+    "relative_humidity": 53.77,
+    "air_pressure": 1001.91,
+    "sensor_id": "bov_sensor_003",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-03T00:29:55.591Z",
+    "temperature": 18.94,
+    "relative_humidity": 54.12,
+    "air_pressure": 1012.61,
+    "sensor_id": "bov_sensor_001",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-03T00:29:55.591Z",
+    "temperature": 22.22,
+    "relative_humidity": 41.62,
+    "air_pressure": 1013,
+    "sensor_id": "bov_sensor_002",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-03T00:29:55.591Z",
+    "temperature": 18.38,
+    "relative_humidity": 56.91,
+    "air_pressure": 1003.9,
+    "sensor_id": "bov_sensor_003",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-03T00:59:55.591Z",
+    "temperature": 19.47,
+    "relative_humidity": 51.45,
+    "air_pressure": 1014.47,
+    "sensor_id": "bov_sensor_001",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-03T00:59:55.591Z",
+    "temperature": 22.09,
+    "relative_humidity": 43.02,
+    "air_pressure": 1013.6,
+    "sensor_id": "bov_sensor_002",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-03T00:59:55.591Z",
+    "temperature": 17.87,
+    "relative_humidity": 56.49,
+    "air_pressure": 1001.75,
+    "sensor_id": "bov_sensor_003",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-03T01:29:55.591Z",
+    "temperature": 19.57,
+    "relative_humidity": 53.05,
+    "air_pressure": 1013.35,
+    "sensor_id": "bov_sensor_001",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-03T01:29:55.591Z",
+    "temperature": 22.38,
+    "relative_humidity": 42.89,
+    "air_pressure": 1012.77,
+    "sensor_id": "bov_sensor_002",
+    "location_id": "bov",
+    "pause": 0
+  },
+  {
+    "record_time": "2025-08-03T01:29:55.591Z",
+    "temperature": 18.51,
+    "relative_humidity": 56.2,
+    "air_pressure": 1001.23,
+    "sensor_id": "bov_sensor_003",
+    "location_id": "bov",
+    "pause": 0
+  }
+]

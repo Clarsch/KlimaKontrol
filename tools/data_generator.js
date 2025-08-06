@@ -1,24 +1,24 @@
 const fs = require('fs');
-const { generateUUID } = require('./server/utils/uuidGenerator');
+const { generateUUID } = require('../server/utils/uuidGenerator');
 
 // Generate realistic environmental data for 3 sensors over the last 3 hours
 function generateTestData() {
     const now = new Date();
-    const threeHoursAgo = new Date(now.getTime() - (3 * 60 * 60 * 1000));
+    const threeHoursAgo = new Date(now.getTime() - (24 * 60 * 60 * 1000));
     
     // Sensor configurations with different baseline values and characteristics
     const sensors = [
         {
-            id: 'sensor_001',
-            baseTemp: 19.5,
-            baseHumidity: 52.5,
+            id: 'sensor_007',
+            baseTemp: 25.5,
+            baseHumidity: 42.5,
             basePressure: 985.4,
             tempVariation: 0.8,
             humidityVariation: 3.0,
             pressureVariation: 2.0
         },
         {
-            id: 'sensor_002', 
+            id: 'sensor_008', 
             baseTemp: 20.2,
             baseHumidity: 48.8,
             basePressure: 986.1,
@@ -27,8 +27,8 @@ function generateTestData() {
             pressureVariation: 1.8
         },
         {
-            id: 'sensor_003',
-            baseTemp: 18.8,
+            id: 'sensor_009',
+            baseTemp: 16.8,
             baseHumidity: 55.2,
             basePressure: 984.7,
             tempVariation: 0.6,
@@ -40,7 +40,7 @@ function generateTestData() {
     const newData = [];
     
     // Generate data every 5 minutes for the last 3 hours
-    for (let time = threeHoursAgo; time <= now; time = new Date(time.getTime() + (5 * 60 * 1000))) {
+    for (let time = threeHoursAgo; time <= now; time = new Date(time.getTime() + (15 * 60 * 1000))) {
         sensors.forEach(sensor => {
             // Add realistic variations based on time of day
             const hour = time.getHours();
@@ -61,7 +61,7 @@ function generateTestData() {
             newData.push({
                 id: generateUUID(),
                 sensor_id: sensor.id,
-                location_id: 'bov',
+                location_id: 'ensted',
                 record_time: time.toISOString(),
                 temperature: Math.round(temperature * 100) / 100,
                 relative_humidity: Math.round(humidity * 100) / 100,
@@ -76,7 +76,7 @@ function generateTestData() {
 // Read existing data and merge with new data
 function updateBovData() {
     try {
-        const filePath = './server/data/environmental/bov.json';
+        const filePath = './server/data/environmental/ensted.json';
         
         // Read existing data
         let existingData = [];
