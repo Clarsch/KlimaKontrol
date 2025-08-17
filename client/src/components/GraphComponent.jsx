@@ -156,21 +156,24 @@ const GraphComponent = ({
               vertical={false}
               stroke="#f0f0f0"
             />
-            <XAxis 
+            <XAxis
               dataKey="record_time"
               type="number"
               domain={[graphConfig.xAxis.start, graphConfig.xAxis.end]}
               tickFormatter={(timestamp) => formatTimestamp(timestamp, graphConfig.xAxis.tickFormat)}
-              scale="time"
               ticks={graphConfig.xAxis.ticks}
-              interval="preserveStartEnd"
               minTickGap={30}
+              axisLine={{ stroke: '#666', strokeWidth: 1 }}
+              tickLine={{ stroke: '#666', strokeWidth: 1 }}
+              tick={{ fontSize: 12, fill: '#666' }}
             />
             <YAxis 
               domain={[graphConfig.yAxis.min, graphConfig.yAxis.max]}
               ticks={graphConfig.yAxis.ticks}
               allowDecimals={true}
-              label={{ value: unit, angle: -90, position: 'insideLeft' }}
+              axisLine={{ stroke: '#666', strokeWidth: 1 }}
+              tickLine={{ stroke: '#666', strokeWidth: 1 }}
+              tick={{ fontSize: 12, fill: '#666' }}
             />
             <Tooltip 
               content={(props) => (
@@ -284,13 +287,26 @@ const GraphComponent = ({
               type="number"
               domain={[graphConfig.xAxis.start, graphConfig.xAxis.end]}
               tickFormatter={(timestamp) => formatTimestamp(timestamp, graphConfig.xAxis.tickFormat)}
-              scale="time"
               ticks={graphConfig.xAxis.ticks}
-              interval="preserveStartEnd"
               minTickGap={30}
+              axisLine={{ stroke: '#666', strokeWidth: 1 }}
+              tickLine={{ stroke: '#666', strokeWidth: 1 }}
+              tick={{ fontSize: 12, fill: '#666' }}
             />
-            <YAxis yAxisId="temp" orientation="left" label={{ value: "°C", angle: -90, position: 'insideLeft' }} />
-            <YAxis yAxisId="humidity" orientation="right" label={{ value: "%", angle: 90, position: 'insideRight' }} />
+            <YAxis 
+              yAxisId="temp" 
+              orientation="left" 
+              axisLine={{ stroke: '#666', strokeWidth: 1 }}
+              tickLine={{ stroke: '#666', strokeWidth: 1 }}
+              tick={{ fontSize: 12, fill: '#666' }}
+            />
+            <YAxis 
+              yAxisId="humidity" 
+              orientation="right" 
+              axisLine={{ stroke: '#666', strokeWidth: 1 }}
+              tickLine={{ stroke: '#666', strokeWidth: 1 }}
+              tick={{ fontSize: 12, fill: '#666' }}
+            />
             <YAxis yAxisId="pressure" orientation="right" domain={[970, 1050]} hide />
             <Tooltip
               content={(props) => (

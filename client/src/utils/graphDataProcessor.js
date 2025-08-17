@@ -68,8 +68,8 @@ export const processGraphData = (rawData, timeRange, options = {}) => {
     return basePoint;
   });
 
-  // Calculate graph configuration based on actual data
-  const graphConfig = calculateGraphConfig(processedData, dataKey);
+  // Calculate graph configuration based on the FLAT DATA timestamps
+  const graphConfig = calculateGraphConfig(flatData, dataKey);
 
   // Generate data info
   const dataInfo = {
@@ -152,8 +152,8 @@ export const processCombinedGraphData = (rawData, timeRange, options = {}) => {
     return basePoint;
   });
 
-  // Calculate graph configuration based on temperature data
-  const graphConfig = calculateGraphConfig(processedData, 'temperature');
+  // Calculate graph configuration based on the FLAT DATA timestamps
+  const graphConfig = calculateGraphConfig(flatData, 'temperature');
 
   // Generate data info
   const dataInfo = {
@@ -207,8 +207,8 @@ const sampleDataForGraph = (data, maxPoints = 200) => {
  */
 const calculateGraphConfig = (data, dataKey) => {
   // Calculate time range from actual data
-  const firstTimestamp = new Date(data[0].record_time).getTime();
-  const lastTimestamp = new Date(data[data.length - 1]).getTime();
+  const firstTimestamp = data[0].record_time;  // Already in milliseconds
+  const lastTimestamp = data[data.length - 1].record_time;  // Already in milliseconds
   const timeSpan = lastTimestamp - firstTimestamp;
   const daysSpan = timeSpan / (1000 * 60 * 60 * 24);
 
@@ -218,14 +218,73 @@ const calculateGraphConfig = (data, dataKey) => {
   // Generate x-axis ticks
   const xTicks = generateXTicks(firstTimestamp, lastTimestamp, tickCount);
 
+  // Debug logging for tick generation
+  console.log('Tick generation debug:', {
+    firstTimestamp: new Date(firstTimestamp),
+    lastTimestamp: new Date(lastTimestamp),
+    tickCount,
+    tickFormat,
+    xTicks: xTicks.map(t => new Date(t)),
+    daysSpan,
+    timeSpan: (lastTimestamp - firstTimestamp) / (1000 * 60 * 60 * 24)
+  });
+
   // Calculate y-axis range from actual data values
-  const allValues = data.map(d => parseFloat(d[dataKey])).filter(v => !isNaN(v));
+  // Extract all sensor values from the flat data structure
+  const allValues = [];
+  data.forEach(d => {
+    // Look for sensor-specific properties (e.g., sensor_001, sensor_002)
+    Object.keys(d).forEach(key => {
+      if (key.startsWith('sensor_') && typeof d[key] === 'number' && !isNaN(d[key])) {
+        allValues.push(d[key]);
+      }
+    });
+  });
+  
+  if (allValues.length === 0) {
+    // Fallback: try to use the dataKey if it exists
+    const fallbackValues = data.map(d => parseFloat(d[dataKey])).filter(v => !isNaN(v));
+    if (fallbackValues.length > 0) {
+      allValues.push(...fallbackValues);
+    }
+  }
+  
+  if (allValues.length === 0) {
+    // No valid values found, return default config
+    return {
+      xAxis: {
+        start: firstTimestamp,
+        end: lastTimestamp,
+        ticks: xTicks,
+        tickFormat,
+        timeSpan: daysSpan
+      },
+      yAxis: {
+        min: 0,
+        max: 100,
+        ticks: [0, 25, 50, 75, 100]
+      },
+      colors
+    };
+  }
+  
   const yMin = Math.min(...allValues);
   const yMax = Math.max(...allValues);
   const yPadding = (yMax - yMin) * 0.05;
   
   // Generate y-axis ticks
   const yTicks = generateYTicks(yMin - yPadding, yMax + yPadding, 5);
+
+  // Debug logging for Y-axis calculation
+  console.log('Y-axis calculation debug:', {
+    dataKey,
+    allValues: allValues.slice(0, 10), // Show first 10 values
+    yMin,
+    yMax,
+    yPadding,
+    yTicks,
+    dataSample: data.slice(0, 3).map(d => Object.keys(d).filter(k => k.startsWith('sensor_')))
+  });
 
   // Define colors for different sensors
   const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA500', '#005670'];
@@ -251,24 +310,35 @@ const calculateGraphConfig = (data, dataKey) => {
  * Determines optimal tick format based on data time span
  */
 const determineTickFormat = (daysSpan) => {
-  if (daysSpan <= 0.1) {
-    // Less than 2.4 hours - show minutes
-    return { tickFormat: 'HH:mm', tickCount: 4 };
-  } else if (daysSpan <= 1) {
-    // Up to 1 day - show hours
-    return { tickFormat: 'HH:mm', tickCount: 6 };
-  } else if (daysSpan <= 7) {
-    // Up to 1 week - show days
-    return { tickFormat: 'dd/MM', tickCount: 7 };
-  } else if (daysSpan <= 31) {
-    // Up to 1 month - show days
-    return { tickFormat: 'dd/MM', tickCount: 8 };
-  } else if (daysSpan <= 180) {
-    // Up to 6 months - show months
-    return { tickFormat: 'MM/yyyy', tickCount: 6 };
+  if (daysSpan < 1) {
+    // Less than 24 hours - show hours and minutes
+    if (daysSpan <= 0.1) {
+      return { tickFormat: 'HH:mm', tickCount: 3 };    // 2.4 hours or less
+    } else if (daysSpan <= 0.5) {
+      return { tickFormat: 'HH:mm', tickCount: 4 };    // 12 hours or less
+    } else {
+      return { tickFormat: 'HH:mm', tickCount: 6 };    // 24 hours - show every 4 hours
+    }
+  } else if (daysSpan < 30) {
+    // 1 day up to but less than 1 month - show days
+    if (daysSpan <= 3) {
+      return { tickFormat: 'dd/MM', tickCount: 4 };    // 3 days or less
+    } else if (daysSpan <= 7) {
+      return { tickFormat: 'dd/MM', tickCount: 6 };    // 1 week or less
+    } else if (daysSpan <= 14) {
+      return { tickFormat: 'dd/MM', tickCount: 7 };    // 2 weeks or less
+    } else {
+      return { tickFormat: 'dd/MM', tickCount: 8 };    // 1 month or less
+    }
   } else {
-    // More than 6 months - show months
-    return { tickFormat: 'MM/yyyy', tickCount: 8 };
+    // 1 month or longer - show months and years
+    if (daysSpan <= 180) {
+      return { tickFormat: 'MM/yyyy', tickCount: 6 };  // 6 months or less
+    } else if (daysSpan <= 365) {
+      return { tickFormat: 'MM/yyyy', tickCount: 8 };  // 1 year or less
+    } else {
+      return { tickFormat: 'MM/yyyy', tickCount: 10 }; // More than 1 year
+    }
   }
 };
 
@@ -290,6 +360,24 @@ const generateXTicks = (start, end, count) => {
     return ticks;
   }
   
+  // Ensure we have at least 2 ticks for proper spacing
+  if (count < 2) count = 2;
+  
+  // For very short time spans, ensure we don't have too many ticks
+  const timeSpan = end - start;
+  const daysSpan = timeSpan / (1000 * 60 * 60 * 24);
+  
+  // For 24-hour data, ensure we get meaningful hourly ticks
+  if (daysSpan <= 1) {
+    // Force 6 ticks for 24-hour data to show every 4 hours
+    count = 6;
+  } else if (daysSpan < 7 && count > 8) {
+    count = 8; // Max 8 ticks for less than 1 week
+  } else if (daysSpan < 30 && count > 10) {
+    count = 10; // Max 10 ticks for less than 1 month
+  }
+  
+  // Generate evenly distributed ticks
   const interval = (end - start) / (count - 1);
   
   for (let i = 0; i < count; i++) {
