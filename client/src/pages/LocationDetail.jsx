@@ -11,6 +11,7 @@ import axiosInstance from '../api/axiosConfig';
 import { useTranslation } from 'react-i18next';
 import { formatTimestamp } from '../utils/formatters';
 import GraphComponent from '../components/GraphComponent';
+import { processGraphData, processCombinedGraphData } from '../utils/graphDataProcessor';
 
 const PageContainer = styled.div`
   min-height: 100vh;
@@ -162,10 +163,11 @@ const TimeButton = styled.button`
 `;
 
 const GraphCard = styled(Card)`
-  height: 400px;
-  margin-bottom: 1rem;
-  padding: 1rem 0.5rem 2.5rem 0.5rem;
-  overflow: hidden;
+  min-height: 500px;
+  height: auto;
+  margin-bottom: 2rem;
+  padding: 1rem 0.5rem 3rem 0.5rem;
+  overflow: visible;
 `;
 
 const GraphTitle = styled.h4`
@@ -545,6 +547,37 @@ const LocationDetail = () => {
     });
   }, [warnings]);
 
+  // Process graph data when environmental data changes
+  const processedGraphData = useMemo(() => {
+    if (!environmentalData) return null;
+    
+    return {
+      temperature: processGraphData(environmentalData, timeRange, {
+        maxDataPoints: 150,
+        enableSmoothing: true,
+        smoothingWindow: 3,
+        dataKey: 'temperature'
+      }),
+      humidity: processGraphData(environmentalData, timeRange, {
+        maxDataPoints: 150,
+        enableSmoothing: true,
+        smoothingWindow: 3,
+        dataKey: 'relative_humidity'
+      }),
+      pressure: processGraphData(environmentalData, timeRange, {
+        maxDataPoints: 150,
+        enableSmoothing: true,
+        smoothingWindow: 3,
+        dataKey: 'air_pressure'
+      }),
+      combined: processCombinedGraphData(environmentalData, timeRange, {
+        maxDataPoints: 150,
+        enableSmoothing: true,
+        smoothingWindow: 3
+      })
+    };
+  }, [environmentalData, timeRange]);
+
   if (loading || !thresholds || !settings) return <LoadingState message={t('loading_location_data')+"..."} />;
   if (error) return <ErrorMessage>{error}</ErrorMessage>;
 
@@ -590,17 +623,19 @@ const LocationDetail = () => {
 
             <GraphCard>
               <GraphTitle>{locationData?.name} - {t('combined_data')}</GraphTitle>
-              {environmentalData && (
+              {processedGraphData?.combined && (
                 <GraphComponent
-                  data={environmentalData}
+                  processedData={processedGraphData.combined.processedData}
+                  graphConfig={processedGraphData.combined.graphConfig}
+                  groupedData={processedGraphData.combined.groupedData}
+                  dataInfo={processedGraphData.combined.dataInfo}
                   dataKey="temperature"
                   unit="°C"
                   thresholds={thresholds.temperature}
                   groundTemp={settings.groundTemperature}
-                  timeRange={timeRange}
                   locationName={locationData?.name}
                   graphType="combined"
-                  height="100%"
+                  height="450px"
                   showSensorLabels={true}
                 />
               )}
@@ -608,17 +643,19 @@ const LocationDetail = () => {
 
             <GraphCard>
               <GraphTitle>{locationData?.name} - {t('temperature')} (°C)</GraphTitle>
-              {environmentalData && (
+              {processedGraphData?.temperature && (
                 <GraphComponent
-                  data={environmentalData}
+                  processedData={processedGraphData.temperature.processedData}
+                  graphConfig={processedGraphData.temperature.graphConfig}
+                  groupedData={processedGraphData.temperature.groupedData}
+                  dataInfo={processedGraphData.temperature.dataInfo}
                   dataKey="temperature"
                   unit="°C"
                   thresholds={thresholds.temperature}
                   groundTemp={settings.groundTemperature}
-                  timeRange={timeRange}
                   locationName={locationData?.name}
                   graphType="single"
-                  height="100%"
+                  height="450px"
                   showSensorLabels={true}
                 />
               )}
@@ -626,16 +663,18 @@ const LocationDetail = () => {
 
             <GraphCard>
               <GraphTitle>{locationData?.name} - {t('relative_humidity')} (%)</GraphTitle>
-              {environmentalData && (
+              {processedGraphData?.humidity && (
                 <GraphComponent
-                  data={environmentalData}
+                  processedData={processedGraphData.humidity.processedData}
+                  graphConfig={processedGraphData.humidity.graphConfig}
+                  groupedData={processedGraphData.humidity.groupedData}
+                  dataInfo={processedGraphData.humidity.dataInfo}
                   dataKey="relative_humidity"
                   unit="%"
                   thresholds={thresholds.humidity}
-                  timeRange={timeRange}
                   locationName={locationData?.name}
                   graphType="single"
-                  height="100%"
+                  height="450px"
                   showSensorLabels={true}
                 />
               )}
@@ -643,16 +682,18 @@ const LocationDetail = () => {
 
             <GraphCard>
               <GraphTitle>{locationData?.name} - {t('air_pressure')} (hPa)</GraphTitle>
-              {environmentalData && (
+              {processedGraphData?.pressure && (
                 <GraphComponent
-                  data={environmentalData}
+                  processedData={processedGraphData.pressure.processedData}
+                  graphConfig={processedGraphData.pressure.graphConfig}
+                  groupedData={processedGraphData.pressure.groupedData}
+                  dataInfo={processedGraphData.pressure.dataInfo}
                   dataKey="air_pressure"
                   unit="hPa"
                   thresholds={thresholds.pressure}
-                  timeRange={timeRange}
                   locationName={locationData?.name}
                   graphType="single"
-                  height="100%"
+                  height="450px"
                   showSensorLabels={true}
                 />
               )}

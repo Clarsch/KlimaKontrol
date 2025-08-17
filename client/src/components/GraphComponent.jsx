@@ -2,13 +2,23 @@ import React from 'react';
 import styled from 'styled-components';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { format } from 'date-fns';
-import { groupReadingsBySensorAndLocation } from '../utils/dataProcessor';
+import { formatTimestamp } from '../utils/graphDataProcessor';
 import GraphErrorBoundary from './GraphErrorBoundary';
 
 const GraphContainer = styled.div`
   position: relative;
   width: 100%;
-  height: 100%;
+  height: ${props => props.height || '450px'};
+  min-height: 450px;
+  display: flex;
+  flex-direction: column;
+`;
+
+const GraphChartContainer = styled.div`
+  flex: 1;
+  min-height: 350px;
+  height: 350px;
+  position: relative;
 `;
 
 const SensorLabel = styled.div`
@@ -19,6 +29,16 @@ const SensorLabel = styled.div`
   font-size: 12px;
   color: #666;
   font-weight: 500;
+`;
+
+const DataInfo = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 4px;
+  font-size: 10px;
+  color: #999;
+  font-style: italic;
 `;
 
 const SensorLabelItem = styled.div`
@@ -89,64 +109,22 @@ const CustomTooltipContent = ({ active, payload, label, locationName, unit }) =>
   );
 };
 
-const getTimeRange = (range) => {
-  const now = new Date();
-  const end = now.getTime();
-  
-  switch (range) {
-    case '1day':
-      return {
-        start: now.setDate(now.getDate() - 1),
-        end,
-        tickFormat: 'HH:mm'
-      };
-    case '1week':
-      return {
-        start: now.setDate(now.getDate() - 7),
-        end,
-        tickFormat: 'MMM d'
-      };
-    case '1month':
-      return {
-        start: now.setMonth(now.getMonth() - 1),
-        end,
-        tickFormat: 'MMM d'
-      };
-    case '1year':
-      return {
-        start: now.setFullYear(now.getFullYear() - 1),
-        end,
-        tickFormat: 'MMM yyyy'
-      };
-    case '2year':
-      return {
-        start: now.setFullYear(now.getFullYear() - 2),
-        end,
-        tickFormat: 'MMM yyyy'
-      };
-    default:
-      return {
-        start: now.setDate(now.getDate() - 7),
-        end,
-        tickFormat: 'MMM d'
-      };
-  }
-};
-
 const GraphComponent = ({ 
-  data, 
+  processedData,
+  graphConfig,
+  groupedData,
+  dataInfo,
   dataKey, 
   unit, 
   thresholds, 
   groundTemp = null, 
-  timeRange = '1week',
   locationName,
-  graphType = 'single', // 'single' or 'combined'
-  height = '330px',
+  graphType = 'single',
+  height = '450px',
   showSensorLabels = true
 }) => {
-  // Handle null, undefined, or empty data
-  if (!data || !Array.isArray(data) || data.length === 0) {
+  // Handle empty data
+  if (!processedData || processedData.length === 0) {
     return (
       <GraphContainer style={{ height }}>
         <ResponsiveContainer width="100%" height="100%">
@@ -158,202 +136,216 @@ const GraphComponent = ({
     );
   }
 
-  const timeRangeConfig = getTimeRange(timeRange);
-  const grouped = groupReadingsBySensorAndLocation(data);
-  const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA500', '#005670'];
-  let colorIdx = 0;
-
-  // Calculate overall data range for Y-axis
-  const allData = Object.values(grouped).flat();
-  const formattedData = allData.map(point => ({
+  // Format data for Recharts (convert timestamps to numbers)
+  const formattedData = processedData.map(point => ({
     ...point,
     record_time: new Date(point.record_time).getTime()
   }));
 
-  const dataMin = Math.min(...formattedData.map(d => parseFloat(d[dataKey])));
-  const dataMax = Math.max(...formattedData.map(d => parseFloat(d[dataKey])));
-  
-  const yMin = Math.min(thresholds.min, dataMin);
-  const yMax = Math.max(thresholds.max, dataMax);
-  
-  const domainPadding = (yMax - yMin) * 0.05;
-
-  // Calculate Y-axis ticks
-  const yAxisTicks = [];
-  const tickCount = 5;
-  const tickInterval = (yMax - yMin) / (tickCount - 1);
-  for (let i = 0; i < tickCount; i++) {
-    yAxisTicks.push(Math.round((yMin + (i * tickInterval)) * 10) / 10);
-  }
-
   const renderSingleGraph = () => (
     <>
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart 
-          margin={{ top: 5, right: 60, bottom: 25, left: 0 }}
-        >
-          <CartesianGrid 
-            strokeDasharray="3 3"
-            horizontal={true}
-            vertical={true}
-          />
-          <XAxis 
-            dataKey="record_time"
-            type="number"
-            domain={[timeRangeConfig.start, timeRangeConfig.end]}
-            tickFormatter={(timestamp) => format(timestamp, timeRangeConfig.tickFormat)}
-            scale="time"
-            interval="preserveStartEnd"
-          />
-          <YAxis 
-            domain={[
-              Math.floor(yMin - domainPadding), 
-              Math.ceil(yMax + domainPadding)
-            ]}
-            ticks={yAxisTicks}
-            allowDecimals={true}
-            interval="preserveStartEnd"
-          />
-          <Tooltip 
-            content={(props) => (
-              <CustomTooltipContent 
-                {...props} 
-                locationName={locationName}
-                unit={unit}
-              />
-            )}
-          />
-          
-          {/* Threshold lines */}
-          <ReferenceLine 
-            y={thresholds.max} 
-            stroke="#FFA500" 
-            strokeDasharray="3 3"
-            label={{ 
-              value: `${thresholds.max}${unit}`,
-              position: 'right',
-              fill: '#FFA500'
-            }}
-          />
-          <ReferenceLine 
-            y={thresholds.min} 
-            stroke="#FFA500" 
-            strokeDasharray="3 3"
-            label={{ 
-              value: `${thresholds.min}${unit}`,
-              position: 'right',
-              fill: '#FFA500'
-            }}
-          />
-
-          {/* Ground temperature reference line (only for temperature graph) */}
-          {groundTemp !== null && (
+      <GraphChartContainer>
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart 
+            data={processedData}
+            margin={{ top: 20, right: 80, bottom: 50, left: 20 }}
+          >
+            <CartesianGrid 
+              strokeDasharray="3 3"
+              horizontal={true}
+              vertical={false}
+              stroke="#f0f0f0"
+            />
+            <XAxis 
+              dataKey="record_time"
+              type="number"
+              domain={[graphConfig.xAxis.start, graphConfig.xAxis.end]}
+              tickFormatter={(timestamp) => formatTimestamp(timestamp, graphConfig.xAxis.tickFormat)}
+              scale="time"
+              ticks={graphConfig.xAxis.ticks}
+              interval="preserveStartEnd"
+              minTickGap={30}
+            />
+            <YAxis 
+              domain={[graphConfig.yAxis.min, graphConfig.yAxis.max]}
+              ticks={graphConfig.yAxis.ticks}
+              allowDecimals={true}
+              label={{ value: unit, angle: -90, position: 'insideLeft' }}
+            />
+            <Tooltip 
+              content={(props) => (
+                <CustomTooltipContent 
+                  {...props} 
+                  locationName={locationName}
+                  unit={unit}
+                />
+              )}
+            />
+            
+            {/* Threshold lines */}
             <ReferenceLine 
-              y={groundTemp} 
-              stroke="#005670" 
+              y={thresholds.max} 
+              stroke="#FFA500" 
               strokeDasharray="3 3"
               label={{ 
-                value: `${groundTemp}°C`,
+                value: `${thresholds.max}${unit}`,
                 position: 'right',
-                fill: '#005670'
+                fill: '#FFA500'
               }}
             />
-          )}
+            <ReferenceLine 
+              y={thresholds.min} 
+              stroke="#FFA500" 
+              strokeDasharray="3 3"
+              label={{ 
+                value: `${thresholds.min}${unit}`,
+                position: 'right',
+                fill: '#FFA500'
+              }}
+            />
 
-          {/* Render a Line for each sensor_id|location_id group */}
-          {Object.entries(grouped).map(([key, records]) => {
-            const [sensorId] = key.split('|');
-            const color = colors[colorIdx++ % colors.length];
-            return (
-              <Line
-                key={key}
-                type="monotone"
-                dataKey={dataKey}
-                data={records.map(point => ({ ...point, record_time: new Date(point.record_time).getTime() }))}
-                stroke={color}
-                dot={false}
-                strokeWidth={2}
-                name={`Sensor ${sensorId}`}
+            {/* Ground temperature reference line (only for temperature graph) */}
+            {groundTemp !== null && (
+              <ReferenceLine 
+                y={groundTemp} 
+                stroke="#005670" 
+                strokeDasharray="3 3"
+                label={{ 
+                  value: `${groundTemp}°C`,
+                  position: 'right',
+                  fill: '#005670'
+                }}
               />
-            );
-          })}
-        </LineChart>
-      </ResponsiveContainer>
+            )}
+
+            {/* Render a Line for each sensor_id|location_id group */}
+            {Object.entries(groupedData).map(([key, records], index) => {
+              const [sensorId] = key.split('|');
+              const color = graphConfig.colors[index % graphConfig.colors.length];
+              return (
+                <Line
+                  key={key}
+                  type="monotone"
+                  dataKey={`sensor_${sensorId}`}
+                  data={processedData}
+                  stroke={color}
+                  dot={false}
+                  strokeWidth={2}
+                  name={`Sensor ${sensorId}`}
+                  connectNulls={true}
+                />
+              );
+            })}
+          </LineChart>
+        </ResponsiveContainer>
+      </GraphChartContainer>
       
       {/* Sensor labels */}
       {showSensorLabels && (
-        <SensorLabel>
-          {Object.entries(grouped).map(([key], index) => {
-            const [sensorId] = key.split('|');
-            const color = colors[index % colors.length];
-            return (
-              <SensorLabelItem key={key}>
-                <SensorColorDot $color={color} />
-                <span>Sensor {sensorId}</span>
-              </SensorLabelItem>
-            );
-          })}
-        </SensorLabel>
+        <>
+          <SensorLabel>
+            {Object.entries(groupedData).map(([key], index) => {
+              const [sensorId] = key.split('|');
+              const color = graphConfig.colors[index % graphConfig.colors.length];
+              return (
+                <SensorLabelItem key={key}>
+                  <SensorColorDot $color={color} />
+                  <span>Sensor {sensorId}</span>
+                </SensorLabelItem>
+              );
+            })}
+          </SensorLabel>
+          {dataInfo.totalPoints > dataInfo.processedPoints && (
+            <DataInfo>
+              Showing {dataInfo.processedPoints} of {dataInfo.totalPoints} data points for better visualization
+            </DataInfo>
+          )}
+          {dataInfo.timeSpan > 0 && (
+            <DataInfo>
+              Data available for {dataInfo.timeSpan.toFixed(1)} days
+            </DataInfo>
+          )}
+        </>
       )}
     </>
   );
 
   const renderCombinedGraph = () => (
     <>
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart margin={{ top: 5, right: 60, bottom: 25, left: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" horizontal vertical />
-          <XAxis
-            dataKey="record_time"
-            type="number"
-            domain={[timeRangeConfig.start, timeRangeConfig.end]}
-            tickFormatter={(timestamp) => format(timestamp, timeRangeConfig.tickFormat)}
-            scale="time"
-            interval="preserveStartEnd"
-          />
-          <YAxis yAxisId="temp" orientation="left" />
-          <YAxis yAxisId="humidity" orientation="right" />
-          <YAxis yAxisId="pressure" orientation="right" domain={[970, 1050]} hide />
-          <Tooltip
-            content={(props) => (
-              <CustomTooltipContent {...props} locationName={locationName} />
-            )}
-          />
-          {/* Render a Line for each sensor_id|location_id group */}
-          {Object.entries(grouped).map(([key, records]) => {
-            const [sensorId] = key.split('|');
-            const color = colors[colorIdx++ % colors.length];
-            return (
-              <Line
-                key={key}
-                yAxisId="temp"
-                type="monotone"
-                dataKey="temperature"
-                data={records.map(point => ({ ...point, record_time: new Date(point.record_time).getTime() }))}
-                stroke={color}
-                dot={false}
-                strokeWidth={2}
-                name={`Sensor ${sensorId}`}
-              />
-            );
-          })}
-        </LineChart>
-      </ResponsiveContainer>
+      <GraphChartContainer>
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart 
+            data={processedData}
+            margin={{ top: 20, right: 80, bottom: 50, left: 20 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" horizontal vertical={false} stroke="#f0f0f0" />
+            <XAxis
+              dataKey="record_time"
+              type="number"
+              domain={[graphConfig.xAxis.start, graphConfig.xAxis.end]}
+              tickFormatter={(timestamp) => formatTimestamp(timestamp, graphConfig.xAxis.tickFormat)}
+              scale="time"
+              ticks={graphConfig.xAxis.ticks}
+              interval="preserveStartEnd"
+              minTickGap={30}
+            />
+            <YAxis yAxisId="temp" orientation="left" label={{ value: "°C", angle: -90, position: 'insideLeft' }} />
+            <YAxis yAxisId="humidity" orientation="right" label={{ value: "%", angle: 90, position: 'insideRight' }} />
+            <YAxis yAxisId="pressure" orientation="right" domain={[970, 1050]} hide />
+            <Tooltip
+              content={(props) => (
+                <CustomTooltipContent {...props} locationName={locationName} />
+              )}
+            />
+            {/* Render a Line for each sensor_id|location_id group */}
+            {Object.entries(groupedData).map(([key, records], index) => {
+              const [sensorId] = key.split('|');
+              const color = graphConfig.colors[index % graphConfig.colors.length];
+              return (
+                <Line
+                  key={key}
+                  yAxisId="temp"
+                  type="monotone"
+                  dataKey={`sensor_${sensorId}`}
+                  data={processedData}
+                  stroke={color}
+                  dot={false}
+                  strokeWidth={2}
+                  name={`Sensor ${sensorId}`}
+                  connectNulls={true}
+                />
+              );
+            })}
+          </LineChart>
+        </ResponsiveContainer>
+      </GraphChartContainer>
       
       {/* Sensor labels */}
       {showSensorLabels && (
-        <SensorLabel>
-          {Object.entries(grouped).map(([key], index) => {
-            const [sensorId] = key.split('|');
-            const color = colors[index % colors.length];
-            return (
-              <SensorLabelItem key={key}>
-                <SensorColorDot $color={color} />
-                <span>Sensor {sensorId}</span>
-              </SensorLabelItem>
-            );
-          })}
-        </SensorLabel>
+        <>
+          <SensorLabel>
+            {Object.entries(groupedData).map(([key], index) => {
+              const [sensorId] = key.split('|');
+              const color = graphConfig.colors[index % graphConfig.colors.length];
+              return (
+                <SensorLabelItem key={key}>
+                  <SensorColorDot $color={color} />
+                  <span>Sensor {sensorId}</span>
+                </SensorLabelItem>
+              );
+            })}
+          </SensorLabel>
+          {dataInfo.totalPoints > dataInfo.processedPoints && (
+            <DataInfo>
+              Showing {dataInfo.processedPoints} of {dataInfo.totalPoints} data points for better visualization
+            </DataInfo>
+          )}
+          {dataInfo.timeSpan > 0 && (
+            <DataInfo>
+              Data available for {dataInfo.timeSpan.toFixed(1)} days
+            </DataInfo>
+          )}
+        </>
       )}
     </>
   );

@@ -1,123 +1,81 @@
-# Graph Components Documentation
+# Graph Components
 
-## Overview
+This directory contains React components for displaying environmental data graphs.
 
-The graph system has been refactored into a reusable `GraphComponent` that supports sensor labels and can be used to create multiple separate graph cards stacked vertically on a page.
+## GraphComponent
 
-## Components
+A pure rendering component that displays line charts based on pre-processed data. The component is responsible only for rendering and does not perform any data manipulation.
 
-### GraphComponent
+### Props
 
-A reusable graph component that can render both single parameter graphs and combined graphs.
-
-#### Props
-
-- `data` (array): Environmental data array
-- `dataKey` (string): The data key to plot (e.g., 'temperature', 'relative_humidity', 'air_pressure')
-- `unit` (string): Unit of measurement (e.g., '°C', '%', 'hPa')
-- `thresholds` (object): Min/max threshold values
+- `processedData` (Array): Pre-processed data array ready for display
+- `graphConfig` (Object): Configuration object containing:
+  - `xAxis`: X-axis configuration (start, end, ticks, tickFormat)
+  - `yAxis`: Y-axis configuration (min, max, ticks)
+  - `colors`: Array of colors for different sensor lines
+- `groupedData` (Object): Data grouped by sensor and location
+- `dataInfo` (Object): Information about the data (totalPoints, processedPoints, timeSpan)
+- `dataKey` (string): The data property to display on the Y-axis
+- `unit` (string): Unit of measurement for the data
+- `thresholds` (Object): Threshold values for min/max lines
 - `groundTemp` (number, optional): Ground temperature reference line
-- `timeRange` (string): Time range for the graph ('1day', '1week', '1month', '1year', '2year')
-- `locationName` (string): Name of the location
-- `graphType` (string): 'single' or 'combined'
+- `locationName` (string): Name of the location being displayed
+- `graphType` (string): Type of graph ('single' or 'combined')
 - `height` (string): Height of the graph container
 - `showSensorLabels` (boolean): Whether to show sensor labels below the graph
 
-#### Example Usage
+### Usage
+
+The GraphComponent expects all data to be pre-processed using the `processGraphData` utility function. This separation of concerns ensures that:
+
+1. **Data processing** is handled by dedicated utilities
+2. **Graph rendering** is the sole responsibility of this component
+3. **X-axis labels** are automatically determined based on the actual data span
+4. **Performance** is optimized by processing data once and reusing it
+
+### Example
 
 ```jsx
+import { processGraphData } from '../utils/graphDataProcessor';
+
+// Process data before passing to component
+const processedData = processGraphData(rawData, timeRange, {
+  maxDataPoints: 150,
+  enableSmoothing: true,
+  smoothingWindow: 3,
+  dataKey: 'temperature'
+});
+
+// Pass processed data to component
 <GraphComponent
-  data={environmentalData}
+  processedData={processedData.processedData}
+  graphConfig={processedData.graphConfig}
+  groupedData={processedData.groupedData}
+  dataInfo={processedData.dataInfo}
   dataKey="temperature"
   unit="°C"
   thresholds={thresholds.temperature}
-  groundTemp={settings.groundTemperature}
-  timeRange={timeRange}
-  locationName={locationData?.name}
+  locationName="Location Name"
   graphType="single"
-  height="100%"
-  showSensorLabels={true}
 />
 ```
 
-## Features
+## Data Processing
 
-### Sensor Labels
+All data processing is handled by the `graphDataProcessor` utility, which:
 
-All graphs include sensor name labels at the bottom with color-coded dots matching the graph lines.
+- Sorts data by timestamp
+- Applies smoothing if enabled
+- Samples data to reduce points for better visualization
+- Groups data by sensor and location
+- Calculates optimal graph configuration based on actual data
+- Generates appropriate x-axis and y-axis ticks
+- Determines optimal tick format based on data time span
 
-### Multiple Graph Cards
+## Architecture Benefits
 
-You can create multiple `GraphCard` containers, each with its own `GraphComponent` instance, stacked vertically on the page:
-
-```jsx
-<GraphCard>
-  <GraphTitle>Temperature Graph</GraphTitle>
-  <GraphComponent
-    data={environmentalData}
-    dataKey="temperature"
-    unit="°C"
-    thresholds={thresholds.temperature}
-    groundTemp={settings.groundTemperature}
-    timeRange={timeRange}
-    locationName={locationData?.name}
-    graphType="single"
-    height="100%"
-    showSensorLabels={true}
-  />
-</GraphCard>
-
-<GraphCard>
-  <GraphTitle>Humidity Graph</GraphTitle>
-  <GraphComponent
-    data={environmentalData}
-    dataKey="relative_humidity"
-    unit="%"
-    thresholds={thresholds.humidity}
-    timeRange={timeRange}
-    locationName={locationData?.name}
-    graphType="single"
-    height="100%"
-    showSensorLabels={true}
-  />
-</GraphCard>
-
-<GraphCard>
-  <GraphTitle>Pressure Graph</GraphTitle>
-  <GraphComponent
-    data={environmentalData}
-    dataKey="air_pressure"
-    unit="hPa"
-    thresholds={thresholds.pressure}
-    timeRange={timeRange}
-    locationName={locationData?.name}
-    graphType="single"
-    height="100%"
-    showSensorLabels={true}
-  />
-</GraphCard>
-```
-
-### Error Handling
-
-All graphs are wrapped in `GraphErrorBoundary` components for graceful error handling.
-
-## Migration from Old System
-
-The old graph rendering functions (`renderGraph` and `renderCombinedGraph`) have been replaced with the new `GraphComponent`. The new system provides:
-
-1. Better reusability
-2. Sensor labels with color coding
-3. Cleaner separation of concerns
-4. Better error handling
-5. Self-contained graph cards
-
-## Styling
-
-Graphs use styled-components and are responsive. The `GraphCard` component provides the container styling with:
-- Fixed height of 400px
-- Proper padding and margins
-- Overflow hidden to ensure content stays within boundaries
-- Clean card-based layout
-
-Each graph card is completely self-contained and will not overlap with other cards on the page. 
+1. **Single Responsibility**: GraphComponent only renders, doesn't process data
+2. **Reusability**: Can be used with any pre-processed data
+3. **Performance**: Data processing happens once, not on every render
+4. **Maintainability**: Clear separation between data logic and presentation logic
+5. **Testing**: Easier to test data processing and rendering separately 
