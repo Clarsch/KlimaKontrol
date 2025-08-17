@@ -23,24 +23,43 @@ const PageContainer = styled.div`
 `;
 
 const Content = styled.div`
-  padding: 2rem;
-  max-width: 1200px;
+  padding: 2rem 4rem;  /* Increased horizontal padding instead of width restriction */
+  width: 100%;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 3fr 1fr;  /* Changed from 2fr 1fr to 3fr 1fr for more graph space */
   gap: 2rem;
+
+  /* Responsive padding for different screen sizes */
+  @media (max-width: 1200px) {
+    padding: 2rem 3rem;
+    grid-template-columns: 2.5fr 1fr;  /* Still give more space to graphs */
+  }
+
+  @media (max-width: 768px) {
+    padding: 2rem 2rem;
+    grid-template-columns: 1fr;  /* Stack on smaller screens */
+    gap: 1rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: 1rem 1rem;
+    gap: 1rem;
+  }
 `;
 
 const MainSection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.5rem;  /* Reduced gap for more compact layout */
+  min-width: 0;  /* Allow content to wrap */
 `;
 
 const SideSection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.5rem;  /* Reduced gap for more compact layout */
+  min-width: 0;  /* Allow content to wrap */
 `;
 
 const Card = styled.div`
@@ -48,6 +67,9 @@ const Card = styled.div`
   border-radius: 8px;
   padding: 1.5rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  min-width: 0;  /* Allow content to wrap */
+  overflow-wrap: break-word;  /* Ensure long text wraps */
+  word-wrap: break-word;
 `;
 
 const WarningCard = styled(Card)`
@@ -96,47 +118,51 @@ const DeactivateButton = styled.button`
 
 const Title = styled.h2`
   color: #005670;
-  margin-bottom: 1rem;
-  font-size: 1.5rem;
+  margin-bottom: 0.75rem;  /* Reduced margin for compactness */
+  font-size: 1.4rem;  /* Slightly smaller for compactness */
 `;
 
 const SubTitle = styled.h3`
   color: #005670;
-  margin-bottom: 1rem;
-  font-size: 1.2rem;
+  margin-bottom: 0.75rem;  /* Reduced margin for compactness */
+  font-size: 1.1rem;  /* Slightly smaller for compactness */
 `;
 
 const ThresholdGroup = styled.div`
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;  /* Reduced margin for compactness */
 `;
 
 const ThresholdRow = styled.div`
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;  /* Reduced gap for compactness */
   margin-bottom: 0.5rem;
+  flex-wrap: wrap;  /* Allow wrapping on small screens */
 `;
 
 const ThresholdLabel = styled.span`
   color: #005670;
-  min-width: 120px;
+  min-width: 100px;  /* Reduced from 120px for compactness */
+  font-size: 0.9rem;  /* Slightly smaller font */
 `;
 
 const ThresholdInput = styled.input`
-  padding: 0.5rem;
+  padding: 0.4rem;  /* Reduced padding for compactness */
   border: 1px solid #ccc;
   border-radius: 4px;
-  width: 100px;
+  width: 80px;  /* Reduced from 100px for compactness */
+  font-size: 0.9rem;  /* Slightly smaller font */
 `;
 
 const SaveButton = styled.button`
   background-color: #005670;
   color: white;
-  padding: 0.5rem 1rem;
+  padding: 0.4rem 0.75rem;  /* Reduced padding for compactness */
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  margin-top: 1rem;
+  margin-top: 0.75rem;  /* Reduced margin for compactness */
+  font-size: 0.9rem;  /* Slightly smaller font */
 
   &:hover {
     background-color: #004560;
@@ -165,38 +191,43 @@ const TimeButton = styled.button`
 const GraphCard = styled(Card)`
   min-height: 500px;
   height: auto;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;  /* Reduced margin for compactness */
   padding: 1rem 0.5rem 3rem 0.5rem;
   overflow: visible;
+  width: 100%;  /* Ensure full width usage */
 `;
 
 const GraphTitle = styled.h4`
   color: #005670;
-  margin-bottom: 1rem;
-  font-size: 1rem;
+  margin-bottom: 0.75rem;  /* Reduced margin for compactness */
+  font-size: 0.95rem;  /* Slightly smaller for compactness */
 `;
 
 const SettingsCard = styled(Card)`
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+  padding: 1.25rem;  /* Slightly reduced padding for compactness */
 `;
 
 const SettingRow = styled.div`
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: 0.75rem;  /* Reduced gap for compactness */
+  margin-bottom: 0.75rem;  /* Reduced margin for compactness */
+  flex-wrap: wrap;  /* Allow wrapping on small screens */
 `;
 
 const SettingLabel = styled.span`
   color: #005670;
-  min-width: 150px;
+  min-width: 120px;  /* Reduced from 150px for compactness */
+  font-size: 0.9rem;  /* Slightly smaller font */
 `;
 
 const SettingInput = styled.input`
-  padding: 0.5rem;
+  padding: 0.4rem;  /* Reduced padding for compactness */
   border: 1px solid #ccc;
   border-radius: 4px;
-  width: 100px;
+  width: 80px;  /* Reduced from 100px for compactness */
+  font-size: 0.9rem;  /* Slightly smaller font */
 `;
 
 const DeactivationInfo = styled.div`

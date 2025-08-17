@@ -14,12 +14,26 @@ const PageContainer = styled.div`
 `;
 
 const UploadContainer = styled.div`
-  padding: 2rem;
+  padding: 2rem 4rem;  /* Increased horizontal padding instead of width restriction */
   margin: 2rem auto;
-  max-width: 800px;
+  width: 100%;
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  /* Responsive padding for different screen sizes */
+  @media (max-width: 1200px) {
+    padding: 2rem 3rem;
+  }
+
+  @media (max-width: 768px) {
+    padding: 2rem 2rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: 1rem 1rem;
+    margin: 1rem auto;
+  }
 `;
 
 const DropZone = styled.div`

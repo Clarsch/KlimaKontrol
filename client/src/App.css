@@ -1,8 +1,27 @@
 #root {
-  max-width: 1280px;
+  width: 100%;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 2rem 4rem;  /* Increased horizontal padding instead of width restriction */
   text-align: center;
+}
+
+/* Responsive padding for different screen sizes */
+@media (max-width: 1200px) {
+  #root {
+    padding: 2rem 3rem;  /* Slightly less padding on medium screens */
+  }
+}
+
+@media (max-width: 768px) {
+  #root {
+    padding: 2rem 2rem;  /* Standard padding on tablets */
+  }
+}
+
+@media (max-width: 480px) {
+  #root {
+    padding: 1rem 1rem;  /* Minimal padding on mobile */
+  }
 }
 
 .logo {

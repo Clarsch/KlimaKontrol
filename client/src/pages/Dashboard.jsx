@@ -19,12 +19,25 @@ const DashboardContainer = styled.div`
 `;
 
 const Content = styled.div`
-  padding: 2rem;
-  max-width: 1200px;
+  padding: 2rem 4rem;  /* Increased horizontal padding instead of width restriction */
+  width: 100%;
   margin: 0 auto;
   opacity: 1;
   transform: translateY(0);
   transition: opacity 0.3s ease, transform 0.3s ease;
+
+  /* Responsive padding for different screen sizes */
+  @media (max-width: 1200px) {
+    padding: 2rem 3rem;
+  }
+
+  @media (max-width: 768px) {
+    padding: 2rem 2rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: 1rem 1rem;
+  }
 
   &.entering {
     opacity: 0;
