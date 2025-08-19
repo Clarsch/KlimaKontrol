@@ -25,6 +25,7 @@
     "settings_update_failed_msg":"Opdatering af indstillinger mislykkedes",
     "all_warnings_deactivated_msg":"Alle advarsler er deaktiveret",
     "loading_location_data":"Henter lokationsdata",
+    "loading_new_data":"Henter nye data",
     "loading":"Henter",
     "environmental_data_title":"Klima Data",
     "1_day":"1 Dag",

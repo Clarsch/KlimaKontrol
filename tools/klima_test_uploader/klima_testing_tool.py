@@ -29,7 +29,7 @@ def prettify_json(input_data: str):
 def post_random_location_data_readings(location, intervalInSeconds, dateIntervalsInHours):
     temperature = 15.0
     humidity = 60.0
-    testDateTime = datetime(2025, 1, 1, 0, 0, 0)
+    testDateTime = datetime(2025, 8, 18, 0, 0, 0)
 
     while True:
 
@@ -50,7 +50,7 @@ def post_random_location_data_readings(location, intervalInSeconds, dateInterval
         testDateTime = testDateTime + timedelta(hours=dateIntervalsInHours)
 
         observation_json = {
-            "sensor_id": "test_sensor_001",
+            "sensor_id": "test_sensor_002",
             "location_id": location,
             "record_time": testDateTime.strftime("%Y-%m-%dT%H:%M:%S"),
             "temperature": round(temperature, 2),

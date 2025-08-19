@@ -197,7 +197,8 @@ KlimaKontrol is a climate monitoring system for churches with a React frontend a
 **Purpose**: Get environmental data for a location with time filtering
 
 **Query Parameters**:
-- `timeRange`: "1day" | "1month" | "6months" | "1year" | "2years"
+- `from`: **Required** - Start date in ISO 8601 format (e.g., "2024-01-01T00:00:00.000Z")
+- `to`: **Optional** - End date in ISO 8601 format (defaults to current time)
 
 **Response**:
 ```json
@@ -213,6 +214,8 @@ KlimaKontrol is a climate monitoring system for churches with a React frontend a
   }
 ]
 ```
+
+**Note**: The endpoint will never return data newer than the current time, even if a future date is specified in the `to` parameter.
 
 ### GET `/api/data/warnings/:locationId`
 

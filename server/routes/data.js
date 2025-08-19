@@ -177,10 +177,123 @@ router.put('/location/:locationId/thresholds', validateLocationUpdate, async (re
     }
 });
 
+/**
+ * Manipulates environmental data to a target number of data points
+ * Uses intelligent sampling to maintain data quality and representativeness
+ * @param {Array} data - Array of environmental data records
+ * @param {number} targetPoints - Target number of data points to return
+ * @returns {Array} Manipulated data array with target number of points
+ */
+function manipulateDataToTargetPoints(data, targetPoints) {
+    if (!data || data.length === 0) {
+        return [];
+    }
+    
+    if (data.length <= targetPoints) {
+        return data; // No manipulation needed
+    }
+    
+    // Sort data by timestamp to ensure chronological order
+    const sortedData = [...data].sort((a, b) => 
+        new Date(a.record_time) - new Date(b.record_time)
+    );
+    
+    // For small datasets, use a more conservative approach
+    if (data.length <= targetPoints * 2) {
+        // If we're only reducing by a small amount, use every other point
+        const step = Math.ceil(data.length / targetPoints);
+        const sampledData = [];
+        
+        for (let i = 0; i < sortedData.length; i += step) {
+            if (sampledData.length < targetPoints) {
+                sampledData.push(sortedData[i]);
+            }
+        }
+        
+        // Ensure we include the last point if we haven't reached target
+        if (sampledData.length < targetPoints && sortedData.length > 1) {
+            sampledData.push(sortedData[sortedData.length - 1]);
+        }
+        
+        return sampledData.sort((a, b) => 
+            new Date(a.record_time) - new Date(b.record_time)
+        );
+    }
+    
+    // For larger datasets, use more aggressive sampling
+    const samplingInterval = Math.ceil(data.length / targetPoints);
+    const sampledData = [];
+    
+    // Always include the first data point
+    sampledData.push(sortedData[0]);
+    
+    // Sample at regular intervals
+    for (let i = samplingInterval; i < sortedData.length - 1; i += samplingInterval) {
+        if (sampledData.length < targetPoints) {
+            sampledData.push(sortedData[i]);
+        }
+    }
+    
+    // Always include the last data point if we haven't reached target
+    if (sampledData.length < targetPoints && sortedData.length > 1) {
+        sampledData.push(sortedData[sortedData.length - 1]);
+    }
+    
+    // If we still haven't reached target, add more points strategically
+    if (sampledData.length < targetPoints) {
+        const remainingSlots = targetPoints - sampledData.length;
+        const remainingData = sortedData.filter(item => !sampledData.includes(item));
+        
+        // Add remaining points evenly distributed
+        for (let i = 0; i < remainingSlots && i < remainingData.length; i++) {
+            const index = Math.floor((i * remainingData.length) / remainingSlots);
+            if (sampledData.length < targetPoints) {
+                sampledData.push(remainingData[index]);
+            }
+        }
+    }
+    
+    // Sort by timestamp to maintain chronological order
+    return sampledData.sort((a, b) => 
+        new Date(a.record_time) - new Date(b.record_time)
+    );
+}
+
 // Update the environmental data endpoint
 router.get('/environmental/:locationId', async (req, res) => {
     try {
-        const { timeRange = '1month' } = req.query;
+        const { from, to } = req.query;
+        
+        // Validate required 'from' parameter
+        if (!from) {
+            return res.status(400).json({ 
+                error: 'Missing required parameter: from' 
+            });
+        }
+        
+        // Parse dates
+        const fromDate = new Date(from);
+        const toDate = to ? new Date(to) : new Date(); // Default to current time if 'to' not provided
+        
+        // Validate date parsing
+        if (isNaN(fromDate.getTime())) {
+            return res.status(400).json({ 
+                error: 'Invalid from date format. Use ISO 8601 format (e.g., 2024-01-01T00:00:00.000Z)' 
+            });
+        }
+        
+        if (to && isNaN(toDate.getTime())) {
+            return res.status(400).json({ 
+                error: 'Invalid to date format. Use ISO 8601 format (e.g., 2024-01-01T00:00:00.000Z)' 
+            });
+        }
+        
+        // Ensure we never return data newer than current time
+        const now = new Date();
+        if (toDate > now) {
+            toDate.setTime(now.getTime());
+        }
+        
         const dataDir = path.join(__dirname, '..', 'data', 'environmental');
         const locationFile = path.join(dataDir, `${req.params.locationId}.json`);
         
@@ -190,22 +303,25 @@ router.get('/environmental/:locationId', async (req, res) => {
             const fileData = await fs.readFile(locationFile, 'utf8');
             const data = JSON.parse(fileData);
             
-            // Filter data based on timeRange
-            const now = new Date();
-            const timeRangeInMs = {
-                '1day': 24 * 60 * 60 * 1000,
-                '1month': 30 * 24 * 60 * 60 * 1000,
-                '6months': 180 * 24 * 60 * 60 * 1000,
-                '1year': 365 * 24 * 60 * 60 * 1000,
-                '2years': 2*365 * 24 * 60 * 60 * 1000
-            };
-            
+            // Filter data based on from/to dates and ensure no future data
             const filteredData = data.filter(record => {
                 const recordDate = new Date(record.record_time);
-                return (now - recordDate) <= timeRangeInMs[timeRange];
+                
+                // Never return data newer than current time
+                if (recordDate > now) {
+                    return false;
+                }
+                
+                // Filter by date range
+                return recordDate >= fromDate && recordDate <= toDate;
             });
             
-            res.json(filteredData);
+            // Manipulate data down to 150 data points for optimal client performance
+            const manipulatedData = manipulateDataToTargetPoints(filteredData, 150);
+            
+            console.log(`Environmental data for ${req.params.locationId}: ${filteredData.length} records filtered, ${manipulatedData.length} records returned`);
+            
+            res.json(manipulatedData);
         } catch (error) {
             if (error.code === 'ENOENT') {
                 // File doesn't exist, return empty array

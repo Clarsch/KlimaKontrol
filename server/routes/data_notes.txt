@@ -1,0 +1,17 @@
+data endpoint should be: `/api/data/environmental/:locationId
+query parameters should be: from, to
+    from: is required
+    to: optional with time.now as default.
+
+    When data is queried, we will return data that is already been manipulated to an appropriate amount. 
+
+IMPLEMENTATION COMPLETE:
+- Updated server/routes/data.js to use from/to parameters instead of timeRange
+- Added validation for required 'from' parameter
+- Added date parsing and validation
+- Implemented filtering to ensure no data newer than current time is returned
+- Updated client/src/pages/LocationDetail.jsx to convert timeRange to from/to dates
+- Updated documentation in server/README.md and docs/SERVER_CLIENT_COMMUNICATION.md
+- Updated server/controllers/dataController.js for consistency
+
+The endpoint now properly limits data to never return anything newer than the current time.

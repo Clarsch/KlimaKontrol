@@ -28,6 +28,7 @@
     "settings_update_failed_msg":"Failed to update settings",
     "all_warnings_deactivated_msg":"All warnings have been deactivated",
     "loading_location_data":"Loading location data",
+    "loading_new_data":"Loading new data",
     "loading":"Loading",
     "environmental_data_title":"Environmental Data",
     "1_day":"1 Day",

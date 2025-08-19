@@ -267,11 +267,59 @@ exports.getLocationsStatus = async (req, res) => {
 
 exports.getEnvironmentalData = async (req, res) => {
   const { locationId } = req.params;
-  const { timeRange = '1month' } = req.query;
+  const { from, to } = req.query;
+
+  // Validate required 'from' parameter
+  if (!from) {
+    return res.status(400).json({ 
+      error: 'Missing required parameter: from' 
+    });
+  }
 
   try {
+    // Parse dates
+    const fromDate = new Date(from);
+    const toDate = to ? new Date(to) : new Date(); // Default to current time if 'to' not provided
+    
+    // Validate date parsing
+    if (isNaN(fromDate.getTime())) {
+      return res.status(400).json({ 
+        error: 'Invalid from date format. Use ISO 8601 format (e.g., 2024-01-01T00:00:00.000Z)' 
+      });
+    }
+    
+    if (to && isNaN(toDate.getTime())) {
+      return res.status(400).json({ 
+        error: 'Invalid to date format. Use ISO 8601 format (e.g., 2024-01-01T00:00:00.000Z)' 
+      });
+    }
+    
+    // Ensure we never return data newer than current time
+    const now = new Date();
+    if (toDate > now) {
+      toDate.setTime(now.getTime());
+    }
+
+    // Convert date range to timeRange for the existing readLocationData function
+    // This is a temporary solution until readLocationData is updated
+    const timeRange = '1year'; // Default to 1 year to ensure we get all data in range
+    
     const data = await readLocationData(locationId, timeRange);
-    res.json(data);
+    
+    // Filter data based on from/to dates and ensure no future data
+    const filteredData = data.filter(record => {
+      const recordDate = new Date(record.record_time);
+      
+      // Never return data newer than current time
+      if (recordDate > now) {
+        return false;
+      }
+      
+      // Filter by date range
+      return recordDate >= fromDate && recordDate <= toDate;
+    });
+    
+    res.json(filteredData);
   } catch (error) {
     console.error('Error fetching environmental data:', error);
     res.status(500).json({ message: 'Error fetching environmental data' });

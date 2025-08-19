@@ -132,7 +132,8 @@
 - **URL:** `/api/data/environmental/:locationId`
 - **Method:** `GET`
 - **Query Parameters:**
-  - `timeRange`: "1day" | "1month" | "6months" | "1year" | "2years"
+  - `from`: **Required** - Start date in ISO 8601 format (e.g., "2024-01-01T00:00:00.000Z")
+  - `to`: **Optional** - End date in ISO 8601 format (defaults to current time)
 - **Response:**
   ```json
   [
@@ -147,6 +148,7 @@
     }
   ]
   ```
+- **Note:** The endpoint will never return data newer than the current time, even if a future date is specified in the `to` parameter.
 
 ## Warning Endpoints
 

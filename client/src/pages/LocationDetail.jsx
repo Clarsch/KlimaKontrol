@@ -186,6 +186,16 @@ const TimeButton = styled.button`
   &:hover {
     background-color: ${props => props.$active ? '#004560' : '#e0e0e0'};
   }
+
+  &:disabled {
+    background-color: #ccc;
+    color: #666;
+    cursor: not-allowed;
+    
+    &:hover {
+      background-color: #ccc;
+    }
+  }
 `;
 
 const GraphCard = styled(Card)`
@@ -359,6 +369,39 @@ const LocationDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [timeRange, setTimeRange] = useState('1month');
+  const [isLoadingTimeRange, setIsLoadingTimeRange] = useState(false);
+  const [lastTimeRange, setLastTimeRange] = useState('1month');
+  
+  // Convert timeRange to from/to dates for the new API
+  const getDateRange = (range) => {
+    const now = new Date();
+    let from = new Date();
+    
+    switch (range) {
+      case '1day':
+        from = new Date(now.getTime() - (24 * 60 * 60 * 1000)); // 24 hours ago
+        break;
+      case '1month':
+        from = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000)); // 30 days ago
+        break;
+      case '6months':
+        from = new Date(now.getTime() - (180 * 24 * 60 * 60 * 1000)); // 180 days ago
+        break;
+      case '1year':
+        from = new Date(now.getTime() - (365 * 24 * 60 * 60 * 1000)); // 365 days ago
+        break;
+      case '2year':
+        from = new Date(now.getTime() - (2 * 365 * 24 * 60 * 60 * 1000)); // 2 years ago
+        break;
+      default:
+        from = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000)); // Default to 1 month
+    }
+    
+    return {
+      from: from.toISOString(),
+      to: now.toISOString()
+    };
+  };
   const [thresholds, setThresholds] = useState(null);
   const [settings, setSettings] = useState(null);
   const [isSavingSettings, setIsSavingSettings] = useState(false);
@@ -390,11 +433,25 @@ const LocationDetail = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true);
+        // Show loading state for time range changes
+        if (environmentalData) {
+          setIsLoadingTimeRange(true);
+        } else {
+          setLoading(true);
+        }
+        
+        const dateRange = getDateRange(timeRange);
+        console.log(`Fetching environmental data for timeRange: ${timeRange}`);
+        console.log(`Date range: from ${new Date(dateRange.from).toLocaleString()} to ${new Date(dateRange.to).toLocaleString()}`);
+        console.log(`ISO strings: from ${dateRange.from} to ${dateRange.to}`);
+        
         const [locationResponse, environmentalResponse, warningsResponse] = await Promise.all([
           axiosInstance.get(`/api/data/location/${encodeURIComponent(locationId)}`),
           axiosInstance.get(`/api/data/environmental/${encodeURIComponent(locationId)}`, {
-            params: { timeRange }
+            params: { 
+              from: dateRange.from,
+              to: dateRange.to
+            }
           }),
           axiosInstance.get(`/api/data/warnings/${encodeURIComponent(locationId)}`)
             .catch(error => {
@@ -408,11 +465,15 @@ const LocationDetail = () => {
         setWarnings(warningsResponse.data);
         setThresholds(locationResponse.data.thresholds);
         setSettings(locationResponse.data.settings);
+        
+        console.log(`Received ${environmentalResponse.data.length} environmental data records from backend`);
+        console.log(`Data sample:`, environmentalResponse.data.slice(0, 3));
       } catch (err) {
         setError(err.response?.data?.error || 'Error fetching data');
         console.error('Error fetching location data:', err);
       } finally {
         setLoading(false);
+        setIsLoadingTimeRange(false);
       }
     };
 
@@ -579,32 +640,33 @@ const LocationDetail = () => {
   }, [warnings]);
 
   // Process graph data when environmental data changes
+  // Backend now handles data manipulation, so we just prepare the data for display
   const processedGraphData = useMemo(() => {
     if (!environmentalData) return null;
     
     return {
       temperature: processGraphData(environmentalData, timeRange, {
-        maxDataPoints: 150,
-        enableSmoothing: true,
-        smoothingWindow: 3,
+        maxDataPoints: environmentalData.length, // Use all data from backend
+        enableSmoothing: false, // No smoothing needed since backend handles data quality
+        smoothingWindow: 1,
         dataKey: 'temperature'
       }),
       humidity: processGraphData(environmentalData, timeRange, {
-        maxDataPoints: 150,
-        enableSmoothing: true,
-        smoothingWindow: 3,
+        maxDataPoints: environmentalData.length, // Use all data from backend
+        enableSmoothing: false, // No smoothing needed since backend handles data quality
+        smoothingWindow: 1,
         dataKey: 'relative_humidity'
       }),
       pressure: processGraphData(environmentalData, timeRange, {
-        maxDataPoints: 150,
-        enableSmoothing: true,
-        smoothingWindow: 3,
+        maxDataPoints: environmentalData.length, // Use all data from backend
+        enableSmoothing: false, // No smoothing needed since backend handles data quality
+        smoothingWindow: 1,
         dataKey: 'air_pressure'
       }),
       combined: processCombinedGraphData(environmentalData, timeRange, {
-        maxDataPoints: 150,
-        enableSmoothing: true,
-        smoothingWindow: 3
+        maxDataPoints: environmentalData.length, // Use all data from backend
+        enableSmoothing: false, // No smoothing needed since backend handles data quality
+        smoothingWindow: 1
       })
     };
   }, [environmentalData, timeRange]);
@@ -622,35 +684,72 @@ const LocationDetail = () => {
             <TimeRangeSelector>
               <TimeButton 
                 $active={timeRange === '1day'} 
-                onClick={() => setTimeRange('1day')}
+                onClick={() => {
+                  if (timeRange !== '1day') {
+                    setTimeRange('1day');
+                  }
+                }}
+                disabled={isLoadingTimeRange}
               >
                 {t('1_day')}
               </TimeButton>
               <TimeButton 
                 $active={timeRange === '1month'} 
-                onClick={() => setTimeRange('1month')}
+                onClick={() => {
+                  if (timeRange !== '1month') {
+                    setTimeRange('1month');
+                  }
+                }}
+                disabled={isLoadingTimeRange}
               >
                 {t('1_month')}
               </TimeButton>
               <TimeButton 
                 $active={timeRange === '6months'} 
-                onClick={() => setTimeRange('6months')}
+                onClick={() => {
+                  if (timeRange !== '6months') {
+                    setTimeRange('6months');
+                  }
+                }}
+                disabled={isLoadingTimeRange}
               >
                 {t('6_months')}
               </TimeButton>
               <TimeButton 
                 $active={timeRange === '1year'} 
-                onClick={() => setTimeRange('1year')}
+                onClick={() => {
+                  if (timeRange !== '1year') {
+                    setTimeRange('1year');
+                  }
+                }}
+                disabled={isLoadingTimeRange}
               >
                 {t('1_year')}
               </TimeButton>
               <TimeButton 
                 $active={timeRange === '2year'} 
-                onClick={() => setTimeRange('2year')}
+                onClick={() => {
+                  if (timeRange !== '2year') {
+                    setTimeRange('2year');
+                  }
+                }}
+                disabled={isLoadingTimeRange}
               >
                 {t('2_years')}
               </TimeButton>
             </TimeRangeSelector>
+            
+            {isLoadingTimeRange && (
+              <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+                {t('loading_new_data')}...
+              </div>
+            )}
+            
+            {!isLoadingTimeRange && environmentalData && (
+              <div style={{ textAlign: 'center', padding: '10px', color: '#666', fontSize: '0.9rem' }}>
+                Showing data from {new Date(getDateRange(timeRange).from).toLocaleDateString()} to {new Date(getDateRange(timeRange).to).toLocaleDateString()}
+              </div>
+            )}
 
             <GraphCard>
               <GraphTitle>{locationData?.name} - {t('combined_data')}</GraphTitle>
