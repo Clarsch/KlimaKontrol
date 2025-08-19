@@ -10,7 +10,19 @@ It has three starting values:
 Both temperature and humidity will be a random factor added or subtracted the latests value, to simulate changes in the values.
 For simulating multiple sensors, run sensor simulation in multiple scripts.
 
-**Note:** The current implementation requires sensor_id and location_id in data readings. Ensure your test data includes these fields.
+**Note:** The API expects the following data structure for data readings:
+```json
+{
+  "sensor_id": "test_sensor_001",
+  "location_id": "location_id",
+  "record_time": "2025-01-01T00:00:00",
+  "temperature": 15.0,
+  "relative_humidity": 60.0,
+  "air_pressure": 1013.25
+}
+```
+
+The `sensor_id` and `location_id` fields are required by the API.
 
 ## Running the script
 

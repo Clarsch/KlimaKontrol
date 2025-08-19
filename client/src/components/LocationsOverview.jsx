@@ -158,6 +158,9 @@ const LocationsOverview = ({
     const { t } = useTranslation();
     const navigate = useNavigate();
 
+    // Ensure expandedAreas is always an object
+    const safeExpandedAreas = expandedAreas || {};
+
     return (
         <div>
             {Array.isArray(areas) && areas.map((area) => (
@@ -166,7 +169,7 @@ const LocationsOverview = ({
                         <AreaHeader>
                             <AreaLabel>
                                 {area.name}
-                                <Arrow $isExpanded={expandedAreas[area.name]} />
+                                <Arrow $isExpanded={safeExpandedAreas[area.name]} />
                             </AreaLabel>
                             <LocationsContainer>
                                 {Array.isArray(area.locations) && area.locations.map(location => {
@@ -190,7 +193,7 @@ const LocationsOverview = ({
                         </AreaHeader>
                     </AreaBar>
                     
-                    <ExpandedArea $isExpanded={expandedAreas[area.name]}>
+                    <ExpandedArea $isExpanded={safeExpandedAreas[area.name]}>
                         {Array.isArray(area.locations) && area.locations.map(location => {
                             const locationStatus = locationStatuses[location.id];
                             if (!locationStatus) {
@@ -236,7 +239,7 @@ LocationsOverview.propTypes = {
       active: PropTypes.bool.isRequired
     })).isRequired
   })).isRequired,
-  expandedAreas: PropTypes.object.isRequired,
+  expandedAreas: PropTypes.object,
   onAreaToggle: PropTypes.func.isRequired
 };
 

@@ -50,12 +50,12 @@ def post_random_location_data_readings(location, intervalInSeconds, dateInterval
         testDateTime = testDateTime + timedelta(hours=dateIntervalsInHours)
 
         observation_json = {
-            "location": location,
+            "sensor_id": "test_sensor_001",
+            "location_id": location,
             "record_time": testDateTime.strftime("%Y-%m-%dT%H:%M:%S"),
             "temperature": round(temperature, 2),
             "relative_humidity": round(humidity, 2),
-            "air_pressure": "1013",
-            "pause": "0"
+            "air_pressure": 1013.25
         }
         print(prettify_json(observation_json))
 

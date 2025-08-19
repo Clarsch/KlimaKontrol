@@ -58,8 +58,13 @@ const Dashboard = () => {
   const [expandedAreas, setExpandedAreas] = useState(() => {
     try {
       const saved = sessionStorage.getItem('dashboardState');
-      return saved ? JSON.parse(saved).expandedAreas : {};
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return parsed.expandedAreas || {};
+      }
+      return {};
     } catch (error) {
+      console.error('Error parsing dashboard state from sessionStorage:', error);
       return {};
     }
   });
