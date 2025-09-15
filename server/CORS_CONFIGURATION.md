@@ -46,6 +46,8 @@ CORS_ORIGINS=https://klima-kontrol-five.vercel.app,http://localhost:3000,http://
 - `http://localhost:3000` - Local development
 - `http://localhost:5173` - Vite dev server
 - `http://localhost:4173` - Vite preview server
+- `http://127.0.0.1:5173` - Alternative localhost
+- `http://127.0.0.1:3000` - Alternative localhost
 
 ## API Endpoints
 
@@ -53,6 +55,9 @@ CORS_ORIGINS=https://klima-kontrol-five.vercel.app,http://localhost:3000,http://
 - `POST /api/auth/login` - User login with access and refresh tokens
 - `POST /api/auth/refresh` - Refresh access token using refresh token
 - `POST /api/auth/logout` - Logout and clear refresh token
+
+### Testing
+- `GET /api/test` - Test endpoint to verify CORS configuration
 
 ### File Upload
 - `POST /api/upload/file` - Upload file (requires authentication)

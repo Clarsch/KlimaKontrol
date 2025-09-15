@@ -28,7 +28,9 @@ async function initializeApp() {
                 'https://klima-kontrol-five.vercel.app',  // Production frontend URL
                 'http://localhost:3000',                   // Local development
                 'http://localhost:5173',                   // Vite dev server
-                'http://localhost:4173'                    // Vite preview server
+                'http://localhost:4173',                   // Vite preview server
+                'http://127.0.0.1:5173',                  // Alternative localhost
+                'http://127.0.0.1:3000'                   // Alternative localhost
             ];
 
         const corsOptions = {
@@ -57,6 +59,15 @@ async function initializeApp() {
         app.use(express.json());
         app.use(cookieParser());
         
+        // Test endpoint for CORS verification
+        app.get('/api/test', (req, res) => {
+            res.json({ 
+                message: 'CORS working!', 
+                timestamp: new Date().toISOString(),
+                origin: req.headers.origin 
+            });
+        });
+
         // Routes
         app.use('/api/auth', authRoutes);
         app.use('/api/data', dataRoutes);
