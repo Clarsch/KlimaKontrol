@@ -1,9 +1,11 @@
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const fs = require('fs');
 const path = require('path');
 const authRoutes = require('./routes/auth');
 const dataRoutes = require('./routes/data');
+const uploadRoutes = require('./routes/upload');
 const configLoader = require('./config/configLoader');
 
 async function initializeApp() {
@@ -19,26 +21,32 @@ async function initializeApp() {
         const app = express();
         createRequiredDirectories();
         
-        // CORS configuration - place this BEFORE any other middleware
+        // Enhanced CORS configuration
+        const corsOrigins = process.env.CORS_ORIGINS 
+            ? process.env.CORS_ORIGINS.split(',')
+            : [
+                'https://klima-kontrol-five.vercel.app',  // Production frontend URL
+                'http://localhost:3000',                   // Local development
+                'http://localhost:5173',                   // Vite dev server
+                'http://localhost:4173'                    // Vite preview server
+            ];
+
         const corsOptions = {
-            origin: (origin, callback) => {
-                if( !origin ) return callback(null, true);
-
-                if (origin === 'http://localhost:5173' || 
-                    origin === 'https://klima-kontrol-five.vercel.app' ||
-                    origin.startsWith('http://localhost:')
-                ) {
-                    return callback(null, true)
-                }
-
-                // Reject the request
-                return callback(new Error('Not allowed by CORS'));
-            },
-            credentials: false,
-            methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS']
+            origin: corsOrigins,
+            credentials: true, // Enable cookies and credentials
+            methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+            allowedHeaders: [
+                'Content-Type', 
+                'Authorization', 
+                'ngrok-skip-browser-warning'
+            ],
+            optionsSuccessStatus: 200 // For legacy browser support
         };
 
         app.use(cors(corsOptions));
+        
+        // Handle preflight requests
+        app.options('*', cors(corsOptions));
         
         // Add middleware to log all requests
         app.use((req, res, next) => {
@@ -47,10 +55,12 @@ async function initializeApp() {
         });
 
         app.use(express.json());
+        app.use(cookieParser());
         
         // Routes
         app.use('/api/auth', authRoutes);
         app.use('/api/data', dataRoutes);
+        app.use('/api/upload', uploadRoutes);
         
         // Error handling middleware
         app.use((err, req, res, next) => {

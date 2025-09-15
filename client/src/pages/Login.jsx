@@ -87,11 +87,11 @@ const Login = () => {
 
       login(response.data.user, response.data.token);
       
-      if (response.data.user.role === 'collector') {
-        navigate('/upload');
-      } else {
-        navigate('/dashboard');
-      }
+      // Use redirectUrl from backend response
+      const redirectUrl = response.data.redirectUrl || 
+        (response.data.user.role === 'collector' ? '/upload' : '/dashboard');
+      
+      navigate(redirectUrl);
     } catch (error) {
       setError(error.response?.data?.message || 'An error occurred');
     }
