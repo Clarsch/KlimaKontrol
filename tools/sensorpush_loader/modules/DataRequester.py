@@ -1,8 +1,26 @@
 import requests
-from sensorpush_loader.modules.Authorization import Authorization 
-import sensorpush_loader.modules.Validater as vd
-import sensorpush_loader.modules.Formatter as fm
-from utils.Logger import Logger
+import sys
+import os
+
+# Add the root directory to the Python path so we can import from utils
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+root_dir = os.path.dirname(parent_dir)
+
+if root_dir not in sys.path:
+    sys.path.insert(0, root_dir)
+
+try:
+    from .Authorization import Authorization 
+    from . import Validater as vd
+    from . import Formatter as fm
+    from utils.Logger import Logger
+except ImportError:
+    # Fallback for when imported from other locations
+    from sensorpush_loader.modules.Authorization import Authorization 
+    from sensorpush_loader.modules import Validater as vd
+    from sensorpush_loader.modules import Formatter as fm
+    from utils.Logger import Logger
 
 class DataRequester:
     TAG = 'DataRequester'
@@ -29,7 +47,7 @@ class DataRequester:
 
     def call_endpoint(self, endpoint):
         endpoint_url = self.base_url + "/" + endpoint
-        data = self.handle_post_request(endpoint_url)
+        data = self.handle_post_request(endpoint_url, {})
         print(f"API status is: {fm.prettify_json(data)}")
        
 

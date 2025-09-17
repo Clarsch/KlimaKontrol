@@ -1,11 +1,30 @@
 import threading
 import asyncio
 from datetime import datetime, timedelta, timezone
-from sensorpush_loader.modules.DataRequester import DataRequester
-from sensorpush_loader.modules.Authorization import Authorization
-import sensorpush_loader.modules.Formatter as fm
-from klima_kontrol_uploader.ObservationUploader import ObservationUploader
-from utils.Logger import Logger
+import sys
+import os
+
+# Add the root directory to the Python path so we can import from utils and klima_kontrol_uploader
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+root_dir = os.path.dirname(parent_dir)
+
+if root_dir not in sys.path:
+    sys.path.insert(0, root_dir)
+
+try:
+    from .DataRequester import DataRequester
+    from .Authorization import Authorization
+    from . import Formatter as fm
+    from klima_kontrol_uploader.ObservationUploader import ObservationUploader
+    from utils.Logger import Logger
+except ImportError:
+    # Fallback for when imported from other locations
+    from sensorpush_loader.modules.DataRequester import DataRequester
+    from sensorpush_loader.modules.Authorization import Authorization
+    from sensorpush_loader.modules import Formatter as fm
+    from klima_kontrol_uploader.ObservationUploader import ObservationUploader
+    from utils.Logger import Logger
 
 
 class DataPullRunner:
@@ -124,6 +143,9 @@ class DataPullRunnerThread(threading.Thread):
     def stop(self):
         self.logger.debug(self.TAG, "STOP event triggered.")
         self._stop_event.set()
+
+    def set_time_interval(self, minutes):
+        self.data_runner.set_data_pull_sleep_interval_in_minutes(minutes)
 
 
 

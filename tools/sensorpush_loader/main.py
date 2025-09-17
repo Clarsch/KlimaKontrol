@@ -1,18 +1,33 @@
 import time
+import sys
+import os
+
+# Add the parent directory to the Python path so we can import from utils
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+root_dir = os.path.dirname(parent_dir)
+
+if root_dir not in sys.path:
+    sys.path.insert(0, root_dir)
+
 from modules.Authorization import Authorization 
 from modules.DataRequester import DataRequester
 from modules.DataPullRunner import DataPullRunner, DataPullRunnerThread
+from utils.Logger import Logger
 import asyncio
 
 
 def main():
     base_url = 'https://api.sensorpush.com'
+    
+    # Initialize logger
+    logger = Logger('sensorpush_loader', os.path.join(os.path.dirname(__file__), 'sensorpush_loader.log'))
 
     queue = asyncio.Queue()
 
-    auth = Authorization(base_url)
-    data_requester = DataRequester(auth, base_url)
-    data_pull_runner = DataPullRunner(queue, auth)
+    auth = Authorization(logger, base_url)
+    data_requester = DataRequester(logger, auth, base_url)
+    data_pull_runner = DataPullRunner(logger, auth)
 
     runner_thread = None
     
@@ -35,7 +50,11 @@ def main():
             data_requester.list_samples_simple()       
         elif action == 'samples':
             sensor_ids = input("Sensor ids list split by semicolons; : ").strip()
-            max_records = input("Max records: ").strip()
+            try:
+                max_records = int(input("Max records: ").strip())
+            except ValueError:
+                print("Error: Max records must be a valid integer")
+                continue
             start_date = input("Start datetime(2025-01-25T00:00:00.000Z): ").strip()
             end_date = input("End datetime(2025-01-26T00:00:00.000Z): ").strip()
             data_requester.list_samples(sensor_ids, max_records, start_date, end_date)      
@@ -47,9 +66,13 @@ def main():
             print(f"Observations does now contain {len(observations)} readings")
 
         elif action == 'runner':
-            time_interval = input("How many minutes between each reading?: ").strip()
-            runner_thread = DataPullRunnerThread(data_pull_runner)
-            runner_thread.set_time_interval(int(time_interval))
+            try:
+                time_interval = int(input("How many minutes between each reading?: ").strip())
+            except ValueError:
+                print("Error: Time interval must be a valid integer")
+                continue
+            runner_thread = DataPullRunnerThread(logger, data_pull_runner)
+            runner_thread.set_time_interval(time_interval)
             runner_thread.start()
             
         elif action == 'stop':

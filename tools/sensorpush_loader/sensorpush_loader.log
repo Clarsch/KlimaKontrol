@@ -1,0 +1,1103 @@
+2025-09-17 22:52:47,161 - sensorpush_loader - DEBUG - Authorization: Fetching new Access Token
+2025-09-17 22:52:47,162 - sensorpush_loader - DEBUG - Authorization: Fetching new Authorization Token
+2025-09-17 22:52:47,162 - sensorpush_loader - DEBUG - Authorization: read_json_config: Reading JSON config file
+2025-09-17 22:52:47,929 - sensorpush_loader - DEBUG - Authorization: AUTHORIZATION TOKEN not valid. Requesting new token.
+2025-09-17 22:52:48,232 - sensorpush_loader - INFO - Authorization: SUCCESSFUL
+2025-09-17 22:52:48,232 - sensorpush_loader - DEBUG - Authorization: INITIALIZED for URL: https://api.sensorpush.com. Is successfully authorized: True.
+2025-09-17 22:52:48,235 - sensorpush_loader - INFO - DataRequester: INITIALIZED.
+2025-09-17 22:52:48,235 - sensorpush_loader - INFO - DataRequester: INITIALIZED.
+2025-09-17 22:52:48,235 - sensorpush_loader - INFO - ObservationUploader: INITIALIZED.
+2025-09-17 22:52:48,235 - sensorpush_loader - INFO - DataPullRunner: INITIALIZED. RunTestConfig: False. LastDatapointReading set to: 2024-09-17 22:52:48.235703
+2025-09-17 22:56:39,104 - sensorpush_loader - DEBUG - Authorization: Fetching new Access Token
+2025-09-17 22:56:39,111 - sensorpush_loader - DEBUG - Authorization: Fetching new Authorization Token
+2025-09-17 23:09:22,254 - sensorpush_loader - DEBUG - Authorization: Fetching new Access Token
+2025-09-17 23:09:22,254 - sensorpush_loader - DEBUG - Authorization: Fetching new Authorization Token
+2025-09-17 23:09:22,254 - sensorpush_loader - DEBUG - Authorization: read_json_config: Reading JSON config file
+2025-09-17 23:09:22,704 - sensorpush_loader - DEBUG - Authorization: AUTHORIZATION TOKEN not valid. Requesting new token.
+2025-09-17 23:09:23,190 - sensorpush_loader - INFO - Authorization: SUCCESSFUL
+2025-09-17 23:09:23,190 - sensorpush_loader - DEBUG - Authorization: INITIALIZED for URL: https://api.sensorpush.com. Is successfully authorized: True.
+2025-09-17 23:09:23,194 - sensorpush_loader - INFO - DataRequester: INITIALIZED.
+2025-09-17 23:09:23,194 - sensorpush_loader - INFO - DataRequester: INITIALIZED.
+2025-09-17 23:09:23,194 - sensorpush_loader - INFO - ObservationUploader: INITIALIZED.
+2025-09-17 23:09:23,194 - sensorpush_loader - INFO - DataPullRunner: INITIALIZED. RunTestConfig: False. LastDatapointReading set to: 2024-09-17 23:09:23.194413
+2025-09-17 23:09:53,682 - sensorpush_loader - DEBUG - DataRequester: Received: {
+    "456378.880007615583691155": {
+        "active": true,
+        "id": "456378.880007615583691155",
+        "calibration": {
+            "temperature": -0.54,
+            "humidity": -0.7
+        },
+        "address": "F1:A9:E4:40:D2:64",
+        "name": "001-2 Ensted Orgel",
+        "deviceId": "456378",
+        "alerts": {
+            "temperature": {
+                "enabled": false,
+                "max": 0,
+                "min": 0
+            },
+            "humidity": {
+                "enabled": false
+            }
+        },
+        "rssi": -67,
+        "type": "HT1",
+        "battery_voltage": 2.99
+    },
+    "16938384.12224369211728183290": {
+        "active": true,
+        "id": "16938384.12224369211728183290",
+        "calibration": {
+            "temperature": 0.1,
+            "barometric_pressure": 0,
+            "dewpoint": 0,
+            "vpd": 0,
+            "humidity": 1.8
+        },
+        "address": "90:CE:B8:A0:78:4D",
+        "name": "001-1 Ensted V\u00e5benhus",
+        "deviceId": "16938384",
+        "alerts": {
+            "temperature": {
+                "enabled": false,
+                "max": 0,
+                "min": 0
+            },
+            "barometric_pressure": {
+                "enabled": false
+            },
+            "dewpoint": {
+                "enabled": false
+            },
+            "vpd": {
+                "enabled": false
+            },
+            "humidity": {
+                "enabled": false
+            }
+        },
+        "rssi": -94,
+        "type": "HTP.xw",
+        "battery_voltage": 2.93
+    },
+    "16950336.41614880524243221815": {
+        "active": true,
+        "id": "16950336.41614880524243221815",
+        "calibration": {
+            "temperature": 0,
+            "dewpoint": 0,
+            "vpd": 0,
+            "humidity": -0.5
+        },
+        "address": "C4:D3:6A:9E:A0:AF",
+        "name": "001-3 Ensted Alter",
+        "deviceId": "16950336",
+        "alerts": {
+            "temperature": {
+                "enabled": false,
+                "max": 0,
+                "min": 0
+            },
+            "dewpoint": {
+                "enabled": false
+            },
+            "vpd": {
+                "enabled": false
+            },
+            "humidity": {
+                "enabled": false
+            }
+        },
+        "rssi": -86,
+        "type": "HT.w",
+        "battery_voltage": 2.96
+    },
+    "16965570.4089955191138237": {
+        "active": true,
+        "id": "16965570.4089955191138237",
+        "calibration": {
+            "temperature": 0,
+            "barometric_pressure": 0,
+            "dewpoint": 0,
+            "vpd": 0,
+            "humidity": 0
+        },
+        "address": "14:9C:EF:A7:A1:A2",
+        "name": "002-01 Kliplev V",
+        "deviceId": "16965570",
+        "alerts": {
+            "temperature": {
+                "enabled": false,
+                "max": 0,
+                "min": 0
+            },
+            "barometric_pressure": {
+                "enabled": false
+            },
+            "dewpoint": {
+                "enabled": false
+            },
+            "vpd": {
+                "enabled": false
+            },
+            "humidity": {
+                "enabled": false
+            }
+        },
+        "type": "HTP.xw"
+    },
+    "16965702.9897914077457058": {
+        "active": true,
+        "id": "16965702.9897914077457058",
+        "calibration": {
+            "temperature": 0,
+            "barometric_pressure": 0,
+            "dewpoint": 0,
+            "vpd": 0,
+            "humidity": 0
+        },
+        "address": "14:9C:EF:A0:13:D1",
+        "name": "005-01",
+        "deviceId": "16965702",
+        "alerts": {
+            "temperature": {
+                "enabled": false,
+                "max": 0,
+                "min": 0
+            },
+            "barometric_pressure": {
+                "enabled": false
+            },
+            "dewpoint": {
+                "enabled": false
+            },
+            "vpd": {
+                "enabled": false
+            },
+            "humidity": {
+                "enabled": false
+            }
+        },
+        "type": "HTP.xw"
+    },
+    "16966396.5097590324062217": {
+        "active": true,
+        "id": "16966396.5097590324062217",
+        "calibration": {
+            "temperature": 0,
+            "barometric_pressure": 0,
+            "dewpoint": 0,
+            "vpd": 0,
+            "humidity": 0
+        },
+        "address": "14:9C:EF:A0:63:C0",
+        "name": "003-01",
+        "deviceId": "16966396",
+        "alerts": {
+            "temperature": {
+                "enabled": false,
+                "max": 0,
+                "min": 0
+            },
+            "barometric_pressure": {
+                "enabled": false
+            },
+            "dewpoint": {
+                "enabled": false
+            },
+            "vpd": {
+                "enabled": false
+            },
+            "humidity": {
+                "enabled": false
+            }
+        },
+        "type": "HTP.xw"
+    },
+    "16966550.3875285501508917": {
+        "active": true,
+        "id": "16966550.3875285501508917",
+        "calibration": {
+            "temperature": 0,
+            "barometric_pressure": 0,
+            "dewpoint": 0,
+            "vpd": 0,
+            "humidity": 0
+        },
+        "address": "14:9C:EF:A9:68:A1",
+        "name": "004-01",
+        "deviceId": "16966550",
+        "alerts": {
+            "temperature": {
+                "enabled": false,
+                "max": 0,
+                "min": 0
+            },
+            "barometric_pressure": {
+                "enabled": false
+            },
+            "dewpoint": {
+                "enabled": false
+            },
+            "vpd": {
+                "enabled": false
+            },
+            "humidity": {
+                "enabled": false
+            }
+        },
+        "type": "HTP.xw"
+    },
+    "16993096.6721640507900759": {
+        "active": true,
+        "id": "16993096.6721640507900759",
+        "calibration": {
+            "temperature": 0,
+            "dewpoint": 0,
+            "vpd": 0,
+            "humidity": 0
+        },
+        "address": "14:9C:EF:A7:80:9C",
+        "name": "005-02",
+        "deviceId": "16993096",
+        "alerts": {
+            "temperature": {
+                "enabled": false,
+                "max": 0,
+                "min": 0
+            },
+            "dewpoint": {
+                "enabled": false
+            },
+            "vpd": {
+                "enabled": false
+            },
+            "humidity": {
+                "enabled": false
+            }
+        },
+        "rssi": -55,
+        "type": "HT.w",
+        "battery_voltage": 3.14
+    },
+    "16996436.8824595984759872": {
+        "active": true,
+        "id": "16996436.8824595984759872",
+        "calibration": {
+            "temperature": 0,
+            "dewpoint": 0,
+            "vpd": 0,
+            "humidity": 0
+        },
+        "address": "14:9C:EF:B3:70:A2",
+        "name": "004-02",
+        "deviceId": "16996436",
+        "alerts": {
+            "temperature": {
+                "enabled": false,
+                "max": 0,
+                "min": 0
+            },
+            "dewpoint": {
+                "enabled": false
+            },
+            "vpd": {
+                "enabled": false
+            },
+            "humidity": {
+                "enabled": false
+            }
+        },
+        "type": "HT.w"
+    },
+    "16997483.2944943800163670": {
+        "active": true,
+        "id": "16997483.2944943800163670",
+        "calibration": {
+            "temperature": 0,
+            "dewpoint": 0,
+            "vpd": 0,
+            "humidity": 0
+        },
+        "address": "14:9C:EF:B3:12:BF",
+        "name": "002-03 Kliplev A",
+        "deviceId": "16997483",
+        "alerts": {
+            "temperature": {
+                "enabled": false,
+                "max": 0,
+                "min": 0
+            },
+            "dewpoint": {
+                "enabled": false
+            },
+            "vpd": {
+                "enabled": false
+            },
+            "humidity": {
+                "enabled": false
+            }
+        },
+        "rssi": -73,
+        "type": "HT.w",
+        "battery_voltage": 3.14
+    },
+    "16998176.2427864859835975": {
+        "active": true,
+        "id": "16998176.2427864859835975",
+        "calibration": {
+            "temperature": 0,
+            "dewpoint": 0,
+            "vpd": 0,
+            "humidity": 0
+        },
+        "address": "14:9C:EF:A5:D0:A6",
+        "name": "003-02",
+        "deviceId": "16998176",
+        "alerts": {
+            "temperature": {
+                "enabled": false,
+                "max": 0,
+                "min": 0
+            },
+            "dewpoint": {
+                "enabled": false
+            },
+            "vpd": {
+                "enabled": false
+            },
+            "humidity": {
+                "enabled": false
+            }
+        },
+        "type": "HT.w"
+    },
+    "17004776.8642067468267166": {
+        "active": true,
+        "id": "17004776.8642067468267166",
+        "calibration": {
+            "temperature": 0,
+            "dewpoint": 0,
+            "vpd": 0,
+            "humidity": 0
+        },
+        "address": "40:79:12:B1:1E:6F",
+        "name": "003-03",
+        "deviceId": "17004776",
+        "alerts": {
+            "temperature": {
+                "enabled": false,
+                "max": 0,
+                "min": 0
+            },
+            "dewpoint": {
+                "enabled": false
+            },
+            "vpd": {
+                "enabled": false
+            },
+            "humidity": {
+                "enabled": false
+            }
+        },
+        "type": "HT.w"
+    },
+    "17004949.7047457371338250": {
+        "active": true,
+        "id": "17004949.7047457371338250",
+        "calibration": {
+            "temperature": 0,
+            "dewpoint": 0,
+            "vpd": 0,
+            "humidity": 0
+        },
+        "address": "40:79:12:AE:6F:22",
+        "name": "005-03",
+        "deviceId": "17004949",
+        "alerts": {
+            "temperature": {
+                "enabled": false,
+                "max": 0,
+                "min": 0
+            },
+            "dewpoint": {
+                "enabled": false
+            },
+            "vpd": {
+                "enabled": false
+            },
+            "humidity": {
+                "enabled": false
+            }
+        },
+        "type": "HT.w"
+    },
+    "17005188.2323314434202474": {
+        "active": true,
+        "id": "17005188.2323314434202474",
+        "calibration": {
+            "temperature": 0,
+            "dewpoint": 0,
+            "vpd": 0,
+            "humidity": 0
+        },
+        "address": "40:79:12:B1:1E:6C",
+        "name": "004-03",
+        "deviceId": "17005188",
+        "alerts": {
+            "temperature": {
+                "enabled": false,
+                "max": 0,
+                "min": 0
+            },
+            "dewpoint": {
+                "enabled": false
+            },
+            "vpd": {
+                "enabled": false
+            },
+            "humidity": {
+                "enabled": false
+            }
+        },
+        "type": "HT.w"
+    },
+    "17005189.1859769562198646": {
+        "active": true,
+        "id": "17005189.1859769562198646",
+        "calibration": {
+            "temperature": 0,
+            "dewpoint": 0,
+            "vpd": 0,
+            "humidity": 0
+        },
+        "address": "40:79:12:B1:35:5A",
+        "name": "002-02 Kliplev O",
+        "deviceId": "17005189",
+        "alerts": {
+            "temperature": {
+                "enabled": false,
+                "max": 0,
+                "min": 0
+            },
+            "dewpoint": {
+                "enabled": false
+            },
+            "vpd": {
+                "enabled": false
+            },
+            "humidity": {
+                "enabled": false
+            }
+        },
+        "type": "HT.w"
+    }
+}
+2025-09-17 23:12:56,323 - sensorpush_loader - DEBUG - DataRequester: Getting observations...
+2025-09-17 23:12:56,332 - sensorpush_loader - WARNING - DataRequester: ValidationError: Max limit is not integer. Received: 50
+2025-09-17 23:15:17,728 - sensorpush_loader - DEBUG - DataRequester: Getting observations...
+2025-09-17 23:15:17,728 - sensorpush_loader - WARNING - DataRequester: ValidationError: Max limit is not integer. Received: 50
+2025-09-17 23:28:13,511 - sensorpush_loader - DEBUG - Authorization: Fetching new Access Token
+2025-09-17 23:28:13,511 - sensorpush_loader - DEBUG - Authorization: Fetching new Authorization Token
+2025-09-17 23:28:13,511 - sensorpush_loader - DEBUG - Authorization: read_json_config: Reading JSON config file
+2025-09-17 23:28:14,095 - sensorpush_loader - DEBUG - Authorization: AUTHORIZATION TOKEN not valid. Requesting new token.
+2025-09-17 23:28:14,576 - sensorpush_loader - INFO - Authorization: SUCCESSFUL
+2025-09-17 23:28:14,576 - sensorpush_loader - DEBUG - Authorization: INITIALIZED for URL: https://api.sensorpush.com. Is successfully authorized: True.
+2025-09-17 23:28:14,576 - sensorpush_loader - INFO - DataRequester: INITIALIZED.
+2025-09-17 23:28:14,578 - sensorpush_loader - INFO - DataRequester: INITIALIZED.
+2025-09-17 23:28:14,578 - sensorpush_loader - INFO - ObservationUploader: INITIALIZED.
+2025-09-17 23:28:14,578 - sensorpush_loader - INFO - DataPullRunner: INITIALIZED. RunTestConfig: False. LastDatapointReading set to: 2024-09-17 23:28:14.578843
+2025-09-17 23:28:30,335 - sensorpush_loader - DEBUG - DataRequester: Getting observations...
+2025-09-17 23:28:31,024 - sensorpush_loader - DEBUG - DataRequester: Received: {
+    "last_time": "1970-01-01T00:00:00.000Z",
+    "sensors": {},
+    "truncated": false,
+    "status": "OK",
+    "total_samples": 0,
+    "total_sensors": 0
+}
+2025-09-17 23:30:15,479 - sensorpush_loader - DEBUG - DataRequester: Getting observations...
+2025-09-17 23:30:16,083 - sensorpush_loader - DEBUG - DataRequester: Received: {
+    "last_time": "1970-01-01T00:00:00.000Z",
+    "sensors": {},
+    "truncated": false,
+    "status": "OK",
+    "total_samples": 0,
+    "total_sensors": 0
+}
+2025-09-17 23:30:53,197 - sensorpush_loader - DEBUG - DataRequester: Getting observations...
+2025-09-17 23:30:53,749 - sensorpush_loader - DEBUG - DataRequester: Received: {
+    "last_time": "2025-09-17T21:30:41.000Z",
+    "sensors": {
+        "16938384.12224369211728183290": [
+            {
+                "observed": "2025-09-17T21:30:33.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 62.96,
+                "humidity": 73.73,
+                "dewpoint": 54.43,
+                "barometric_pressure": 29.73,
+                "vpd": 0.51,
+                "altitude": 0,
+                "altimeter_pressure": 29.72
+            },
+            {
+                "observed": "2025-09-17T21:28:13.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 62.96,
+                "humidity": 73.72,
+                "dewpoint": 54.43,
+                "barometric_pressure": 29.73,
+                "vpd": 0.51,
+                "altitude": 0,
+                "altimeter_pressure": 29.72
+            },
+            {
+                "observed": "2025-09-17T21:25:32.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 62.94,
+                "humidity": 73.74,
+                "dewpoint": 54.43,
+                "barometric_pressure": 29.74,
+                "vpd": 0.51,
+                "altitude": 0,
+                "altimeter_pressure": 29.73
+            },
+            {
+                "observed": "2025-09-17T21:24:15.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 62.98,
+                "humidity": 73.71,
+                "dewpoint": 54.43,
+                "barometric_pressure": 29.74,
+                "vpd": 0.51,
+                "altitude": 0,
+                "altimeter_pressure": 29.73
+            },
+            {
+                "observed": "2025-09-17T21:22:12.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 62.96,
+                "humidity": 73.74,
+                "dewpoint": 54.43,
+                "barometric_pressure": 29.74,
+                "vpd": 0.51,
+                "altitude": 0,
+                "altimeter_pressure": 29.73
+            },
+            {
+                "observed": "2025-09-17T21:21:14.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 62.96,
+                "humidity": 73.74,
+                "dewpoint": 54.43,
+                "barometric_pressure": 29.74,
+                "vpd": 0.51,
+                "altitude": 0,
+                "altimeter_pressure": 29.73
+            },
+            {
+                "observed": "2025-09-17T21:17:09.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 62.96,
+                "humidity": 73.67,
+                "dewpoint": 54.43,
+                "barometric_pressure": 29.74,
+                "vpd": 0.51,
+                "altitude": 0,
+                "altimeter_pressure": 29.73
+            },
+            {
+                "observed": "2025-09-17T21:16:11.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 62.96,
+                "humidity": 73.62,
+                "dewpoint": 54.39,
+                "barometric_pressure": 29.74,
+                "vpd": 0.52,
+                "altitude": 0,
+                "altimeter_pressure": 29.73
+            },
+            {
+                "observed": "2025-09-17T21:15:01.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 62.98,
+                "humidity": 73.65,
+                "dewpoint": 54.43,
+                "barometric_pressure": 29.74,
+                "vpd": 0.51,
+                "altitude": 0,
+                "altimeter_pressure": 29.73
+            },
+            {
+                "observed": "2025-09-17T21:14:01.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 62.98,
+                "humidity": 73.65,
+                "dewpoint": 54.43,
+                "barometric_pressure": 29.74,
+                "vpd": 0.51,
+                "altitude": 0,
+                "altimeter_pressure": 29.73
+            },
+            {
+                "observed": "2025-09-17T21:13:01.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 62.94,
+                "humidity": 73.83,
+                "dewpoint": 54.47,
+                "barometric_pressure": 29.74,
+                "vpd": 0.51,
+                "altitude": 0,
+                "altimeter_pressure": 29.73
+            },
+            {
+                "observed": "2025-09-17T21:12:01.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 62.98,
+                "humidity": 73.72,
+                "dewpoint": 54.43,
+                "barometric_pressure": 29.74,
+                "vpd": 0.51,
+                "altitude": 0,
+                "altimeter_pressure": 29.73
+            },
+            {
+                "observed": "2025-09-17T21:11:01.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 62.96,
+                "humidity": 73.74,
+                "dewpoint": 54.43,
+                "barometric_pressure": 29.74,
+                "vpd": 0.51,
+                "altitude": 0,
+                "altimeter_pressure": 29.73
+            },
+            {
+                "observed": "2025-09-17T21:10:01.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 62.98,
+                "humidity": 73.66,
+                "dewpoint": 54.43,
+                "barometric_pressure": 29.74,
+                "vpd": 0.51,
+                "altitude": 0,
+                "altimeter_pressure": 29.73
+            },
+            {
+                "observed": "2025-09-17T21:09:01.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 62.98,
+                "humidity": 73.67,
+                "dewpoint": 54.43,
+                "barometric_pressure": 29.74,
+                "vpd": 0.51,
+                "altitude": 0,
+                "altimeter_pressure": 29.73
+            },
+            {
+                "observed": "2025-09-17T21:08:01.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 62.96,
+                "humidity": 73.66,
+                "dewpoint": 54.43,
+                "barometric_pressure": 29.74,
+                "vpd": 0.51,
+                "altitude": 0,
+                "altimeter_pressure": 29.73
+            },
+            {
+                "observed": "2025-09-17T21:07:01.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 63,
+                "humidity": 73.69,
+                "dewpoint": 54.43,
+                "barometric_pressure": 29.74,
+                "vpd": 0.51,
+                "altitude": 0,
+                "altimeter_pressure": 29.73
+            },
+            {
+                "observed": "2025-09-17T21:06:01.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 62.98,
+                "humidity": 73.74,
+                "dewpoint": 54.43,
+                "barometric_pressure": 29.74,
+                "vpd": 0.51,
+                "altitude": 0,
+                "altimeter_pressure": 29.73
+            },
+            {
+                "observed": "2025-09-17T21:05:01.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 63.01,
+                "humidity": 73.69,
+                "dewpoint": 54.43,
+                "barometric_pressure": 29.74,
+                "vpd": 0.51,
+                "altitude": 0,
+                "altimeter_pressure": 29.73
+            },
+            {
+                "observed": "2025-09-17T21:04:01.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 63,
+                "humidity": 73.59,
+                "dewpoint": 54.39,
+                "barometric_pressure": 29.74,
+                "vpd": 0.52,
+                "altitude": 0,
+                "altimeter_pressure": 29.73
+            },
+            {
+                "observed": "2025-09-17T21:03:01.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 62.98,
+                "humidity": 73.67,
+                "dewpoint": 54.43,
+                "barometric_pressure": 29.74,
+                "vpd": 0.51,
+                "altitude": 0,
+                "altimeter_pressure": 29.73
+            },
+            {
+                "observed": "2025-09-17T21:02:01.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 62.98,
+                "humidity": 73.56,
+                "dewpoint": 54.39,
+                "barometric_pressure": 29.74,
+                "vpd": 0.52,
+                "altitude": 0,
+                "altimeter_pressure": 29.73
+            },
+            {
+                "observed": "2025-09-17T21:01:01.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 62.98,
+                "humidity": 73.58,
+                "dewpoint": 54.39,
+                "barometric_pressure": 29.74,
+                "vpd": 0.52,
+                "altitude": 0,
+                "altimeter_pressure": 29.73
+            },
+            {
+                "observed": "2025-09-17T21:00:01.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 63,
+                "humidity": 73.73,
+                "dewpoint": 54.43,
+                "barometric_pressure": 29.74,
+                "vpd": 0.51,
+                "altitude": 0,
+                "altimeter_pressure": 29.73
+            }
+        ],
+        "16950336.41614880524243221815": [
+            {
+                "observed": "2025-09-17T21:30:41.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 67.21,
+                "humidity": 64.17,
+                "dewpoint": 54.77,
+                "vpd": 0.81,
+                "altitude": 0
+            },
+            {
+                "observed": "2025-09-17T21:30:09.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 67.23,
+                "humidity": 64.32,
+                "dewpoint": 54.81,
+                "vpd": 0.81,
+                "altitude": 0
+            },
+            {
+                "observed": "2025-09-17T21:28:41.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 67.21,
+                "humidity": 64.67,
+                "dewpoint": 54.98,
+                "vpd": 0.8,
+                "altitude": 0
+            },
+            {
+                "observed": "2025-09-17T21:27:42.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 67.14,
+                "humidity": 65.01,
+                "dewpoint": 54.94,
+                "vpd": 0.79,
+                "altitude": 0
+            },
+            {
+                "observed": "2025-09-17T21:26:41.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 67.15,
+                "humidity": 65.15,
+                "dewpoint": 55.02,
+                "vpd": 0.78,
+                "altitude": 0
+            },
+            {
+                "observed": "2025-09-17T21:26:00.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 67.15,
+                "humidity": 65.65,
+                "dewpoint": 55.23,
+                "vpd": 0.77,
+                "altitude": 0
+            },
+            {
+                "observed": "2025-09-17T21:25:55.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 67.15,
+                "humidity": 65.65,
+                "dewpoint": 55.23,
+                "vpd": 0.77,
+                "altitude": 0
+            },
+            {
+                "observed": "2025-09-17T21:25:00.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 67.12,
+                "humidity": 65.95,
+                "dewpoint": 55.36,
+                "vpd": 0.77,
+                "altitude": 0
+            },
+            {
+                "observed": "2025-09-17T21:24:00.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 67.15,
+                "humidity": 66.11,
+                "dewpoint": 55.4,
+                "vpd": 0.76,
+                "altitude": 0
+            },
+            {
+                "observed": "2025-09-17T21:23:00.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 67.14,
+                "humidity": 66.26,
+                "dewpoint": 55.48,
+                "vpd": 0.76,
+                "altitude": 0
+            },
+            {
+                "observed": "2025-09-17T21:22:00.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 67.17,
+                "humidity": 66.21,
+                "dewpoint": 55.44,
+                "vpd": 0.76,
+                "altitude": 0
+            },
+            {
+                "observed": "2025-09-17T21:21:00.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 67.17,
+                "humidity": 66.28,
+                "dewpoint": 55.48,
+                "vpd": 0.76,
+                "altitude": 0
+            },
+            {
+                "observed": "2025-09-17T21:20:00.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 67.17,
+                "humidity": 66.18,
+                "dewpoint": 55.44,
+                "vpd": 0.76,
+                "altitude": 0
+            },
+            {
+                "observed": "2025-09-17T21:19:00.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 67.17,
+                "humidity": 66.12,
+                "dewpoint": 55.4,
+                "vpd": 0.76,
+                "altitude": 0
+            },
+            {
+                "observed": "2025-09-17T21:18:00.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 67.14,
+                "humidity": 66.05,
+                "dewpoint": 55.4,
+                "vpd": 0.76,
+                "altitude": 0
+            },
+            {
+                "observed": "2025-09-17T21:17:00.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 67.15,
+                "humidity": 65.97,
+                "dewpoint": 55.36,
+                "vpd": 0.77,
+                "altitude": 0
+            },
+            {
+                "observed": "2025-09-17T21:16:00.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 67.21,
+                "humidity": 65.97,
+                "dewpoint": 55.53,
+                "vpd": 0.77,
+                "altitude": 0
+            },
+            {
+                "observed": "2025-09-17T21:15:00.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 67.19,
+                "humidity": 65.89,
+                "dewpoint": 55.49,
+                "vpd": 0.77,
+                "altitude": 0
+            },
+            {
+                "observed": "2025-09-17T21:14:00.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 67.19,
+                "humidity": 65.85,
+                "dewpoint": 55.49,
+                "vpd": 0.77,
+                "altitude": 0
+            },
+            {
+                "observed": "2025-09-17T21:13:00.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 67.19,
+                "humidity": 65.75,
+                "dewpoint": 55.45,
+                "vpd": 0.78,
+                "altitude": 0
+            },
+            {
+                "observed": "2025-09-17T21:12:00.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 67.24,
+                "humidity": 65.73,
+                "dewpoint": 55.4,
+                "vpd": 0.78,
+                "altitude": 0
+            },
+            {
+                "observed": "2025-09-17T21:11:00.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 67.23,
+                "humidity": 65.66,
+                "dewpoint": 55.4,
+                "vpd": 0.78,
+                "altitude": 0
+            },
+            {
+                "observed": "2025-09-17T21:10:00.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 67.24,
+                "humidity": 65.57,
+                "dewpoint": 55.36,
+                "vpd": 0.78,
+                "altitude": 0
+            },
+            {
+                "observed": "2025-09-17T21:09:00.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 67.28,
+                "humidity": 65.53,
+                "dewpoint": 55.32,
+                "vpd": 0.78,
+                "altitude": 0
+            },
+            {
+                "observed": "2025-09-17T21:08:00.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 67.26,
+                "humidity": 65.37,
+                "dewpoint": 55.28,
+                "vpd": 0.79,
+                "altitude": 0
+            },
+            {
+                "observed": "2025-09-17T21:07:00.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 67.24,
+                "humidity": 65.26,
+                "dewpoint": 55.23,
+                "vpd": 0.79,
+                "altitude": 0
+            },
+            {
+                "observed": "2025-09-17T21:06:00.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 67.3,
+                "humidity": 65.23,
+                "dewpoint": 55.19,
+                "vpd": 0.79,
+                "altitude": 0
+            },
+            {
+                "observed": "2025-09-17T21:05:00.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 67.33,
+                "humidity": 65.1,
+                "dewpoint": 55.15,
+                "vpd": 0.79,
+                "altitude": 0
+            },
+            {
+                "observed": "2025-09-17T21:04:00.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 67.32,
+                "humidity": 65,
+                "dewpoint": 55.11,
+                "vpd": 0.79,
+                "altitude": 0
+            },
+            {
+                "observed": "2025-09-17T21:03:00.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 67.33,
+                "humidity": 64.93,
+                "dewpoint": 55.07,
+                "vpd": 0.8,
+                "altitude": 0
+            },
+            {
+                "observed": "2025-09-17T21:02:00.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 67.32,
+                "humidity": 64.87,
+                "dewpoint": 55.07,
+                "vpd": 0.8,
+                "altitude": 0
+            },
+            {
+                "observed": "2025-09-17T21:01:00.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 67.35,
+                "humidity": 64.61,
+                "dewpoint": 54.94,
+                "vpd": 0.8,
+                "altitude": 0
+            },
+            {
+                "observed": "2025-09-17T21:00:00.000Z",
+                "gateways": "jGYtlG1RX45fG+VzAcqakiptyeRWuhr4oqoSNtBSZ9k=",
+                "temperature": 67.39,
+                "humidity": 64.46,
+                "dewpoint": 55.07,
+                "vpd": 0.81,
+                "altitude": 0
+            }
+        ]
+    },
+    "truncated": false,
+    "status": "OK",
+    "total_samples": 57,
+    "total_sensors": 2
+}

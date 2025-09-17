@@ -1,0 +1,5 @@
+2025-09-17 23:27:41,356 - test_validation - DEBUG - Authorization: Fetching new Access Token
+2025-09-17 23:27:41,357 - test_validation - DEBUG - Authorization: Fetching new Authorization Token
+2025-09-17 23:27:41,357 - test_validation - DEBUG - Authorization: read_json_config: Reading JSON config file
+2025-09-17 23:27:41,693 - test_validation - ERROR - Authorization: Error: 403
+2025-09-17 23:27:41,693 - test_validation - ERROR - Authorization: {"message":"invalid user"}
