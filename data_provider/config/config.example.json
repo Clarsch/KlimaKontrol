@@ -1,0 +1,72 @@
+{
+  "database": {
+    "type": "sqlite",
+    "path": "./data/sensor_data.db",
+    "backup_enabled": true,
+    "backup_frequency_hours": 24,
+    "backup_retention_days": 7,
+    "vacuum_frequency_hours": 168
+  },
+  "sensorpush": {
+    "api_url": "https://api.sensorpush.com",
+    "credentials": {
+      "email": "your-email@example.com",
+      "password": "your-password"
+    },
+    "request_limits": {
+      "max_samples_per_request": 1000,
+      "rate_limit_delay_ms": 60000,
+      "max_sensors_per_batch": 50
+    }
+  },
+  "server": {
+    "base_url": "http://localhost:3000",
+    "upload_endpoint": "/api/data/reading/dataReading",
+    "batch_upload_endpoint": "/api/data/upload",
+    "auth": {
+      "type": "jwt",
+      "token": "your-jwt-token-here"
+    },
+    "timeout_seconds": 30,
+    "retry_attempts": 3
+  },
+  "service": {
+    "frequency_minutes": 15,
+    "log_level": "INFO",
+    "data_directory": "./data",
+    "max_retry_attempts": 3,
+    "retry_delay_seconds": 30,
+    "batch_size": 100,
+    "sensor_sync_frequency_hours": 24
+  },
+  "sensors": {
+    "mapping": {
+      "sensorpush_id": "local_sensor_id",
+      "location_id": "location_id"
+    },
+    "default_location": "bov",
+    "auto_discover": true
+  },
+  "data_conversion": {
+    "temperature_unit": "celsius",
+    "pressure_unit": "hpa",
+    "humidity_unit": "percentage"
+  },
+  "data_retention": {
+    "sensor_readings_days": 365,
+    "upload_logs_days": 90,
+    "error_logs_days": 30,
+    "cleanup_frequency_hours": 24,
+    "batch_cleanup_size": 1000,
+    "vacuum_after_cleanup": true
+  },
+  "logging": {
+    "level": "INFO",
+    "file_rotation": {
+      "max_bytes": 10485760,
+      "backup_count": 5
+    },
+    "console_output": true,
+    "structured_logging": true
+  }
+}
