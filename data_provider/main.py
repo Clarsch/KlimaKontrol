@@ -271,7 +271,10 @@ class DataProviderService:
             gateways_data = self.sensorpush_client.get_gateways()
             
             # Sync with database
-            sensor_created, sensor_updated = self.db_manager.sync_sensors(sensors_data.get('sensors', {}))
+            sensor_created, sensor_updated = self.db_manager.sync_sensors(
+                sensors_data.get('sensors', {}), 
+                self.config.sensors.default_location
+            )
             gateway_created, gateway_updated = self.db_manager.sync_gateways(gateways_data.get('gateways', {}))
             
             # Update sync timestamp
@@ -311,14 +314,8 @@ class DataProviderService:
                 # Fetch samples
                 batch_result = self.sensorpush_client.get_samples(batch, start_time, end_time)
                 
-                # Convert data
-                sensor_mapping = {
-                    s['sensorpush_id']: {
-                        'local_sensor_id': s['local_sensor_id'],
-                        'location_id': s['location_id']
-                    }
-                    for s in batch_sensors
-                }
+                # Get sensor mapping from database
+                sensor_mapping = self.db_manager.get_sensor_mapping()
                 
                 converted_readings = self.data_converter.convert_sensor_batch(
                     batch_result, sensor_mapping

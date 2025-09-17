@@ -87,7 +87,38 @@ See `config/config.example.json` for complete configuration options.
 - **Local Server**: Server URL, endpoints, and authentication
 - **Service**: Fetch frequency, batch sizes, retry settings
 - **Database**: Retention policies and cleanup schedules
-- **Sensors**: Mapping between SensorPush IDs and local sensor IDs
+- **Sensors**: Default location and auto-discovery settings
+
+### Sensor Management
+
+Sensors are discovered from SensorPush API but **must be manually assigned** to prevent false data:
+1. **Auto-discover** sensors from SensorPush API (stored with null local_sensor_id and location_id)
+2. **Manual assignment required** - sensors must be assigned local ID and location before data fetching
+3. **Data integrity** - only assigned sensors will have data fetched and uploaded
+4. **Track sensor state** and fetch timestamps per sensor
+
+Use the sensor management utility to manage sensors:
+```bash
+# List all sensors (shows assigned/unassigned status)
+python manage_sensors.py list
+
+# List unassigned sensors that need assignment
+python manage_sensors.py list-unassigned
+
+# Assign a sensor with local ID and location
+python manage_sensors.py assign 16938384.41622496812705309768 bov_sensor_001 bov
+
+# List sensors for a location
+python manage_sensors.py list-location bov
+
+# Update sensor location
+python manage_sensors.py update-location 16938384.41622496812705309768 rise
+
+# Sync new sensors from API
+python manage_sensors.py sync
+```
+
+**Important**: New sensors will appear as "UNASSIGNED" and must be manually assigned before the service will fetch their data.
 
 ## Database Schema
 

@@ -40,12 +40,9 @@
     "sensor_sync_frequency_hours": 24
   },
   "sensors": {
-    "mapping": {
-      "sensorpush_id": "local_sensor_id",
-      "location_id": "location_id"
-    },
     "default_location": "bov",
-    "auto_discover": true
+    "auto_discover": true,
+    "auto_assign_location": true
   },
   "data_conversion": {
     "temperature_unit": "celsius",

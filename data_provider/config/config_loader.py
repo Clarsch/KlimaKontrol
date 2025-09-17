@@ -76,17 +76,11 @@ class ServiceConfig(BaseModel):
         return v.upper()
 
 
-class SensorMapping(BaseModel):
-    """Sensor ID mapping configuration."""
-    sensorpush_id: str
-    location_id: str
-
-
 class SensorsConfig(BaseModel):
     """Sensor configuration."""
-    mapping: Dict[str, SensorMapping] = {}
     default_location: str = "bov"
     auto_discover: bool = True
+    auto_assign_location: bool = True
 
 
 class DataConversionConfig(BaseModel):

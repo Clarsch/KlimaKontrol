@@ -26,12 +26,13 @@ class DatabaseManager:
         """Initialize database manager."""
         logger.info("Database manager initialized")
     
-    def sync_sensors(self, sensorpush_sensors: Dict[str, Any]) -> Tuple[int, int]:
+    def sync_sensors(self, sensorpush_sensors: Dict[str, Any], default_location: str = "bov") -> Tuple[int, int]:
         """
         Sync sensors from SensorPush API with local database.
         
         Args:
             sensorpush_sensors: Sensors data from SensorPush API
+            default_location: Default location for new sensors
             
         Returns:
             Tuple of (created_count, updated_count)
@@ -45,10 +46,16 @@ class DatabaseManager:
                     # Check if sensor exists
                     existing_sensor = get_sensor_by_sensorpush_id(session, sensorpush_id)
                     
+                    # For new sensors, set local_sensor_id and location_id to None
+                    # These must be manually assigned to avoid false data
+                    local_sensor_id = sensor_data.get('deviceId')  # Only use if provided by API
+                    if not local_sensor_id or local_sensor_id == sensorpush_id:
+                        local_sensor_id = None  # Must be manually assigned
+                    
                     sensor_info = {
                         'sensorpush_id': sensorpush_id,
-                        'local_sensor_id': sensor_data.get('deviceId', sensorpush_id),
-                        'location_id': 'unknown',  # Will be updated from mapping
+                        'local_sensor_id': local_sensor_id,  # None for new sensors
+                        'location_id': None,  # Must be manually assigned
                         'sensor_name': sensor_data.get('name', ''),
                         'device_type': sensor_data.get('type', ''),
                         'mac_address': sensor_data.get('address', ''),
@@ -60,18 +67,18 @@ class DatabaseManager:
                     }
                     
                     if existing_sensor:
-                        # Update existing sensor
+                        # Update existing sensor (but preserve existing local_sensor_id and location_id)
                         for key, value in sensor_info.items():
-                            if key != 'sensorpush_id':  # Don't update the ID
+                            if key not in ['sensorpush_id', 'local_sensor_id', 'location_id']:  # Don't update IDs or location
                                 setattr(existing_sensor, key, value)
                         updated_count += 1
                         logger.debug(f"Updated sensor: {sensorpush_id}")
                     else:
-                        # Create new sensor
+                        # Create new sensor (with null local_sensor_id and location_id)
                         new_sensor = Sensor(**sensor_info)
                         session.add(new_sensor)
                         created_count += 1
-                        logger.debug(f"Created sensor: {sensorpush_id}")
+                        logger.debug(f"Created sensor: {sensorpush_id} (unassigned - requires manual assignment)")
                         
                         # Create sensor state
                         sensor_state = SensorState(
@@ -89,6 +96,122 @@ class DatabaseManager:
                 raise
         
         return created_count, updated_count
+    
+    def assign_sensor(self, sensorpush_id: str, local_sensor_id: str, location_id: str) -> bool:
+        """
+        Assign local sensor ID and location to a sensor.
+        
+        Args:
+            sensorpush_id: SensorPush ID of the sensor
+            local_sensor_id: Local sensor ID to assign
+            location_id: Location ID to assign
+            
+        Returns:
+            True if assigned successfully, False otherwise
+        """
+        with get_session() as session:
+            try:
+                sensor = get_sensor_by_sensorpush_id(session, sensorpush_id)
+                if sensor:
+                    sensor.local_sensor_id = local_sensor_id
+                    sensor.location_id = location_id
+                    sensor.updated_at = datetime.utcnow()
+                    session.commit()
+                    logger.info(f"Assigned sensor {sensorpush_id} -> {local_sensor_id} at {location_id}")
+                    return True
+                else:
+                    logger.warning(f"Sensor not found: {sensorpush_id}")
+                    return False
+            except Exception as e:
+                session.rollback()
+                logger.error(f"Failed to assign sensor: {e}")
+                return False
+    
+    def update_sensor_location(self, sensorpush_id: str, new_location_id: str) -> bool:
+        """
+        Update sensor location.
+        
+        Args:
+            sensorpush_id: SensorPush ID of the sensor
+            new_location_id: New location ID
+            
+        Returns:
+            True if updated successfully, False otherwise
+        """
+        with get_session() as session:
+            try:
+                sensor = get_sensor_by_sensorpush_id(session, sensorpush_id)
+                if sensor:
+                    sensor.location_id = new_location_id
+                    sensor.updated_at = datetime.utcnow()
+                    session.commit()
+                    logger.info(f"Updated sensor {sensorpush_id} location to {new_location_id}")
+                    return True
+                else:
+                    logger.warning(f"Sensor not found: {sensorpush_id}")
+                    return False
+            except Exception as e:
+                session.rollback()
+                logger.error(f"Failed to update sensor location: {e}")
+                return False
+    
+    def get_unassigned_sensors(self) -> List[Dict[str, Any]]:
+        """
+        Get sensors that haven't been assigned local_sensor_id or location_id.
+        
+        Returns:
+            List of unassigned sensors
+        """
+        with get_session() as session:
+            sensors = session.query(Sensor).filter(
+                Sensor.is_active == True,
+                (Sensor.local_sensor_id.is_(None) | Sensor.location_id.is_(None))
+            ).all()
+            
+            sensor_list = []
+            for sensor in sensors:
+                sensor_list.append({
+                    'id': sensor.id,
+                    'sensorpush_id': sensor.sensorpush_id,
+                    'local_sensor_id': sensor.local_sensor_id,
+                    'location_id': sensor.location_id,
+                    'sensor_name': sensor.sensor_name,
+                    'device_type': sensor.device_type,
+                    'is_active': sensor.is_active,
+                    'needs_assignment': sensor.local_sensor_id is None or sensor.location_id is None
+                })
+            
+            return sensor_list
+    
+    def get_sensor_by_location(self, location_id: str) -> List[Dict[str, Any]]:
+        """
+        Get all sensors for a specific location.
+        
+        Args:
+            location_id: Location ID
+            
+        Returns:
+            List of sensors for the location
+        """
+        with get_session() as session:
+            sensors = session.query(Sensor).filter(
+                Sensor.location_id == location_id,
+                Sensor.is_active == True
+            ).all()
+            
+            sensor_list = []
+            for sensor in sensors:
+                sensor_list.append({
+                    'id': sensor.id,
+                    'sensorpush_id': sensor.sensorpush_id,
+                    'local_sensor_id': sensor.local_sensor_id,
+                    'location_id': sensor.location_id,
+                    'sensor_name': sensor.sensor_name,
+                    'device_type': sensor.device_type,
+                    'is_active': sensor.is_active
+                })
+            
+            return sensor_list
     
     def sync_gateways(self, sensorpush_gateways: Dict[str, Any]) -> Tuple[int, int]:
         """
@@ -204,13 +327,18 @@ class DatabaseManager:
     
     def get_sensors_for_fetch(self) -> List[Dict[str, Any]]:
         """
-        Get sensors that need data fetching.
+        Get sensors that need data fetching (only assigned sensors).
         
         Returns:
             List of sensor information for fetching
         """
         with get_session() as session:
-            sensors = get_active_sensors(session)
+            # Only get sensors that have been assigned local_sensor_id and location_id
+            sensors = session.query(Sensor).filter(
+                Sensor.is_active == True,
+                Sensor.local_sensor_id.isnot(None),
+                Sensor.location_id.isnot(None)
+            ).all()
             
             sensor_list = []
             for sensor in sensors:
@@ -224,8 +352,33 @@ class DatabaseManager:
                         'last_fetch_timestamp': sensor_state.last_fetch_timestamp
                     })
             
-            logger.debug(f"Found {len(sensor_list)} sensors for data fetching")
+            logger.debug(f"Found {len(sensor_list)} assigned sensors for data fetching")
             return sensor_list
+    
+    def get_sensor_mapping(self) -> Dict[str, Dict[str, str]]:
+        """
+        Get sensor mapping from database for data conversion (only assigned sensors).
+        
+        Returns:
+            Dictionary mapping SensorPush IDs to local sensor info
+        """
+        with get_session() as session:
+            # Only get sensors that have been assigned local_sensor_id and location_id
+            sensors = session.query(Sensor).filter(
+                Sensor.is_active == True,
+                Sensor.local_sensor_id.isnot(None),
+                Sensor.location_id.isnot(None)
+            ).all()
+            
+            mapping = {}
+            for sensor in sensors:
+                mapping[sensor.sensorpush_id] = {
+                    'local_sensor_id': sensor.local_sensor_id,
+                    'location_id': sensor.location_id
+                }
+            
+            logger.debug(f"Retrieved mapping for {len(mapping)} assigned sensors from database")
+            return mapping
     
     def update_sensor_fetch_timestamp(self, sensor_id: int, timestamp: datetime):
         """

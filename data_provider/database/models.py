@@ -21,8 +21,8 @@ class Sensor(Base):
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     sensorpush_id = Column(String(100), unique=True, nullable=False, index=True)
-    local_sensor_id = Column(String(50), nullable=False, index=True)
-    location_id = Column(String(50), nullable=False, index=True)
+    local_sensor_id = Column(String(50), nullable=True, index=True)  # Allow null for unassigned sensors
+    location_id = Column(String(50), nullable=True, index=True)  # Allow null for unassigned sensors
     sensor_name = Column(String(100))
     device_type = Column(String(50))  # HT1, HT2, etc.
     mac_address = Column(String(17))  # MAC address
