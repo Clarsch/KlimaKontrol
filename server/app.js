@@ -68,6 +68,16 @@ async function initializeApp() {
             });
         });
 
+        // Health check endpoint for data provider
+        app.get('/api/health', (req, res) => {
+            res.json({ 
+                status: 'healthy',
+                timestamp: new Date().toISOString(),
+                server: 'KlimaKontrol Server',
+                version: '1.0.0'
+            });
+        });
+
         // Routes
         app.use('/api/auth', authRoutes);
         app.use('/api/data', dataRoutes);
