@@ -56,7 +56,10 @@ sudo mkdir -p $BASE_LOG_DIR/{klima-server,klima-ngrok,data-provider}
 # Set permissions
 sudo chown -R $USER:$USER /opt/klimakontrol/
 sudo chmod -R 755 /opt/klimakontrol/
-print_status "Directory structure created"
+
+# Ensure log directories are writable
+sudo chmod -R 777 /opt/klimakontrol/logs/
+print_status "Directory structure created with proper permissions"
 
 # Step 2: Check and initialize submodule
 print_info "Step 2: Setting up submodule..."

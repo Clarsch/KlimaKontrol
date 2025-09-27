@@ -9,9 +9,12 @@ echo "🚀 Starting KlimaKontrol Server..."
 # Navigate to server directory
 cd /home/chris/projects/KlimaKontrol/server
 
-# Create directories
-mkdir -p /opt/klimakontrol/data/klima-server
-mkdir -p /opt/klimakontrol/logs/klima-server
+# Create directories with proper permissions
+sudo mkdir -p /opt/klimakontrol/data/klima-server
+sudo mkdir -p /opt/klimakontrol/logs/klima-server
+sudo chown -R $USER:$USER /opt/klimakontrol/
+sudo chmod -R 755 /opt/klimakontrol/data/
+sudo chmod -R 777 /opt/klimakontrol/logs/
 
 # Install dependencies if node_modules doesn't exist
 if [ ! -d "node_modules" ]; then

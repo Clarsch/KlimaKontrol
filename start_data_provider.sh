@@ -29,10 +29,13 @@ pip install --upgrade pip
 echo "📦 Installing Python dependencies..."
 pip install -r requirements.txt
 
-# Create directories
+# Create directories with proper permissions
 echo "📁 Creating directories..."
-mkdir -p /opt/klimakontrol/data/data-provider
-mkdir -p /opt/klimakontrol/logs/data-provider
+sudo mkdir -p /opt/klimakontrol/data/data-provider
+sudo mkdir -p /opt/klimakontrol/logs/data-provider
+sudo chown -R $USER:$USER /opt/klimakontrol/
+sudo chmod -R 755 /opt/klimakontrol/data/
+sudo chmod -R 777 /opt/klimakontrol/logs/
 
 # Setup configuration
 echo "⚙️  Setting up configuration..."
