@@ -159,8 +159,10 @@ else
     print_status "ngrok found"
 fi
 
-# Step 7: Create PM2 startup script
-print_info "Step 7: Creating PM2 startup script..."
+# Step 7: Create PM2 startup scripts
+print_info "Step 7: Creating PM2 startup scripts..."
+
+# Data provider startup script
 cat > $PROJECT_ROOT/start_data_provider.sh << 'EOF'
 #!/bin/bash
 # Data Provider Startup Script for PM2
@@ -169,8 +171,33 @@ source venv/bin/activate
 exec python main.py
 EOF
 
+# Server startup script
+cat > $PROJECT_ROOT/start_server.sh << 'EOF'
+#!/bin/bash
+# Server Startup Script for PM2
+cd /home/chris/projects/KlimaKontrol/server
+if [ ! -d "node_modules" ]; then
+    echo "Installing server dependencies..."
+    npm install
+fi
+exec npm run start
+EOF
+
+# Ngrok startup script
+cat > $PROJECT_ROOT/start_ngrok.sh << 'EOF'
+#!/bin/bash
+# Ngrok Startup Script for PM2
+if ! command -v ngrok &> /dev/null; then
+    echo "ngrok is not installed. Please install ngrok first."
+    exit 1
+fi
+exec ngrok http --domain=possible-key-bluebird.ngrok-free.app 5001
+EOF
+
 chmod +x $PROJECT_ROOT/start_data_provider.sh
-print_status "PM2 startup script created"
+chmod +x $PROJECT_ROOT/start_server.sh
+chmod +x $PROJECT_ROOT/start_ngrok.sh
+print_status "PM2 startup scripts created"
 
 # Step 8: Final verification
 print_info "Step 8: Final verification..."

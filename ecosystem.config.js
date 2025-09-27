@@ -33,18 +33,11 @@ module.exports = {
   apps: [
     {
       name: 'klima-server',
-      script: 'npm',
-      args: 'run start',
-      cwd: '/home/chris/projects/KlimaKontrol/server',
+      script: path.resolve(__dirname, 'start_server.sh'),
+      interpreter: 'bash',
+      cwd: path.resolve(__dirname),
       watch: false,
       exec_mode: 'fork',
-      interpreter: 'none',
-      pre_start: [
-        `mkdir -p ${SERVICE_DIRS['klima-server'].dataDir}`,
-        `mkdir -p ${SERVICE_DIRS['klima-server'].logDir}`,
-        'cd /home/chris/projects/KlimaKontrol/server',
-        'npm install'
-      ].join(' && '),
       env: {
         NODE_ENV: 'production',
         PORT: 3000,
@@ -73,13 +66,10 @@ module.exports = {
     },
     {
       name: 'klima-ngrok',
-      script: 'ngrok',
-      args: 'http --domain=possible-key-bluebird.ngrok-free.app 5001',
+      script: path.resolve(__dirname, 'start_ngrok.sh'),
+      interpreter: 'bash',
+      cwd: path.resolve(__dirname),
       exec_mode: 'fork',
-      interpreter: 'none',
-      pre_start: [
-        `mkdir -p ${SERVICE_DIRS['klima-ngrok'].logDir}`
-      ].join(' && '),
       env: {
         NODE_ENV: 'production'
       },
