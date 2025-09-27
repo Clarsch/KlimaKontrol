@@ -491,7 +491,7 @@ async function handleFileUpload(req, res) {
             location_id: location
         }));
 
-        handleFileUpload(req, res, location, recordsWithLocation)
+        processFileData(req, res, location, recordsWithLocation)
     
     } catch (error) {
         console.error('File processing error:', error);
@@ -507,7 +507,7 @@ async function handleFileUpload(req, res) {
 
 }
     
-async function handleFileUpload(req, res, location, records) {
+async function processFileData(req, res, location, records) {
     try {
         
         // Get location config for thresholds
