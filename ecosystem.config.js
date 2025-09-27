@@ -80,9 +80,9 @@ module.exports = {
     },
     {
       name: 'data-provider',
-      script: path.resolve(__dirname, 'tools-submodule', 'data_provider', 'main.py'),
-      interpreter: path.resolve(__dirname, 'tools-submodule', 'data_provider', 'venv', 'bin', 'python'),
-      cwd: path.resolve(__dirname, 'tools-submodule', 'data_provider'),
+      script: path.resolve(__dirname, 'start_data_provider.sh'),
+      interpreter: 'bash',
+      cwd: path.resolve(__dirname),
       instances: 1,
       autorestart: true,
       watch: false,
