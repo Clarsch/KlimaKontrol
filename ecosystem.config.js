@@ -80,17 +80,13 @@ module.exports = {
     },
     {
       name: 'data-provider',
-      script: path.resolve(__dirname, 'start_data_provider.sh'),
-      interpreter: 'bash',
-      cwd: path.resolve(__dirname),
+      script: path.resolve(__dirname, 'tools-submodule', 'data_provider', 'main.py'),
+      interpreter: path.resolve(__dirname, 'tools-submodule', 'data_provider', 'venv', 'bin', 'python'),
+      cwd: path.resolve(__dirname, 'tools-submodule', 'data_provider'),
       instances: 1,
       autorestart: true,
       watch: false,
       max_memory_restart: '512M',
-      // Alternative: Use Python directly once venv is created
-      // script: path.resolve(__dirname, 'tools-submodule', 'data_provider', 'main.py'),
-      // interpreter: path.resolve(__dirname, 'tools-submodule', 'data_provider', 'venv', 'bin', 'python'),
-      // cwd: path.resolve(__dirname, 'tools-submodule', 'data_provider'),
       env: {
         NODE_ENV: 'production',
         PYTHONPATH: path.resolve(__dirname, 'tools-submodule', 'data_provider'),
