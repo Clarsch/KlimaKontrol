@@ -3,6 +3,28 @@ const os = require('os');
 
 // Cross-platform configuration
 const isWindows = os.platform() === 'win32';
+
+// Base directories for data and logs
+const BASE_DATA_DIR = '/opt/klimakontrol/data';
+const BASE_LOG_DIR = '/opt/klimakontrol/logs';
+
+// Service-specific directories
+const SERVICE_DIRS = {
+  'klima-server': {
+    dataDir: path.join(BASE_DATA_DIR, 'klima-server'),
+    logDir: path.join(BASE_LOG_DIR, 'klima-server')
+  },
+  'klima-ngrok': {
+    dataDir: null, // ngrok doesn't need data directory
+    logDir: path.join(BASE_LOG_DIR, 'klima-ngrok')
+  },
+  'data-provider': {
+    dataDir: path.join(BASE_DATA_DIR, 'data-provider'),
+    logDir: path.join(BASE_LOG_DIR, 'data-provider')
+  }
+};
+
+// Python interpreter path
 const pythonInterpreter = isWindows 
   ? path.resolve(__dirname, 'tools-submodule', 'data_provider', 'venv', 'Scripts', 'python.exe')
   : path.resolve(__dirname, 'tools-submodule', 'data_provider', 'venv', 'bin', 'python');
@@ -18,6 +40,8 @@ module.exports = {
       exec_mode: 'fork',
       interpreter: 'none',
       pre_start: [
+        `mkdir -p ${SERVICE_DIRS['klima-server'].dataDir}`,
+        `mkdir -p ${SERVICE_DIRS['klima-server'].logDir}`,
         'cd /home/chris/projects/KlimaKontrol/server',
         'npm install'
       ].join(' && '),
@@ -27,24 +51,24 @@ module.exports = {
         JWT_SECRET: 'your-super-secret-jwt-key-change-this-in-production',
         REFRESH_TOKEN_SECRET: 'your-refresh-token-secret-change-this-in-production',
         CORS_ORIGINS: 'https://klima-kontrol-five.vercel.app,http://localhost:3000,http://localhost:5173,http://localhost:4173',
-        DATA_DIR: '/opt/klimakontrol/data/klima-server',
-        LOG_DIR: '/opt/klimakontrol/logs/klima-server'
+        DATA_DIR: SERVICE_DIRS['klima-server'].dataDir,
+        LOG_DIR: SERVICE_DIRS['klima-server'].logDir
       },
       env_production: {
         NODE_ENV: 'production',
         PORT: 3000,
-        DATA_DIR: '/opt/klimakontrol/data/klima-server',
-        LOG_DIR: '/opt/klimakontrol/logs/klima-server'
+        DATA_DIR: SERVICE_DIRS['klima-server'].dataDir,
+        LOG_DIR: SERVICE_DIRS['klima-server'].logDir
       },
       env_development: {
         NODE_ENV: 'development',
         PORT: 3000,
-        DATA_DIR: '/opt/klimakontrol/data/klima-server',
-        LOG_DIR: '/opt/klimakontrol/logs/klima-server'
+        DATA_DIR: SERVICE_DIRS['klima-server'].dataDir,
+        LOG_DIR: SERVICE_DIRS['klima-server'].logDir
       },
-      error_file: '/opt/klimakontrol/logs/klima-server/error.log',
-      out_file: '/opt/klimakontrol/logs/klima-server/out.log',
-      log_file: '/opt/klimakontrol/logs/klima-server/combined.log',
+      error_file: path.join(SERVICE_DIRS['klima-server'].logDir, 'error.log'),
+      out_file: path.join(SERVICE_DIRS['klima-server'].logDir, 'out.log'),
+      log_file: path.join(SERVICE_DIRS['klima-server'].logDir, 'combined.log'),
       time: true
     },
     {
@@ -53,12 +77,15 @@ module.exports = {
       args: 'http --domain=possible-key-bluebird.ngrok-free.app 5001',
       exec_mode: 'fork',
       interpreter: 'none',
+      pre_start: [
+        `mkdir -p ${SERVICE_DIRS['klima-ngrok'].logDir}`
+      ].join(' && '),
       env: {
         NODE_ENV: 'production'
       },
-      error_file: '/opt/klimakontrol/logs/klima-ngrok/error.log',
-      out_file: '/opt/klimakontrol/logs/klima-ngrok/out.log',
-      log_file: '/opt/klimakontrol/logs/klima-ngrok/combined.log',
+      error_file: path.join(SERVICE_DIRS['klima-ngrok'].logDir, 'error.log'),
+      out_file: path.join(SERVICE_DIRS['klima-ngrok'].logDir, 'out.log'),
+      log_file: path.join(SERVICE_DIRS['klima-ngrok'].logDir, 'combined.log'),
       time: true
     },
     {
@@ -70,12 +97,23 @@ module.exports = {
       autorestart: true,
       watch: false,
       max_memory_restart: '512M',
+      pre_start: [
+        'cd /home/chris/projects/KlimaKontrol/tools-submodule/data_provider',
+        'python3 -m venv venv || true',
+        'source venv/bin/activate && pip install --upgrade pip',
+        'source venv/bin/activate && pip install -r requirements.txt',
+        `mkdir -p ${SERVICE_DIRS['data-provider'].dataDir}`,
+        `mkdir -p ${SERVICE_DIRS['data-provider'].logDir}`,
+        'cp config/config.example.json config/config.json || true',
+        'python3 setup_external_dirs.py --base-dir /opt/klimakontrol --migrate || true',
+        'source venv/bin/activate && python main.py --init-db || true'
+      ].join(' && '),
       env: {
         NODE_ENV: 'production',
         PYTHONPATH: path.resolve(__dirname, 'tools-submodule', 'data_provider'),
         VIRTUAL_ENV: path.resolve(__dirname, 'tools-submodule', 'data_provider', 'venv'),
-        DATA_DIR: '/opt/klimakontrol/data/data-provider',
-        LOG_DIR: '/opt/klimakontrol/logs/data-provider',
+        DATA_DIR: SERVICE_DIRS['data-provider'].dataDir,
+        LOG_DIR: SERVICE_DIRS['data-provider'].logDir,
         PATH: isWindows 
           ? `${path.resolve(__dirname, 'tools-submodule', 'data_provider', 'venv', 'Scripts')};${process.env.PATH}`
           : `${path.resolve(__dirname, 'tools-submodule', 'data_provider', 'venv', 'bin')}:${process.env.PATH}`
@@ -85,8 +123,8 @@ module.exports = {
         LOG_LEVEL: 'INFO',
         PYTHONPATH: path.resolve(__dirname, 'tools-submodule', 'data_provider'),
         VIRTUAL_ENV: path.resolve(__dirname, 'tools-submodule', 'data_provider', 'venv'),
-        DATA_DIR: '/opt/klimakontrol/data/data-provider',
-        LOG_DIR: '/opt/klimakontrol/logs/data-provider',
+        DATA_DIR: SERVICE_DIRS['data-provider'].dataDir,
+        LOG_DIR: SERVICE_DIRS['data-provider'].logDir,
         PATH: isWindows 
           ? `${path.resolve(__dirname, 'tools-submodule', 'data_provider', 'venv', 'Scripts')};${process.env.PATH}`
           : `${path.resolve(__dirname, 'tools-submodule', 'data_provider', 'venv', 'bin')}:${process.env.PATH}`
@@ -96,15 +134,15 @@ module.exports = {
         LOG_LEVEL: 'DEBUG',
         PYTHONPATH: path.resolve(__dirname, 'tools-submodule', 'data_provider'),
         VIRTUAL_ENV: path.resolve(__dirname, 'tools-submodule', 'data_provider', 'venv'),
-        DATA_DIR: '/opt/klimakontrol/data/data-provider',
-        LOG_DIR: '/opt/klimakontrol/logs/data-provider',
+        DATA_DIR: SERVICE_DIRS['data-provider'].dataDir,
+        LOG_DIR: SERVICE_DIRS['data-provider'].logDir,
         PATH: isWindows 
           ? `${path.resolve(__dirname, 'tools-submodule', 'data_provider', 'venv', 'Scripts')};${process.env.PATH}`
           : `${path.resolve(__dirname, 'tools-submodule', 'data_provider', 'venv', 'bin')}:${process.env.PATH}`
       },
-      log_file: '/opt/klimakontrol/logs/data-provider/combined.log',
-      out_file: '/opt/klimakontrol/logs/data-provider/out.log',
-      error_file: '/opt/klimakontrol/logs/data-provider/error.log',
+      log_file: path.join(SERVICE_DIRS['data-provider'].logDir, 'combined.log'),
+      out_file: path.join(SERVICE_DIRS['data-provider'].logDir, 'out.log'),
+      error_file: path.join(SERVICE_DIRS['data-provider'].logDir, 'error.log'),
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
       merge_logs: true,
       time: true,
@@ -124,7 +162,15 @@ module.exports = {
       repo: 'your-git-repo-url',
       path: '/home/chris/projects/KlimaKontrol',
       'pre-deploy-local': '',
-      'post-deploy': 'git submodule update --init --recursive && cd server && npm install && pm2 reload ecosystem.config.js --env production',
+      'post-deploy': [
+        'git submodule update --init --recursive',
+        'cd server && npm install',
+        `mkdir -p ${BASE_DATA_DIR} ${BASE_LOG_DIR}`,
+        `mkdir -p ${SERVICE_DIRS['klima-server'].dataDir} ${SERVICE_DIRS['klima-server'].logDir}`,
+        `mkdir -p ${SERVICE_DIRS['klima-ngrok'].logDir}`,
+        `mkdir -p ${SERVICE_DIRS['data-provider'].dataDir} ${SERVICE_DIRS['data-provider'].logDir}`,
+        'pm2 reload ecosystem.config.js --env production'
+      ].join(' && '),
       'pre-setup': ''
     }
   }
