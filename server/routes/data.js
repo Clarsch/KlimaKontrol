@@ -381,7 +381,7 @@ router.post('/reading/dataReading', async (req, res) => {
         records = [dataReading]
         const location = dataReading.location_id.toLowerCase();
 
-        handleFileUpload(req, res, location, records)
+        processFileData(req, res, location, records)
 
         
     } catch (error) {
@@ -423,15 +423,115 @@ router.patch('/warnings/:warningId/deactivate', async (req, res) => {
     }
 });
 
-// Update the upload endpoint
-router.post('/upload', function(req, res) {
-    console.log('Upload request received:', {
+// Batch JSON upload endpoint for data provider
+router.post('/upload', async (req, res) => {
+    try {
+        console.log('Batch upload request received:', {
+            body: req.body,
+            headers: req.headers
+        });
+
+        // Check if this is a JSON batch upload (from data provider)
+        if (req.body.readings && Array.isArray(req.body.readings)) {
+            return await handleBatchJsonUpload(req, res);
+        }
+
+        // Otherwise, handle as file upload
+        return handleFileUpload(req, res);
+    } catch (error) {
+        console.error('Upload endpoint error:', error);
+        res.status(500).json({ 
+            message: 'Error processing upload', 
+            error: error.message 
+        });
+    }
+});
+
+// Handle batch JSON uploads from data provider
+async function handleBatchJsonUpload(req, res) {
+    try {
+        const { readings, batch_id, timestamp } = req.body;
+        
+        if (!readings || !Array.isArray(readings)) {
+            return res.status(400).json({ 
+                message: 'Invalid batch data: readings array is required' 
+            });
+        }
+
+        if (readings.length === 0) {
+            return res.status(200).json({ 
+                message: 'No readings to process', 
+                count: 0 
+            });
+        }
+
+        console.log(`Processing batch ${batch_id} with ${readings.length} readings`);
+
+        // Process each reading
+        const processedReadings = [];
+        const errors = [];
+
+        for (let i = 0; i < readings.length; i++) {
+            const reading = readings[i];
+            
+            try {
+                // Validate required fields
+                if (!reading.sensor_id) {
+                    errors.push(`Reading ${i}: sensor_id is required`);
+                    continue;
+                }
+                
+                if (!reading.location_id) {
+                    errors.push(`Reading ${i}: location_id is required`);
+                    continue;
+                }
+
+                // Process the reading using the existing logic
+                const location = reading.location_id.toLowerCase();
+                const records = [reading];
+                
+                // Call the existing processFileData function
+                await processFileData(req, res, location, records);
+                processedReadings.push(reading);
+                
+            } catch (error) {
+                console.error(`Error processing reading ${i}:`, error);
+                errors.push(`Reading ${i}: ${error.message}`);
+            }
+        }
+
+        const response = {
+            message: `Processed ${processedReadings.length} of ${readings.length} readings`,
+            processed_count: processedReadings.length,
+            total_count: readings.length,
+            batch_id: batch_id,
+            errors: errors.length > 0 ? errors : undefined
+        };
+
+        if (errors.length > 0) {
+            console.warn(`Batch ${batch_id} had ${errors.length} errors:`, errors);
+        }
+
+        res.status(200).json(response);
+
+    } catch (error) {
+        console.error('Batch JSON upload error:', error);
+        res.status(500).json({ 
+            message: 'Error processing batch upload', 
+            error: error.message 
+        });
+    }
+}
+
+// File upload endpoint (original functionality)
+function handleFileUpload(req, res) {
+    console.log('File upload request received:', {
         body: req.body,
         files: req.files,
         headers: req.headers
     });
 
-    upload(req, res, async function(err) {
+    upload.single('file')(req, res, async function(err) {
         if (err instanceof multer.MulterError) {
             console.error('Multer error:', err);
             return res.status(400).json({
@@ -448,7 +548,7 @@ router.post('/upload', function(req, res) {
         }
 
         try {
-            await handleFileUpload(req, res);
+            await handleFileUploadProcessing(req, res);
         } catch (error) {
             console.error('File processing error:', error);
             res.status(500).json({ 
@@ -457,10 +557,10 @@ router.post('/upload', function(req, res) {
             });
         }
     });
-});
+}
 
 // Separate function to handle the file processing
-async function handleFileUpload(req, res) {
+async function handleFileUploadProcessing(req, res) {
     try {
         if (!req.file) {
             return res.status(400).json({ message: 'No file uploaded' });
