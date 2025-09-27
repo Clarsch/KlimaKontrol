@@ -90,24 +90,17 @@ module.exports = {
     },
     {
       name: 'data-provider',
-      script: path.resolve(__dirname, 'tools-submodule', 'data_provider', 'main.py'),
-      interpreter: pythonInterpreter,
-      cwd: path.resolve(__dirname, 'tools-submodule', 'data_provider'),
+      script: path.resolve(__dirname, 'start_data_provider.sh'),
+      interpreter: 'bash',
+      cwd: path.resolve(__dirname),
       instances: 1,
       autorestart: true,
       watch: false,
       max_memory_restart: '512M',
-      pre_start: [
-        'cd /home/chris/projects/KlimaKontrol/tools-submodule/data_provider',
-        'python3 -m venv venv || true',
-        'source venv/bin/activate && pip install --upgrade pip',
-        'source venv/bin/activate && pip install -r requirements.txt',
-        `mkdir -p ${SERVICE_DIRS['data-provider'].dataDir}`,
-        `mkdir -p ${SERVICE_DIRS['data-provider'].logDir}`,
-        'cp config/config.example.json config/config.json || true',
-        'python3 setup_external_dirs.py --base-dir /opt/klimakontrol --migrate || true',
-        'source venv/bin/activate && python main.py --init-db || true'
-      ].join(' && '),
+      // Alternative: Use Python directly once venv is created
+      // script: path.resolve(__dirname, 'tools-submodule', 'data_provider', 'main.py'),
+      // interpreter: path.resolve(__dirname, 'tools-submodule', 'data_provider', 'venv', 'bin', 'python'),
+      // cwd: path.resolve(__dirname, 'tools-submodule', 'data_provider'),
       env: {
         NODE_ENV: 'production',
         PYTHONPATH: path.resolve(__dirname, 'tools-submodule', 'data_provider'),
