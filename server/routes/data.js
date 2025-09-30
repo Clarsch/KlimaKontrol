@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const configLoader = require('../config/configLoader');
 const { validateLocationUpdate } = require('../middleware/validation');
+const { authenticateToken } = require('../middleware/auth');
 const fs = require('fs').promises;
 const path = require('path');
 const multer = require('multer');
@@ -360,7 +361,7 @@ router.get('/warnings/:locationId', async (req, res) => {
     }
 });
 
-router.post('/reading/dataReading', async (req, res) => {
+router.post('/reading/dataReading', authenticateToken, async (req, res) => {
     try {
         const dataReading = req.body;
         console.log("Data Reading received of: " + JSON.stringify(dataReading, null, 2))
@@ -424,7 +425,7 @@ router.patch('/warnings/:warningId/deactivate', async (req, res) => {
 });
 
 // Batch JSON upload endpoint for data provider
-router.post('/upload', async (req, res) => {
+router.post('/upload', authenticateToken, async (req, res) => {
     try {
         console.log('Batch upload request received:', {
             body: req.body,
