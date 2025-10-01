@@ -489,10 +489,9 @@ async function handleBatchJsonUpload(req, res) {
 
                 // Process the reading using the existing logic
                 const location = reading.location_id.toLowerCase();
-                const records = [reading];
                 
-                // Call the existing processFileData function
-                await processFileData(req, res, location, records);
+                // Process individual reading without sending response
+                await processIndividualReading(reading, location);
                 processedReadings.push(reading);
                 
             } catch (error) {
@@ -730,13 +729,85 @@ async function processFileData(req, res, location, records) {
 
     } catch (error) {
         console.error('File processing error:', error);
-        if (req.file) {
+        if (req.file && req.file.path) {
             await fs.unlink(req.file.path).catch(console.error);
         }
         res.status(500).json({ 
             message: 'Error processing file',
             error: error.message 
         });
+    }
+}
+
+// Process individual reading without sending response (for batch uploads)
+async function processIndividualReading(reading, location) {
+    try {
+        // Get location config for thresholds
+        const locationConfig = await configLoader.loadConfig('locations');
+        
+        // Case-insensitive location search
+        const locationData = locationConfig.find(loc => 
+            loc.id.toLowerCase() === location.toLowerCase()
+        );
+        
+        if (!locationData) {
+            throw new Error(`Location '${location}' not found in configuration`);
+        }
+
+        // Add UUID to record and ensure location_id is set
+        const { addUUIDToRecord } = require('../utils/uuidGenerator');
+        const processedRecord = addUUIDToRecord({
+            ...reading,
+            location_id: location
+        });
+
+        // Process data for warnings using location thresholds
+        const warnings = processData([processedRecord], location, locationData.thresholds);
+
+        // Save warnings if any
+        if (warnings.length > 0) {
+            const warningsPath = path.join(__dirname, '..', 'data', 'warnings', 'warnings.json');
+            let existingWarnings = {};
+            try {
+                const warningsContent = await fs.readFile(warningsPath, 'utf8');
+                existingWarnings = JSON.parse(warningsContent);
+            } catch (error) {
+                if (error.code !== 'ENOENT') throw error;
+            }
+
+            // Add new warnings to existing ones
+            existingWarnings[location] = [
+                ...(existingWarnings[location] || []),
+                ...warnings
+            ];
+
+            // Save updated warnings
+            await fs.writeFile(warningsPath, JSON.stringify(existingWarnings, null, 2));
+        }
+
+        // Update environmental data file
+        const envDataPath = path.join(__dirname, '..', 'data', 'environmental', `${location}.json`);
+        let existingData = [];
+        try {
+            const existingContent = await fs.readFile(envDataPath, 'utf8');
+            existingData = JSON.parse(existingContent);
+        } catch (error) {
+            if (error.code !== 'ENOENT') throw error;
+        }
+
+        // Merge and sort data
+        const mergedData = [...existingData, processedRecord].sort((a, b) => 
+            new Date(a.record_time) - new Date(b.record_time)
+        );
+
+        // Save merged environmental data
+        await fs.writeFile(envDataPath, JSON.stringify(mergedData, null, 2));
+
+        console.log(`Processed reading for ${location}: ${processedRecord.sensor_id} at ${processedRecord.record_time}`);
+
+    } catch (error) {
+        console.error(`Error processing individual reading for ${location}:`, error);
+        throw error;
     }
 }
 
