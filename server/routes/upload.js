@@ -2,7 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const { authenticateToken } = require('../middleware/auth');
+const { authenticateToken, authenticateUploader } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -26,7 +26,7 @@ const upload = multer({
 });
 
 // File upload endpoint
-router.post('/file', authenticateToken, upload.single('file'), (req, res) => {
+router.post('/file', authenticateUploader, upload.single('file'), (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ message: 'No file uploaded' });
@@ -69,7 +69,7 @@ router.post('/file', authenticateToken, upload.single('file'), (req, res) => {
 });
 
 // Get uploaded files list
-router.get('/files', authenticateToken, (req, res) => {
+router.get('/files', authenticateUploader, (req, res) => {
     try {
         const uploadsDir = path.join(__dirname, '../data/uploads');
         
@@ -100,7 +100,7 @@ router.get('/files', authenticateToken, (req, res) => {
 });
 
 // Download file
-router.get('/files/:fileName', authenticateToken, (req, res) => {
+router.get('/files/:fileName', authenticateUploader, (req, res) => {
     try {
         const { fileName } = req.params;
         const filePath = path.join(__dirname, '../data/uploads', fileName);
@@ -120,7 +120,7 @@ router.get('/files/:fileName', authenticateToken, (req, res) => {
 });
 
 // Delete file
-router.delete('/files/:fileName', authenticateToken, (req, res) => {
+router.delete('/files/:fileName', authenticateUploader, (req, res) => {
     try {
         const { fileName } = req.params;
         const filePath = path.join(__dirname, '../data/uploads', fileName);
