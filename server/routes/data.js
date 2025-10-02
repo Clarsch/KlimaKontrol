@@ -675,7 +675,14 @@ async function processFileData(req, res, location, records) {
                 ...record,
                 location_id: location
             };
-            return addUUIDToRecord(recordWithLocation);
+            
+            // Ensure sensor_name is preserved if provided
+            const finalRecord = {
+                ...recordWithLocation
+                // sensor_name will be preserved if it exists in the original record
+            };
+            
+            return addUUIDToRecord(finalRecord);
         });
 
         // Process data for warnings using location thresholds
@@ -759,6 +766,7 @@ async function processIndividualReading(reading, location) {
         const processedRecord = addUUIDToRecord({
             ...reading,
             location_id: location
+            // sensor_name will be preserved if it exists in the reading
         });
 
         // Process data for warnings using location thresholds
