@@ -28,8 +28,10 @@ async function initializeApp() {
                 'https://klima-kontrol-five.vercel.app',  // Production frontend URL
                 'http://localhost:3000',                   // Local development
                 'http://localhost:5173',                   // Vite dev server
+                'http://localhost:5175',                   // Vite dev server (alternative port)
                 'http://localhost:4173',                   // Vite preview server
                 'http://127.0.0.1:5173',                  // Alternative localhost
+                'http://127.0.0.1:5175',                  // Alternative localhost (alternative port)
                 'http://127.0.0.1:3000'                   // Alternative localhost
             ];
 

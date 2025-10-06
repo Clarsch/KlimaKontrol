@@ -1,3 +1,4 @@
+require('dotenv').config({ path: './config/.env' });
 const express = require('express');
 const { verifyDataStructure } = require('./utils/dataStructure');
 
