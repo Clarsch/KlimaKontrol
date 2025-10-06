@@ -379,6 +379,12 @@ router.post('/reading/dataReading', authenticateUploader, async (req, res) => {
             });
         }
         
+        if (!dataReading.sensor_name) {
+            return res.status(400).json({ 
+                message: 'sensor_name is required for data readings' 
+            });
+        }
+        
         records = [dataReading]
         const location = dataReading.location_id.toLowerCase();
 
@@ -484,6 +490,11 @@ async function handleBatchJsonUpload(req, res) {
                 
                 if (!reading.location_id) {
                     errors.push(`Reading ${i}: location_id is required`);
+                    continue;
+                }
+                
+                if (!reading.sensor_name) {
+                    errors.push(`Reading ${i}: sensor_name is required`);
                     continue;
                 }
 
@@ -638,6 +649,11 @@ async function processFileData(req, res, location, records) {
             // Validate location_id
             if (!record.location_id || typeof record.location_id !== 'string') {
                 validationErrors.push(`Row ${index + 1}: Missing or invalid location_id`);
+            }
+            
+            // Validate sensor_name
+            if (!record.sensor_name || typeof record.sensor_name !== 'string') {
+                validationErrors.push(`Row ${index + 1}: Missing or invalid sensor_name`);
             }
             
             const temp = parseFloat(record.temperature);
